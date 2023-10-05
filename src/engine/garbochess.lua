@@ -12,7 +12,7 @@
 
 -- require "bit"
 -- bit = import "noBitOp"
-bit = import 'lua53bit'.bit
+bit = import 'lua53bit'
 printTable(bit)
 
 g_timeout = 2;		-- can set maximum seconds for analysing

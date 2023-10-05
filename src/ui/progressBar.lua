@@ -1,5 +1,4 @@
-
-local gfx <const> = playdate.graphics
+local gfx<const> = playdate.graphics
 
 PROGRESS_BAR_STATE = {
     SHOWING = "SHOWING",
@@ -8,18 +7,18 @@ PROGRESS_BAR_STATE = {
 
 class('ProgressBar').extends()
 
-function ProgressBar:init(x,y)
-	ProgressBar.super.init(self)
-    
+function ProgressBar:init(x, y)
+    ProgressBar.super.init(self)
+
     self.state = PROGRESS_BAR_STATE.NOT_SHOWING
     self.percent = 0
     local progressImage = gfx.imagetable.new("images/progress-dither")
-    assert( progressImage )
+    assert(progressImage)
 
     self.infillSprite = gfx.sprite.new(progressImage[1])
-    self.infillSprite:moveTo(x, y )
+    self.infillSprite:moveTo(x, y)
     -- self.infillSprite:add()
-	
+
     self.progressSprite = gfx.sprite.new(progressImage[3])
     self.progressSprite:moveTo(x, y)
     -- self.progressSprite:add()
@@ -28,12 +27,12 @@ function ProgressBar:init(x,y)
     self.surroundSprite:moveTo(x, y)
     -- self.surroundSprite:add()
 
-    self.textSprite = gfx.sprite.spriteWithText("Thinking",150,20)
-    self.textSprite:moveTo(x, y+3)
+    self.textSprite = gfx.sprite.spriteWithText("Thinking", 150, 20)
+    self.textSprite:moveTo(x, y + 3)
     -- self.textSprite:add()
     -- kDrawModeXOR
     -- gfx.setDitherPattern(1, gfx.image.kDrawModeXOR)
-	gfx.drawText("Thinking...",x,y)
+    gfx.drawText("Thinking...", x, y)
     self:updateProgress(0)
     -- self:show()
     -- local backgroundImage = gfx.image.new( "Images/background" )
@@ -46,7 +45,7 @@ function ProgressBar:init(x,y)
     --         gfx.clearClipRect()
     --     end
     -- )
-end	
+end
 
 function ProgressBar:hide()
     self.state = PROGRESS_BAR_STATE.NOT_SHOWING
@@ -70,11 +69,7 @@ end
 
 function ProgressBar:updateProgress(percent)
     self.percent = percent
-    self.progressSprite:setClipRect(
-        self.progressSprite.x-self.progressSprite.width/2,
-        self.progressSprite.y-self.progressSprite.height/2,
-        self.percent*3,
-        self.progressSprite.height
-    )
+    self.progressSprite:setClipRect(self.progressSprite.x - self.progressSprite.width / 2,
+        self.progressSprite.y - self.progressSprite.height / 2, self.percent * 3, self.progressSprite.height)
 end
 
