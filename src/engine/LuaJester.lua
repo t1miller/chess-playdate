@@ -2214,6 +2214,7 @@ function ChoiceMov(side, iop)
 
     while ((not Js_flag.timeout) and (Js_depth_Seek < Js_maxDepthSeek)) do
 
+        coroutine.yield()
         Js_depth_Seek = Js_depth_Seek + 1;
 
         score.i = Seek(side, 1, Js_depth_Seek, alpha, beta, Js_variants, rpt);
@@ -2257,7 +2258,7 @@ function ChoiceMov(side, iop)
             alpha = score.i - Js__alpha - Js_dxDither;
         end
 
-        coroutine.yield()
+        -- coroutine.yield()
     end
 
     score.i = Js_root.score;
@@ -3868,7 +3869,6 @@ function Seek(side, ply, depth, alpha, beta, bstline, rpt)
         end
 
         Js_eliminate0[1 + ply] = iif((best > 9000), mv, 0);
-
     end
 
     if playdate.getElapsedTime() > Js_searchTimeout then
@@ -4058,7 +4058,7 @@ function EnterMove(from_sq, to_sq, promo)
         Js_depth_Seek = 0;
         return true
     else
-        print("invalid move")
+        -- print("invalid move")
         return false
     end
 
@@ -4336,29 +4336,19 @@ end
 -- autosample3();
 -- autosample4();
 
--- -- EXAMPLES
--- -- user moves
--- EnterMove("e2","e8","") -- enters a user move
--- -- EnterMove("b2","a1","R"); -- promote rook
--- --  local iMvt = 0; i think this variable determines valid move or not
--- -- computer move
--- Jst_Play();
-
--- -- has all the flags to determin if draw, check, checkmate etc
--- ShowStat()
-
 GAME_STATE = {
-    NEW_GAME = "NEW_GAME",
-    INVALID_MOVE = "INVALID_MOVE",
-    USER_WON = "USER_WON",
-    COMPUTER_WON = "COMPUTER_WON",
-    DRAW_BY_REPITION = "DRAW_BY_REPITION",
-    DRAW = "DRAW",
-    CHECK = "CHECK",
-    INSUFFICIENT_MATERIAL = "INSUFFICIENT_MATERIAL",
-    STALEMATE = "STALEMATE",
-    VALID_MOVE = "VALID_MOVE",
-    COMPUTER_THINKING = "COMPUTER_THINKING"
+    NEW_GAME = "New Game",
+    INVALID_MOVE = "Invalid Move",
+    USER_WON = "Checkmate\nWhite Wins!",
+    COMPUTER_WON = "Checkmate\nBlack Wins!",
+    RESIGN = "Black Resigned\nWhite Wins!",
+    DRAW_BY_REPITION = "Draw By Repetition!",
+    DRAW = "Draw!",
+    CHECK = "Check!",
+    INSUFFICIENT_MATERIAL = "Insufficient Material\nDraw!",
+    STALEMATE = "Stalemate!",
+    VALID_MOVE = "Valid Move",
+    COMPUTER_THINKING = "Computer Thinking"
 }
 
 class('ChessGame', {
@@ -4367,13 +4357,14 @@ class('ChessGame', {
 
 function ChessGame:init(white)
     ChessGame.super.init(self)
-
     print("initialized jester engine")
     print("search depth = " .. Js_maxDepth .. " search timeout = " .. (Js_searchTimeout) .. " seconds")
     self.state = GAME_STATE.NEW_GAME
     self.white = white
     self.timer = nil
     self.computerThinking = false
+    self.whitesCapturedPieces = {}
+    self.blacksCapturedPieces = {}
     InitGame()
     UpdateDisplay();
 end
@@ -4422,14 +4413,11 @@ function ChessGame:move(from, to, isUser, moveDoneCallback, onProgressCallback)
             self:checkIfGameIsOver()
             moveDoneCallback()
         end)
-        local firstCall = true
+        playdate.resetElapsedTime()
         self.timer = playdate.timer.keyRepeatTimerWithDelay(0, 500, function()
-            if firstCall then
-                onProgressCallback(0.0)
-                firstCall = false
-            else
-                onProgressCallback((playdate.getElapsedTime() / Js_searchTimeout) * 100)
-            end
+
+            onProgressCallback((playdate.getElapsedTime() / Js_searchTimeout) * 100)
+
             if coroutine.status(computersMove) == "dead" then
                 self.timer:remove()
             elseif coroutine.status(computersMove) == "suspended" then
@@ -4443,7 +4431,7 @@ function ChessGame:isGameOver()
     return
         self.state == GAME_STATE.COMPUTER_WON or self.state == GAME_STATE.USER_WON or self.state == GAME_STATE.DRAW or
             self.state == GAME_STATE.DRAW_BY_REPITION or self.state == GAME_STATE.INSUFFICIENT_MATERIAL or self.state ==
-            GAME_STATE.STALEMATE
+            GAME_STATE.STALEMATE or self.state == GAME_STATE.RESIGN
 end
 
 function ChessGame:checkIfGameIsOver()
@@ -4471,7 +4459,7 @@ function ChessGame:checkIfGameIsOver()
     end
 
     if Js_fAbandon then
-        self.state = GAME_STATE.USER_WON
+        self.state = GAME_STATE.RESIGN
     end
 
     if Js_bDraw == 3 then
@@ -4485,17 +4473,58 @@ function ChessGame:checkIfGameIsOver()
 end
 
 function ChessGame:undoLastTwoMoves()
+    if Js_nGameMoves < 2 then
+        return
+    end
     UndoMov()
     UndoMov()
+    self.state = GAME_STATE.VALID_MOVE
 end
 
 function ChessGame:isComputerThinking()
     return self.computerThinking
 end
 
-function ChessGame:setDifficulty(timeoutSeconds)
-    Js_searchTimeout = timeoutSeconds
-    print("difficulty set to: " .. Js_searchTimeout .. " seconds")
+function ChessGame:setDifficulty(params)
+    Js_searchTimeout = params[1]
+    Js_maxDepth = params[2]
+    print("difficulty set to: timeout = " .. Js_searchTimeout .. " seconds, depth = "..Js_maxDepth)
+end
+
+-- start will all the pieces then remove pieces you see
+function ChessGame:getMissingPieces(board)
+    local pieceCount = {
+        ["p"] = 8,
+        ["P"] = 8,
+        ["n"] = 2,
+        ["N"] = 2,
+        ["b"] = 2,
+        ["B"] = 2,
+        ["r"] = 2,
+        ["R"] = 2,
+        ["q"] = 1,
+        ["Q"] = 1,
+        ["k"] = 1,
+        ["K"] = 1,
+    }
+
+    -- get either the current game board or
+    -- the board that is visible
+    local boardToUse = nil
+    if board then
+        boardToUse = board
+    else
+        boardToUse = getBoard()
+    end
+
+    local boardPieces = boardToUse:gsub("[%c%p%s]", "")
+
+    for i = 1, boardPieces:len() do
+        local piece = boardPieces:sub(i,i)
+        pieceCount[piece] -= 1
+    end
+
+    return pieceCount
 end
 
 function ChessGame:getState()

@@ -2,10 +2,12 @@ import "CoreLibs/graphics"
 import "CoreLibs/sprites"
 import "CoreLibs/ui"
 import "CoreLibs/crank"
+import "CoreLibs/timer"
 
 import 'ui/dialogBox'
 import 'ui/boardGrid'
 import 'ui/progressBar'
+import 'ui/capturedPieces'
 
 -- import 'engine/garbochess' -- cant even get desktop version working
 import 'engine/LuaJester' -- it works!
@@ -14,26 +16,58 @@ import 'engine/LuaJester' -- it works!
 
 local gfx<const> = playdate.graphics
 local chessGame = ChessGame()
-local boardGridView = BoardGridLayout(chessGame:getBoard())
-local dialogBox = DialogBox("", "New Game", "Dismiss")
-local progressBar = ProgressBar(320, 15)
+local boardGridView = BoardGridView(chessGame:getBoard())
+local dialogBox = DialogBox(200, 120, "", "New Game", "Dismiss")
+local progressBar = ProgressBar(330, 120)
+local bCapturedPieces = CapturedPieces(269, 13, false)
+local wCapturedPieces = CapturedPieces(269, 177, true)
+local GAME_DIFFICULTY <const> = {
+    ["Easy"] = {2,3},
+    ["Med"] = {2,6},
+    ["Hard"] = {4,6},
+    ["Expert"] = {15,6}
+}
+chessGame:setDifficulty(GAME_DIFFICULTY["Easy"])
 
-local function showDialog()
-    local state = chessGame:getState()
-    if state == GAME_STATE.USER_WON then
-        dialogBox:updateText("Checkmate\nWhite Wins!")
-    elseif state == GAME_STATE.COMPUTER_WON then
-        dialogBox:updateText("Checkmate\nBlack Wins!")
-    elseif state == GAME_STATE.DRAW then
-        dialogBox:updateText("Draw!")
-    elseif state == GAME_STATE.DRAW_BY_REPITION then
-        dialogBox:updateText("Draw By Repetition!")
-    elseif state == GAME_STATE.STALEMATE then
-        dialogBox:updateText("Stalemate!")
-    elseif state == GAME_STATE.INSUFFICIENT_MATERIAL then
-        dialogBox:updateText("Insufficient Material\nDraw!")
+local function newGame()
+    chessGame = ChessGame()
+    boardGridView:clearGameData()
+    boardGridView:addBoard(chessGame:getBoard())
+    wCapturedPieces:clear()
+    bCapturedPieces:clear()
+end
+
+local function getUsersMove()
+    local from, to = boardGridView:clickCell()
+    chessGame:move(from, to, true)
+    if chessGame:getState() == GAME_STATE.INVALID_MOVE then
+        return false
     end
-    dialogBox:show()
+    boardGridView:addBoard(chessGame:getBoard())
+    wCapturedPieces:addPieces(chessGame:getMissingPieces())
+    return true
+end
+
+local function getComputersMove()
+    progressBar:show()
+    chessGame:move("", "", false,
+        function()
+            boardGridView:addBoard(chessGame:getBoard())
+            bCapturedPieces:addPieces(chessGame:getMissingPieces())
+
+            -- hide progress bar after done thinking
+            progressBar:hide()
+
+            if chessGame:isGameOver() then
+                dialogBox:show(chessGame:getState())
+                return
+            end
+
+        end,
+        function(progress)
+            print("progress = " .. progress .. "%")
+            progressBar:updateProgress(progress)
+        end)
 end
 
 local function gameStateMachine()
@@ -42,52 +76,43 @@ local function gameStateMachine()
     -- clicked A, start a new game
     if dialogBox:isShowing() then
         dialogBox:dismiss()
-        chessGame = ChessGame()
-        boardGridView:clearGameData()
-        boardGridView:addBoard(chessGame:getBoard())
+        newGame()
         return
     end
 
     -- game ended and end game dialog isn't showing
     -- show game ended dialog
     if chessGame:isGameOver() then
-        showDialog()
+        dialogBox:show(chessGame:getState())
         return
     end
 
     -- game hasnt ended, get users move 
-    local from, to = boardGridView:clickCell()
-    chessGame:move(from, to, true)
-    if chessGame:getState() == GAME_STATE.INVALID_MOVE then
+    -- local from, to = boardGridView:clickCell()
+    -- chessGame:move(from, to, true)
+    -- if chessGame:getState() == GAME_STATE.INVALID_MOVE then
+    --     return
+    -- end
+    -- boardGridView:addBoard(chessGame:getBoard())
+    -- local capturedPiece = chessGame:getCapturedPiece()
+    -- if capturedPiece then
+    --     wCapturedPieces:addPiece(capturedPiece)
+    -- end
+    local didMove = getUsersMove()
+    if didMove == false then
         return
     end
-    boardGridView:addBoard(chessGame:getBoard())
 
     -- the game just ended after a user move
     -- or a computer move, show game ended dialog
     if chessGame:isGameOver() then
-        showDialog()
+        dialogBox:show(chessGame:getState())
         return
     end
 
     -- game hasnt ended, get computers move
-    if chessGame:isGameOver() == false then
-        -- show progress bar while computer is thinking
-        progressBar:show()
-        chessGame:move("", "", false, function()
-            boardGridView:addBoard(chessGame:getBoard())
-            if chessGame:isGameOver() then
-                showDialog()
-                return
-            end
-            -- hide progress bar after done thinking
-            progressBar:hide()
-        end, function(progress)
-            print("progress = " .. progress .. "%")
-            progressBar:updateProgress(progress)
-        end)
-    end
-
+    -- show progress bar while computer is thinking
+    getComputersMove()
 end
 
 function playdate.AButtonDown()
@@ -111,8 +136,14 @@ function playdate.cranked(change, acceleratedChange)
     local crankTicks = playdate.getCrankTicks(4)
     if crankTicks == 1 then
         boardGridView:nextPosition()
+        local missingPieces = chessGame:getMissingPieces(boardGridView:getVisibleBoard())
+        bCapturedPieces:addPieces(missingPieces)
+        wCapturedPieces:addPieces(missingPieces)
     elseif crankTicks == -1 then
         boardGridView:previousPosition()
+        local missingPieces = chessGame:getMissingPieces(boardGridView:getVisibleBoard())
+        bCapturedPieces:addPieces(missingPieces)
+        wCapturedPieces:addPieces(missingPieces)
     end
 end
 
@@ -138,33 +169,22 @@ function playdate.update()
     playdate.timer:updateTimers()
 end
 
--- easy - 1 second timeout
--- medium - 4 second timeout
--- hard - 8 second timeout
--- expert - 15 second timeout
--- todo change search depth for easy to 3
-GAME_DIFFICULTY = {
-    ["Easy"] = 1,
-    ["Med"] = 4,
-    ["Hard"] = 8,
-    ["Expert"] = 15
-}
 
-local function setupMenu()
+function initMenu()
     local menu = playdate.getSystemMenu()
-
-    local _, ignoredError = menu:addOptionsMenuItem("Difficulty", {"Easy", "Med", "Hard", "Expert"}, "Med",
+    local _, error1 = menu:addOptionsMenuItem("Difficulty", {"Easy", "Med", "Hard", "Expert"}, "Easy",
         function(value)
+            -- change difficult clicked
             chessGame:setDifficulty(GAME_DIFFICULTY[value])
         end)
 
-    local _, ignoredError = menu:addMenuItem("New Game", function()
-        chessGame = ChessGame()
-        boardGridView:clearGameData()
-        boardGridView:addBoard(chessGame:getBoard())
+    local _, error2 = menu:addMenuItem("New Game", function()
+        -- new game clicked
+        newGame()
     end)
 
-    local _, ignoredError = menu:addMenuItem("undo move", function()
+    local _, error3 = menu:addMenuItem("undo move", function()
+            -- undo move clicked
         if chessGame:isComputerThinking() then
             print("cant undo move while computer is thinking")
             return
@@ -172,11 +192,14 @@ local function setupMenu()
         chessGame:undoLastTwoMoves()
         boardGridView:removeBoard()
         boardGridView:removeBoard()
+        local missingPieces = chessGame:getMissingPieces(boardGridView:getVisibleBoard())
+        bCapturedPieces:addPieces(missingPieces)
+        wCapturedPieces:addPieces(missingPieces)
     end)
-
+    
 end
 
-setupMenu()
+initMenu()
 
 -- TODO
 -- let user choose promotion piece

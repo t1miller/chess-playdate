@@ -3,11 +3,13 @@ import "CoreLibs/sprites"
 import "CoreLibs/graphics"
 
 local gfx<const> = playdate.graphics
-
-local DIALOG_STATE = {
+local WIDTH <const> = 220
+local HEIGHT <const> = 120
+local DIALOG_STATE <const> = {
     SHOWING = "0",
     NOT_SHOWING = "1"
 }
+
 
 class('DialogBox', {
     text = "",
@@ -15,14 +17,12 @@ class('DialogBox', {
     bButtonText = ""
 }).extends(gfx.sprite)
 
-function DialogBox:init(text, aButtonText, bButtonText)
+function DialogBox:init(x, y, text)
     DialogBox.super.init(self)
 
-    self.aButtonText = aButtonText
-    self.bButtonText = bButtonText
     self.state = DIALOG_STATE.NOT_SHOWING
-    self:setSize(220, 180)
-    self:moveTo(200, 120)
+    self:setSize(WIDTH, HEIGHT)
+    self:moveTo(x, y)
     self:setZIndex(900)
     self.text = text
     self.currentChar = 1 -- we'll use these for the animation
@@ -58,42 +58,31 @@ function DialogBox:draw()
     -- that way, the colors we set etc. won't be stuck
     gfx.pushContext()
 
-    -- draw the box				
-    gfx.setColor(gfx.kColorWhite)
-    gfx.fillRect(0, 0, 220, 180)
+        gfx.setFont(gfx.getSystemFont())
 
-    -- border
-    gfx.setLineWidth(4)
-    gfx.setColor(gfx.kColorBlack)
-    gfx.drawRect(0, 0, 220, 180)
+        -- draw the box				
+        gfx.setColor(gfx.kColorWhite)
+        gfx.fillRect(0, 0, WIDTH, HEIGHT)
 
-    -- draw the text!
-    -- gfx.drawTextInRect(self.currentText, 10, 10, 200, 160)
-    gfx.drawTextInRect(self.currentText, 10, 10, 200, 100)
+        -- border
+        gfx.setLineWidth(4)
+        gfx.setColor(gfx.kColorBlack)
+        gfx.drawRect(0, 0, WIDTH, HEIGHT)
 
-    -- draw A button
-    gfx.drawCircleAtPoint(30, 100, 17)
-    gfx.drawTextAligned("A", 31, 93, kTextAlignment.center)
-    gfx.drawTextAligned(self.aButtonText, 65, 93, kTextAlignment.left)
-
-    -- draw B button
-    gfx.drawCircleAtPoint(30, 145, 17)
-    gfx.drawTextAligned("B", 31, 138, kTextAlignment.center)
-    gfx.drawTextAligned(self.bButtonText, 65, 138, kTextAlignment.left)
+        -- draw the text!
+        -- gfx.drawTextInRect(self.currentText, 10, 10, 200, 160)
+        gfx.drawTextInRect(self.currentText.."\n\nⒶ New Game\nⒷ Dismiss\n", 10, 10, 200, 100)
 
     gfx.popContext()
 
 end
 
-function DialogBox:updateText(text)
-    self.text = text
-end
-
-function DialogBox:show()
+function DialogBox:show(text)
     if self:isShowing() then
         return
     end
     self.state = DIALOG_STATE.SHOWING
+    self.text = text
     self:add()
     print("showing dialog box")
 end

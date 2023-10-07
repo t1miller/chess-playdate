@@ -1,6 +1,6 @@
 local gfx<const> = playdate.graphics
 
-PROGRESS_BAR_STATE = {
+local PROGRESS_BAR_STATE <const> = {
     SHOWING = "SHOWING",
     NOT_SHOWING = "NOT_SHOWING"
 }
@@ -27,24 +27,11 @@ function ProgressBar:init(x, y)
     self.surroundSprite:moveTo(x, y)
     -- self.surroundSprite:add()
 
-    self.textSprite = gfx.sprite.spriteWithText("Thinking", 150, 20)
-    self.textSprite:moveTo(x, y + 3)
+    -- self.textSprite = gfx.sprite.spriteWithText("Thinking", 150, 20, gfx.setFont(gfx.font.new("fonts/Mini Mono 2X")))
+    -- self.textSprite:moveTo(x, y + 3)
     -- self.textSprite:add()
-    -- kDrawModeXOR
-    -- gfx.setDitherPattern(1, gfx.image.kDrawModeXOR)
-    gfx.drawText("Thinking...", x, y)
-    self:updateProgress(0)
-    -- self:show()
-    -- local backgroundImage = gfx.image.new( "Images/background" )
-    -- assert( backgroundImage )
 
-    -- gfx.sprite.setBackgroundDrawingCallback(
-    --     function( x, y, width, height )
-    --         gfx.setClipRect( x, y, width, height )
-    --         backgroundImage:draw( 0, 0 )
-    --         gfx.clearClipRect()
-    --     end
-    -- )
+    self:updateProgress(0)
 end
 
 function ProgressBar:hide()
@@ -52,7 +39,7 @@ function ProgressBar:hide()
     self.infillSprite:remove()
     self.progressSprite:remove()
     self.surroundSprite:remove()
-    self.textSprite:remove()
+    -- self.textSprite:remove()
 end
 
 function ProgressBar:show()
@@ -60,7 +47,7 @@ function ProgressBar:show()
     self.infillSprite:add()
     self.progressSprite:add()
     self.surroundSprite:add()
-    self.textSprite:add()
+    -- self.textSprite:add()
 end
 
 function ProgressBar:isShowing()
