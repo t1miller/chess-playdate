@@ -2594,110 +2594,107 @@ end
 
 function Lalgb(f, t, flag)
 
-    local i = 0
-    local y = 0
     local m3p = 0
 
     if (f ~= t) then
-        local a0 = Js_asciiMove[1 + 0]
-        local a1 = Js_asciiMove[1 + 1]
-        local a2 = Js_asciiMove[1 + 2]
-        local a3 = Js_asciiMove[1 + 3]
-        a0[1 + 0] = (97 + IColmn(f)) -- (char)
-        a0[1 + 1] = (49 + IRaw(f)) -- (char)
-        a0[1 + 2] = (97 + IColmn(t)) -- (char)
-        a0[1 + 3] = (49 + IRaw(t)) -- (char)
-        a0[1 + 4] = 0
+        local a0 = Js_asciiMove[1]
+        local a1 = Js_asciiMove[2]
+        local a2 = Js_asciiMove[3]
+        local a3 = Js_asciiMove[4]
+        a0[1] = (97 + IColmn(f)) -- (char)
+        a0[2] = (49 + IRaw(f)) -- (char)
+        a0[3] = (97 + IColmn(t)) -- (char)
+        a0[4] = (49 + IRaw(t)) -- (char)
+        a0[5] = 0
 
-        a3[1 + 0] = 0
-        a1[1 + 0] = Js_upperNot[1 + Js_board[1 + f]]
+        a3[1] = 0
+        a1[1] = Js_upperNot[1 + Js_board[1 + f]]
 
-        if (a1[1 + 0] == "P") then
+        if (a1[1] == "P") then
 
-            if (a0[1 + 0] == a0[1 + 2]) then
-                a1[1 + 0] = a0[1 + 2]
-                a2[1 + 0] = a1[1 + 0]
-                a1[1 + 1] = a0[1 + 3]
-                a2[1 + 1] = a1[1 + 1]
+            if (a0[1] == a0[3]) then
+                a1[1] = a0[3]
+                a2[1] = a1[1]
+                a1[2] = a0[4]
+                a2[2] = a1[2]
                 m3p = 2
             else
-                a1[1 + 0] = a0[1 + 0]
-                a2[1 + 0] = a1[1 + 0]
-                a1[1 + 1] = a0[1 + 2]
-                a2[1 + 1] = a1[1 + 1]
-                a2[1 + 2] = a0[1 + 3]
+                a1[1] = a0[1]
+                a2[1] = a1[1]
+                a1[2] = a0[3]
+                a2[2] = a1[2]
+                a2[3] = a0[4]
                 m3p = 3
             end
 
-            a1[1 + 2] = 0
+            a1[3] = 0
             a2[1 + m3p] = 0
             if ((flag & Js_promote) ~= 0) then
-                a1[1 + 2] = Js_lowerNot[1 + (flag & Js_pawn_msk)]
-                a2[1 + m3p] = a1[1 + 2]
-                a0[1 + 4] = a1[1 + 2]
-                a0[1 + 5] = 0
+                a1[3] = Js_lowerNot[1 + (flag & Js_pawn_msk)]
+                a2[1 + m3p] = a1[3]
+                a0[5] = a1[3]
+                a0[6] = 0
                 a2[1 + (m3p + 1)] = 0
-                a1[1 + 3] = 0
+                a1[4] = 0
             end
 
         else
 
-            a2[1 + 0] = a1[1 + 0]
-            a2[1 + 1] = a0[1 + 1]
-            a1[1 + 1] = a0[1 + 2]
-            a2[1 + 2] = a1[1 + 1]
-            a1[1 + 2] = a0[1 + 3]
-            a2[1 + 3] = a1[1 + 2]
-            a1[1 + 3] = 0
-            a2[1 + 4] = 0
-            for i = 0, 5, 1 do
+            a2[1] = a1[1]
+            a2[2] = a0[2]
+            a1[2] = a0[3]
+            a2[3] = a1[2]
+            a1[3] = a0[4]
+            a2[4] = a1[3]
+            a1[4] = 0
+            a2[5] = 0
+            for i = 0, 5 do
                 a3[1 + i] = a2[1 + i]
             end
 
-            a3[1 + 1] = a0[1 + 0]
+            a3[2] = a0[1]
             if ((flag & Js_castle_msk) ~= 0) then
 
                 if (t > f) then
 
-                    a1[1 + 0] = 111
-                    a1[1 + 1] = 45
-                    a1[1 + 2] = 111
-                    a1[1 + 3] = 0
+                    a1[1] = 111
+                    a1[2] = 45
+                    a1[3] = 111
+                    a1[4] = 0
 
-                    a2[1 + 0] = 111
-                    a2[1 + 1] = 45
-                    a2[1 + 2] = 111
-                    a2[1 + 3] = 0
+                    a2[1] = 111
+                    a2[2] = 45
+                    a2[3] = 111
+                    a2[4] = 0
 
                 else
 
-                    a1[1 + 0] = 111
-                    a1[1 + 1] = 45
-                    a1[1 + 2] = 111
-                    a1[1 + 3] = 45
-                    a1[1 + 4] = 111
-                    a1[1 + 5] = 0
+                    a1[1] = 111
+                    a1[2] = 45
+                    a1[3] = 111
+                    a1[4] = 45
+                    a1[5] = 111
+                    a1[6] = 0
 
-                    a2[1 + 0] = 111
-                    a2[1 + 1] = 45
-                    a2[1 + 2] = 111
-                    a2[1 + 3] = 45
-                    a2[1 + 4] = 111
-                    a2[1 + 5] = 0
+                    a2[1] = 111
+                    a2[2] = 45
+                    a2[3] = 111
+                    a2[4] = 45
+                    a2[5] = 111
+                    a2[6] = 0
                 end
             end
         end
 
     else
 
-        for i = 0, 3, 1 do
+        for i = 0, 3 do
             Js_asciiMove[1 + i][1 + 0] = 0
         end
     end
 end
 
 function UpdatePiecMap(side, sq, iop)
-    local i = 0
     if (iop == 1) then
         Js_piecesCount[1 + side] = Js_piecesCount[1 + side] - 1
         for i = Js_pieceIndex[1 + sq], Js_piecesCount[1 + side], 1 do
@@ -2716,15 +2713,14 @@ function getBoard()
     local BB = {} -- 8x8
     local iCol = 0
     local iLine = 0
-    local i = 0
     local s = ""
     local ch = ""
 
-    for i = 0, 7, 1 do
+    for i = 0, 7 do
         BB[1 + i] = {} -- create object
     end
 
-    for i = 0, 63, 1 do
+    for i = 0, 63 do
         iCol = i % 8
         iLine = (i - iCol) / 8
         if (Js_board[1 + i] == Js_empty) then
@@ -2750,15 +2746,14 @@ function UpdateDisplay()
     local BB = {} -- 8x8
     local iCol = 0
     local iLine = 0
-    local i = 0
     local s = ""
     local ch = ""
 
-    for i = 0, 7, 1 do
+    for i = 0, 7 do
         BB[1 + i] = {} -- create object
     end
 
-    for i = 0, 63, 1 do
+    for i = 0, 63 do
         iCol = i % 8
         iLine = (i - iCol) / 8
         if (Js_board[1 + i] == Js_empty) then
@@ -2788,8 +2783,6 @@ function AvailCaptur(side, ply)
     local node = Js_Tree[1 + Tpt] -- _BTREE
     local inext = Tpt + 1
     local r7 = Js_raw7[1 + side]
-    local ipl = side
-    local i = 0
 
     local sq = 0
     local piece = 0
@@ -2798,7 +2791,7 @@ function AvailCaptur(side, ply)
     local u = 0
     local fl = 0
 
-    for i = 0, Js_piecesCount[1 + side], 1 do
+    for i = 0, Js_piecesCount[1 + side] do
 
         sq = Js_pieceMap[1 + side][1 + i]
         piece = Js_board[1 + sq]
@@ -2901,8 +2894,6 @@ end
 
 function InitStatus()
 
-    local i = 0
-    local sq = 0
     local c = 0
     local c2 = 0
 
@@ -2920,7 +2911,7 @@ function InitStatus()
     Js_piecesCount[1 + Js_black] = 0
     Js_piecesCount[1 + Js_white] = 0
 
-    for sq = 0, 63, 1 do
+    for sq = 0, 63 do
 
         if (Js_color[1 + sq] ~= Js_hollow) then
             c = Js_color[1 + sq]
@@ -2962,8 +2953,6 @@ end
 
 function CheckMatrl()
 
-    local flag = true
-
     local nP = 0
     local nK = 0
     local nB = 0
@@ -2975,9 +2964,7 @@ function CheckMatrl()
     local nB1 = 0
     local nB2 = 0
 
-    local i = 0
-
-    for i = 0, 63, 1 do
+    for i = 0, 63 do
 
         if (Js_board[1 + i] == Js_pawn) then
             nP = nP + 1
@@ -3148,12 +3135,11 @@ function PawnPts(sq, side)
     local r = 0
     local in_square = false
     local e = 0
-    local j = 0
 
     if (Js_c1 == Js_white) then
 
         s = Js_wPawnMvt[1 + sq]
-        if (((sq == 11) and (Js_color[1 + 19] ~= Js_hollow)) or ((sq == 12) and (Js_color[1 + 20] ~= Js_hollow))) then
+        if (((sq == 11) and (Js_color[20] ~= Js_hollow)) or ((sq == 12) and (Js_color[21] ~= Js_hollow))) then
             s = s + Js_junk_pawn
         end
 
@@ -3217,7 +3203,7 @@ function PawnPts(sq, side)
         if (Js_c1 == Js_black) then
 
             s = Js_bPawnMvt[1 + sq]
-            if (((sq == 51) and (Js_color[1 + 43] ~= Js_hollow)) or ((sq == 52) and (Js_color[1 + 44] ~= Js_hollow))) then
+            if (((sq == 51) and (Js_color[44] ~= Js_hollow)) or ((sq == 52) and (Js_color[45] ~= Js_hollow))) then
                 s = s + Js_junk_pawn
             end
 
