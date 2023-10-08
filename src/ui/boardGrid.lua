@@ -114,7 +114,7 @@ function BoardGridView:init(newBoard)
 		self:drawFiles()
 		self:drawRanks()
 	gfx.popContext()
-	print("board grid view initialized")
+	print("Board Grid View: grid view initialized")
 end
 
 function BoardGridView:drawGridView()
@@ -153,13 +153,6 @@ function BoardGridView:drawRanks()
 	end
 end
 
--- function BoardGridView:drawBackground()
--- 	gfx.pushContext()
--- 		gfx.setColor(gfx.kColorBlack)
--- 		gfx.fillRect(350, 200, BOARD_WIDTH+25, BOARD_WIDTH+25)
--- 	gfx.popContext()
--- end
-
 function BoardGridView:addBoard(newBoard)
 	table.insert(boards, newBoard)
 	boardIdx += 1
@@ -187,7 +180,6 @@ function BoardGridView:previousPosition()
 	if boardIdx == 0 then
 		boardIdx = 1
 	end
-	print("previousPosition() calling drawGridView()")
 	self:drawGridView()
 end
 
@@ -196,7 +188,6 @@ function BoardGridView:nextPosition()
 	if boardIdx >= #boards then
 		boardIdx = #boards
 	end
-	print("nextPosition() calling drawGridView()")
 	self:drawGridView()
 end
 
@@ -210,7 +201,7 @@ function BoardGridView:clickCell()
 	local piece = getPieceAt(boards[boardIdx], r, c)
 	table.insert(clicked, { r, c, position, piece })
 	local move = clicked[#clicked - 1][3] .. clicked[#clicked][3]
-	print("move: " .. move)
+	print("Board Grid View: move: " .. move)
 	self:drawGridView()
 	return clicked[#clicked - 1][3], clicked[#clicked][3]
 end

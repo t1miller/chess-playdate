@@ -14,7 +14,7 @@
 -- Free usage and much thanks to Fabien!
 --
 -- require "bit";
-bit = import"bitop/funcs".bit32
+local bit = import "lua53bit"
 
 -- colour.h
 

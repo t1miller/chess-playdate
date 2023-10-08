@@ -70,7 +70,6 @@ function DialogBox:draw()
         gfx.drawRect(0, 0, WIDTH, HEIGHT)
 
         -- draw the text!
-        -- gfx.drawTextInRect(self.currentText, 10, 10, 200, 160)
         gfx.drawTextInRect(self.currentText.."\n\nⒶ New Game\nⒷ Dismiss\n", 10, 10, 200, 100)
 
     gfx.popContext()
@@ -84,7 +83,7 @@ function DialogBox:show(text)
     self.state = DIALOG_STATE.SHOWING
     self.text = text
     self:add()
-    print("showing dialog box")
+    print("Dialog Box: showing")
 end
 
 function DialogBox:isShowing()
@@ -100,5 +99,5 @@ function DialogBox:dismiss()
     self.typing = true
     self.state = DIALOG_STATE.NOT_SHOWING
     self:remove()
-    print("dismissing dialog box")
+    print("Dialog Box: dismissing")
 end

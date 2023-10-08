@@ -5,8 +5,8 @@ import "CoreLibs/graphics"
 import 'ui/imageCache'
 
 local gfx <const> = playdate.graphics
-local WIDTH <const> = 130
-local HEIGHT <const> = 70
+-- local WIDTH <const> = 130
+-- local HEIGHT <const> = 70
 local imageCache = ImageCache()
 -- local PIECE_VALUE <const> = {
 -- 	["p"] = 1,
@@ -88,7 +88,6 @@ function CapturedPieces:draw(missingPieces)
 		pieceOrder = {"p","n","b","r","q"}
 	end
 
-	print()
 	for i = 1, #pieceOrder do
 		local sprites = self.pieceSprites[pieceOrder[i]]
 		for j = 1, missingPieces[pieceOrder[i]] do
@@ -106,12 +105,13 @@ function CapturedPieces:draw(missingPieces)
 	end
 end
 
--- function CapturedPieces:calculateScore()
--- 	local score = 0
--- 	for i = 1, #self.pieces do
--- 		local piece = self.pieces[i]
--- 		score += PIECE_VALUE[piece]
--- 	end
--- 	return score
--- end
+-- score diff = your pieces captured - oponents
+function CapturedPieces:calculateScore()
+	local score = 0
+	for i = 1, #self.pieces do
+		local piece = self.pieces[i]
+		score += PIECE_VALUE[piece]
+	end
+	return score
+end
 

@@ -36,10 +36,12 @@ function ImageCache:getPieceImage(piece)
 end
 
 local function cachePieceImages()
+	print("ImageCache: caching images")
 	for _, pieceImagePath in pairs(PIECES_IMG_PATHS) do
 		local pieceImage = gfx.image.new(pieceImagePath)
 		cachedPieceImages[pieceImagePath] = pieceImage
 	end
+	print("ImageCache: done caching images")
 end
 
 cachePieceImages()

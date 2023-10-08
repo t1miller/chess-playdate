@@ -22,12 +22,12 @@ local progressBar = ProgressBar(330, 120)
 local bCapturedPieces = CapturedPieces(269, 13, false)
 local wCapturedPieces = CapturedPieces(269, 177, true)
 local GAME_DIFFICULTY <const> = {
-    ["Easy"] = {2,3},
-    ["Med"] = {2,6},
-    ["Hard"] = {4,6},
-    ["Expert"] = {15,6}
+    ["easy"] = {3,6},
+    ["med"] = {4,6},
+    ["hard"] = {8,6},
+    ["expert"] = {16,6}
 }
-chessGame:setDifficulty(GAME_DIFFICULTY["Easy"])
+chessGame:setDifficulty(GAME_DIFFICULTY["easy"])
 
 local function newGame()
     chessGame = ChessGame()
@@ -88,23 +88,11 @@ local function gameStateMachine()
     end
 
     -- game hasnt ended, get users move 
-    -- local from, to = boardGridView:clickCell()
-    -- chessGame:move(from, to, true)
-    -- if chessGame:getState() == GAME_STATE.INVALID_MOVE then
-    --     return
-    -- end
-    -- boardGridView:addBoard(chessGame:getBoard())
-    -- local capturedPiece = chessGame:getCapturedPiece()
-    -- if capturedPiece then
-    --     wCapturedPieces:addPiece(capturedPiece)
-    -- end
     local didMove = getUsersMove()
     if didMove == false then
         return
     end
 
-    -- the game just ended after a user move
-    -- or a computer move, show game ended dialog
     if chessGame:isGameOver() then
         dialogBox:show(chessGame:getState())
         return
@@ -133,7 +121,7 @@ function playdate.BButtonDown()
 end
 
 function playdate.cranked(change, acceleratedChange)
-    local crankTicks = playdate.getCrankTicks(4)
+    local crankTicks = playdate.getCrankTicks(1)
     if crankTicks == 1 then
         boardGridView:nextPosition()
         local missingPieces = chessGame:getMissingPieces(boardGridView:getVisibleBoard())
@@ -170,15 +158,15 @@ function playdate.update()
 end
 
 
-function initMenu()
+local function initMenu()
     local menu = playdate.getSystemMenu()
-    local _, error1 = menu:addOptionsMenuItem("Difficulty", {"Easy", "Med", "Hard", "Expert"}, "Easy",
+    local _, error1 = menu:addOptionsMenuItem("Difficulty", {"easy", "med", "hard", "expert"}, "easy",
         function(value)
             -- change difficult clicked
             chessGame:setDifficulty(GAME_DIFFICULTY[value])
         end)
 
-    local _, error2 = menu:addMenuItem("New Game", function()
+    local _, error2 = menu:addMenuItem("new game", function()
         -- new game clicked
         newGame()
     end)
