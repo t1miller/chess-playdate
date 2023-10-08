@@ -1,12 +1,14 @@
 -- BitOp
 -- require "bit"
+
 -- local bit = import "lua53bit"
--- local bit = import "bitop/funcs".bit32
+
 
 -- Or an alternative is bitwises emulation.
 -- This loads and executes other .lua file
 -- (substitutes "bit" object)
 -- loadfile("noBitOp.lua")
+
 
 -- This is a Lua version of
 -- Jester (http://www.ludochess.com/) - a strong java chess engine
@@ -20,8 +22,8 @@
 -- Lua (via javascript) work by http://chessforeva.blogspot.com
 -- sorry for hack, just very good source for lua
 
-local function _BTREE()
 
+function _BTREE()
     local b = {}
     b.replay = 0
     b.f = 0
@@ -31,8 +33,7 @@ local function _BTREE()
     return b
 end
 
-local function _GAMESTATS()
-
+function _GAMESTATS()
     local g = {}
     g.mate = false
     g.timeout = false
@@ -40,15 +41,13 @@ local function _GAMESTATS()
     return g
 end
 
-local function _INT()
-
+function _INT()
     local x = {}
     x.i = 0
     return x
 end
 
-local function _MOVES()
-
+function _MOVES()
     local m = {}
     m.gamMv = 0
     m.score = 0
@@ -57,153 +56,154 @@ local function _MOVES()
     return m
 end
 
-local Js_maxDepth = 6 -- Search Depth setting for lua (no timeout option)
+Js_maxDepth = 6         -- Search Depth setting for lua (no timeout option)
 
-local Js_searchTimeout = 4 -- 9 seconds for search allowed
+Js_searchTimeout = 12   -- 9 seconds for search allowed
 
--- local Js_startTime = 0
-local Js_nMovesMade = 0
-local Js_computer = 0
-local Js_player = 0
-local Js_enemy = 0
+Js_startTime = 0
+Js_nMovesMade = 0
+Js_computer = 0
+Js_player = 0
+Js_enemy = 0
 
-local Js_fUserWin_kc = false
--- local Js_fInGame = false
+Js_fUserWin_kc = false
+Js_fInGame = false
 
-local Js_fGameOver = false
 
-local Js_fCheck_kc = false
-local Js_fMate_kc = false
-local Js_bDraw = 0
-local Js_fStalemate = false
--- local Js_fSoonMate_kc = false -- Algo detects soon checkmate
-local Js_fAbandon = false -- Algo resigns, if game lost
+Js_fGameOver = false
 
-local Js_working = 0
-local Js_working2 = 0
-local Js_advX_pawn = 10
-local Js_isoX_pawn = 7
-local Js_pawnPlus = 0
-local Js_castle_pawn = 0
-local Js_bishopPlus = 0
-local Js_adv_knight = 0
-local Js_far_knight = 0
-local Js_far_bishop = 0
-local Js_king_agress = 0
+Js_fCheck_kc = false
+Js_fMate_kc = false
+Js_bDraw = 0
+Js_fStalemate = false
+Js_fSoonMate_kc = false   -- Algo detects soon checkmate
+Js_fAbandon = false       -- Algo resigns, if game lost
 
-local Js_junk_pawn = -15
-local Js_stopped_pawn = -4
-local Js_doubled_pawn = -14
-local Js_bad_pawn = -4
-local Js_semiOpen_rook = 10
-local Js_semiOpen_rookOther = 4
-local Js_rookPlus = 0
-local Js_crossArrow = 8
-local Js_pinnedVal = 10
-local Js_semiOpen_king = 0
-local Js_semiOpen_kingOther = 0
-local Js_castle_K = 0
-local Js_moveAcross_K = 0
-local Js_safe_King = 0
+Js_working = 0
+Js_working2 = 0
+Js_advX_pawn = 10
+Js_isoX_pawn = 7
+Js_pawnPlus = 0
+Js_castle_pawn = 0
+Js_bishopPlus = 0
+Js_adv_knight = 0
+Js_far_knight = 0
+Js_far_bishop = 0
+Js_king_agress = 0
 
-local Js_agress_across = -6
-local Js_pinned_p = -8
-local Js_pinned_other = -12
+Js_junk_pawn = -15
+Js_stopped_pawn = -4
+Js_doubled_pawn = -14
+Js_bad_pawn = -4
+Js_semiOpen_rook = 10
+Js_semiOpen_rookOther = 4
+Js_rookPlus = 0
+Js_crossArrow = 8
+Js_pinnedVal = 10
+Js_semiOpen_king = 0
+Js_semiOpen_kingOther = 0
+Js_castle_K = 0
+Js_moveAcross_K = 0
+Js_safe_King = 0
 
-local Js_nGameMoves = {} -- int[]
-local Js_depth_Seek = 0
-local Js_c1 = 0
-local Js_c2 = 0
-local Js_agress2 = {} -- int[]
-local Js_agress1 = {} -- int[]
-local Js_ptValue = 0
-local Js_flip = false
-local Js_fEat = false
-local Js_myPiece = ""
-local Js_Message = ""
+Js_agress_across = -6
+Js_pinned_p = -8
+Js_pinned_other = -12
 
-local Js_fiftyMoves = 0
-local Js_indenSqr = 0
-local Js_realBestDepth = 0
-local Js_realBestScore = 0
-local Js_realBestMove = 0
-local Js_lastDepth = 0
-local Js_lastScore = 0
--- local Js_fKO = false
+Js_nGameMoves = {}   --int[]
+Js_depth_Seek = 0
+Js_c1 = 0
+Js_c2 = 0
+Js_agress2 = {}   --int[]
+Js_agress1 = {}   --int[]
+Js_ptValue = 0
+Js_flip = false
+Js_fEat = false
+Js_myPiece = ""
+Js_Message = ""
 
--- local Js_fromMySquare = 0
--- local Js_toMySquare = 0
-local Js_cNodes = 0
-local Js_scoreDither = 0
-local Js__alpha = 0
-local Js__beta = 0
-local Js_dxAlphaBeta = 0
-local Js_maxDepthSeek = 0
-local Js_specialScore = 0
--- local Js_hint = 0
+Js_fiftyMoves = 0
+Js_indenSqr = 0
+Js_realBestDepth = 0
+Js_realBestScore = 0
+Js_realBestMove = 0
+Js_lastDepth = 0
+Js_lastScore = 0
+Js_fKO = false
 
-local Js_currentScore = 0
 
-local Js_proPiece = 0
-local Js_pawc1 = {}
-local Js_pawc2 = {}
--- local Js_origSquare = 0
-local Js_destSquare = 0
+Js_fromMySquare = 0
+Js_toMySquare = 0
+Js_cNodes = 0
+Js_scoreDither = 0
+Js__alpha = 0
+Js__beta = 0
+Js_dxAlphaBeta = 0
+Js_maxDepthSeek = 0
+Js_specialScore = 0
+Js_hint = 0
 
-local Js_cCompNodes = 0
-local Js_dxDither = 0
-local Js_scoreWin0 = 0
-local Js_scoreWin1 = 0
-local Js_scoreWin2 = 0
-local Js_scoreWin3 = 0
-local Js_scoreWin4 = 0
+Js_currentScore = 0
 
--- local Js_USER_TOPLAY = 0
-local Js_JESTER_TOPLAY = 1
+Js_proPiece = 0
+Js_pawc1 = {}
+Js_pawc2 = {}
+Js_origSquare = 0
+Js_destSquare = 0
 
-local Js_hollow = 2
-local Js_empty = 0
-local Js_pawn = 1
-local Js_knight = 2
-local Js_bishop = 3
-local Js_rook = 4
-local Js_queen = 5
-local Js_king = 6
+Js_cCompNodes = 0
+Js_dxDither = 0
+Js_scoreWin0 = 0
+Js_scoreWin1 = 0
+Js_scoreWin2 = 0
+Js_scoreWin3 = 0
+Js_scoreWin4 = 0
 
-local Js_white = 0
-local Js_black = 1
+Js_USER_TOPLAY = 0
+Js_JESTER_TOPLAY = 1
 
-local Js_N9 = 90
+Js_hollow = 2
+Js_empty = 0
+Js_pawn = 1
+Js_knight = 2
+Js_bishop = 3
+Js_rook = 4
+Js_queen = 5
+Js_king = 6
 
-local Js_szIdMvt = "ABCDEFGH" .. "IJKLMNOP" .. "QRSTUVWX" .. "abcdefgh" .. "ijklmnop" .. "qrstuvwx" .. "01234567" ..
-                 "89YZyz*+"
-local Js_szAlgMvt = {"a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1", "a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2", "a3",
-               "b3", "c3", "d3", "e3", "f3", "g3", "h3", "a4", "b4", "c4", "d4", "e4", "f4", "g4", "h4", "a5", "b5",
-               "c5", "d5", "e5", "f5", "g5", "h5", "a6", "b6", "c6", "d6", "e6", "f6", "g6", "h6", "a7", "b7", "c7",
-               "d7", "e7", "f7", "g7", "h7", "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8"}
+Js_white = 0
+Js_black = 1
 
--- local Js_color_sq = {0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0,
---                1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0}
+Js_N9 = 90
 
-local Js_bkPawn = 7
-local Js_pawn_msk = 7
-local Js_promote = 8
-local Js_castle_msk = 16
-local Js_enpassant_msk = 32
-local Js__idem = 64
-local Js_menace_pawn = 128
--- local Js_check = 256
-local Js_capture = 512
-local Js_draw = 1024
-local Js_pawnVal = 100
-local Js_knightVal = 350
-local Js_bishopVal = 355
-local Js_rookVal = 550
-local Js_queenVal = 1050
-local Js_kingVal = 1200
-local Js_xltP = 16384
-local Js_xltN = 10240
-local Js_xltB = 6144
+Js_szIdMvt = "ABCDEFGH" .. "IJKLMNOP" .. "QRSTUVWX" .. "abcdefgh" .. "ijklmnop" .. "qrstuvwx" .. "01234567" .. "89YZyz*+"
+Js_szAlgMvt = { "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1", "a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2", "a3",
+    "b3", "c3", "d3", "e3", "f3", "g3", "h3", "a4", "b4", "c4", "d4", "e4", "f4", "g4", "h4", "a5", "b5", "c5", "d5",
+    "e5", "f5", "g5", "h5", "a6", "b6", "c6", "d6", "e6", "f6", "g6", "h6", "a7", "b7", "c7", "d7", "e7", "f7", "g7",
+    "h7", "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8" }
+
+Js_color_sq = { 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0,
+    1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0 }
+
+Js_bkPawn = 7
+Js_pawn_msk = 7
+Js_promote = 8
+Js_castle_msk = 16
+Js_enpassant_msk = 32
+Js__idem = 64
+Js_menace_pawn = 128
+Js_check = 256
+Js_capture = 512
+Js_draw = 1024
+Js_pawnVal = 100
+Js_knightVal = 350
+Js_bishopVal = 355
+Js_rookVal = 550
+Js_queenVal = 1050
+Js_kingVal = 1200
+Js_xltP = 16384
+Js_xltN = 10240
+Js_xltB = 6144
 Js_xltR = 1024
 Js_xltQ = 512
 Js_xltK = 256
@@ -212,132 +212,130 @@ Js_xltBN = 2048
 Js_xltRQ = 1536
 Js_xltNN = 8192
 
-local Js_movesList = {} -- new _MOVES[512]
-local Js_flag = _GAMESTATS() -- new _GAMESTATS()
-local Js_Tree = {} -- new _BTREE[2000]
-local Js_root = _BTREE()
-local Js_tmpTree = _BTREE() -- new _BTREE()
-local Js_treePoint = {} -- new int[Js_maxDepth]
-local Js_board = {} -- new int[64]
-local Js_color = {} -- new int[64]
-local Js_pieceMap = {} -- new int[2][16]
-local Js_pawnMap = {} -- new int[2][8]
-local Js_roquer = {0, 0}
-local Js_nMvtOnBoard = {} -- new int[64]
-local Js_scoreOnBoard = {} -- new int[64]
-local Js_gainScore = _INT()
+Js_movesList = {}        --new _MOVES[512]
+Js_flag = _GAMESTATS()   --new _GAMESTATS()
+Js_Tree = {}             --new _BTREE[2000]
+Js_root = _BTREE()
+Js_tmpTree = _BTREE()    --new _BTREE()
+Js_treePoint = {}        --new int[Js_maxDepth]
+Js_board = {}            --new int[64]
+Js_color = {}            --new int[64]
+Js_pieceMap = {}         --new int[2][16]
+Js_pawnMap = {}          --new int[2][8]
+Js_roquer = { 0, 0 }
+Js_nMvtOnBoard = {}      --new int[64]
+Js_scoreOnBoard = {}     --new int[64]
+Js_gainScore = _INT()
 
-local Js_otherTroop = {1, 0, 2}
-local Js_variants = {} -- new int[Js_maxDepth]
-local Js_pieceIndex = {} -- new int[64]
-local Js_piecesCount = {0, 0}
-local Js_arrowData = {} -- new int[4200]
-local Js_crossData = {} -- new int[4200]
-local Js_agress = {} -- new int[2][64]
-local Js_matrl = {0, 0}
-local Js_pmatrl = {0, 0}
-local Js_ematrl = {0, 0}
-local Js_pinned = {0, 0}
-local Js_withPawn = {0, 0}
-local Js_withKnight = {0, 0}
-local Js_withBishop = {0, 0}
-local Js_withRook = {0, 0}
-local Js_withQueen = {0, 0}
-local Js_flagCheck = {} -- new int[Js_maxDepth]
-local Js_flagEat = {} -- new int[Js_maxDepth]
-local Js_menacePawn = {} -- new int[Js_maxDepth]
-local Js_scorePP = {} -- new int[Js_maxDepth]
-local Js_scoreTP = {} -- new int[Js_maxDepth]
-local Js_eliminate0 = {} -- new int[Js_maxDepth]
-local Js_eliminate1 = {} -- new int[Js_maxDepth]
-local Js_eliminate2 = {} -- new int[Js_maxDepth]
-local Js_eliminate3 = {} -- new int[Js_maxDepth]
-local Js_storage = {} -- new short[10000]
-local Js_wPawnMvt = {} -- new int[64]
-local Js_bPawnMvt = {} -- new int[64]
-local Js_knightMvt = {} -- new int[2][64]
-local Js_bishopMvt = {} -- new int[2][64]
-local Js_kingMvt = {} -- new int[2][64]
-local Js_killArea = {} -- new int[2][64]
-local Js_fDevl = {0, 0}
-local Js_nextCross = {} -- new char[40000]
-local Js_nextArrow = {} -- new char[40000]
-local Js_tmpCh = {} -- new char[20]
-local Js_movCh = {} -- new char[8]
-local Js_b_r = {} -- new int[64]
+Js_otherTroop = { 1, 0, 2 }
+Js_variants = {}     --new int[Js_maxDepth]
+Js_pieceIndex = {}   --new int[64]
+Js_piecesCount = { 0, 0 }
+Js_arrowData = {}    --new int[4200]
+Js_crossData = {}    --new int[4200]
+Js_agress = {}       --new int[2][64]
+Js_matrl = { 0, 0 }
+Js_pmatrl = { 0, 0 }
+Js_ematrl = { 0, 0 }
+Js_pinned = { 0, 0 }
+Js_withPawn = { 0, 0 }
+Js_withKnight = { 0, 0 }
+Js_withBishop = { 0, 0 }
+Js_withRook = { 0, 0 }
+Js_withQueen = { 0, 0 }
+Js_flagCheck = {}    --new int[Js_maxDepth]
+Js_flagEat = {}      --new int[Js_maxDepth]
+Js_menacePawn = {}   --new int[Js_maxDepth]
+Js_scorePP = {}      --new int[Js_maxDepth]
+Js_scoreTP = {}      --new int[Js_maxDepth]
+Js_eliminate0 = {}   --new int[Js_maxDepth]
+Js_eliminate1 = {}   --new int[Js_maxDepth]
+Js_eliminate2 = {}   --new int[Js_maxDepth]
+Js_eliminate3 = {}   --new int[Js_maxDepth]
+Js_storage = {}      --new short[10000]
+Js_wPawnMvt = {}     --new int[64]
+Js_bPawnMvt = {}     --new int[64]
+Js_knightMvt = {}    --new int[2][64]
+Js_bishopMvt = {}    --new int[2][64]
+Js_kingMvt = {}      --new int[2][64]
+Js_killArea = {}     --new int[2][64]
+Js_fDevl = { 0, 0 }
+Js_nextCross = {}    --new char[40000]
+Js_nextArrow = {}    --new char[40000]
+Js_tmpCh = {}        --new char[20]
+Js_movCh = {}        --new char[8]
+Js_b_r = {}          --new int[64]
 
-local Js_upperNot = {" ", "P", "N", "B", "R", "Q", "K"}
-local Js_lowerNot = {" ", "p", "n", "b", "r", "q", "k"}
-local Js_rgszPiece = {"", "", "N", "B", "R", "Q", "K"}
-local Js_asciiMove = {{" ", " ", " ", " ", " ", " "}, {" ", " ", " ", " ", " ", " "}, {" ", " ", " ", " ", " ", " "},
-                {" ", " ", " ", " ", " ", " "}}
-local Js_reguBoard = {Js_rook, Js_knight, Js_bishop, Js_queen, Js_king, Js_bishop, Js_knight, Js_rook, Js_pawn, Js_pawn,
-                Js_pawn, Js_pawn, Js_pawn, Js_pawn, Js_pawn, Js_pawn, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, Js_pawn, Js_pawn, Js_pawn, Js_pawn, Js_pawn, Js_pawn,
-                Js_pawn, Js_pawn, Js_rook, Js_knight, Js_bishop, Js_queen, Js_king, Js_bishop, Js_knight, Js_rook}
-local Js_reguColor = {Js_white, Js_white, Js_white, Js_white, Js_white, Js_white, Js_white, Js_white, Js_white, Js_white,
-                Js_white, Js_white, Js_white, Js_white, Js_white, Js_white, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-                2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, Js_black, Js_black, Js_black, Js_black, Js_black,
-                Js_black, Js_black, Js_black, Js_black, Js_black, Js_black, Js_black, Js_black, Js_black, Js_black,
-                Js_black}
-local Js_pieceTyp = {{Js_empty, Js_pawn, Js_knight, Js_bishop, Js_rook, Js_queen, Js_king, Js_empty},
-               {Js_empty, Js_bkPawn, Js_knight, Js_bishop, Js_rook, Js_queen, Js_king, Js_empty}}
-local Js_direction = {{0, 0, 0, 0, 0, 0, 0, 0}, {10, 9, 11, 0, 0, 0, 0, 0}, {8, -8, 12, -12, 19, -19, 21, -21},
-                {9, 11, -9, -11, 0, 0, 0, 0}, {1, 10, -1, -10, 0, 0, 0, 0}, {1, 10, -1, -10, 9, 11, -9, -11},
-                {1, 10, -1, -10, 9, 11, -9, -11}, {-10, -9, -11, 0, 0, 0, 0, 0}}
-local Js_maxJobs = {0, 2, 1, 7, 7, 7, 1, 2}
-local Js_virtualBoard = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 1, 2, 3, 4, 5,
-                   6, 7, -1, -1, 8, 9, 10, 11, 12, 13, 14, 15, -1, -1, 16, 17, 18, 19, 20, 21, 22, 23, -1, -1, 24, 25,
-                   26, 27, 28, 29, 30, 31, -1, -1, 32, 33, 34, 35, 36, 37, 38, 39, -1, -1, 40, 41, 42, 43, 44, 45, 46,
-                   47, -1, -1, 48, 49, 50, 51, 52, 53, 54, 55, -1, -1, 56, 57, 58, 59, 60, 61, 62, 63, -1, -1, -1, -1,
-                   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}
-local Js_start_K = {0, 0, -4, -10, -10, -4, 0, 0, -4, -4, -8, -12, -12, -8, -4, -4, -12, -16, -20, -20, -20, -20, -16, -12,
-              -16, -20, -24, -24, -24, -24, -20, -16, -16, -20, -24, -24, -24, -24, -20, -16, -12, -16, -20, -20, -20,
-              -20, -16, -12, -4, -4, -8, -12, -12, -8, -4, -4, 0, 0, -4, -10, -10, -4, 0, 0}
-local Js_end_K = {0, 6, 12, 18, 18, 12, 6, 0, 6, 12, 18, 24, 24, 18, 12, 6, 12, 18, 24, 30, 30, 24, 18, 12, 18, 24, 30, 36,
-            36, 30, 24, 18, 18, 24, 30, 36, 36, 30, 24, 18, 12, 18, 24, 30, 30, 24, 18, 12, 6, 12, 18, 24, 24, 18, 12,
-            6, 0, 6, 12, 18, 18, 12, 6, 0}
-local Js_vanish_K = {0, 8, 16, 24, 24, 16, 8, 0, 8, 32, 40, 48, 48, 40, 32, 8, 16, 40, 56, 64, 64, 56, 40, 16, 24, 48, 64, 72,
-               72, 64, 48, 24, 24, 48, 64, 72, 72, 64, 48, 24, 16, 40, 56, 64, 64, 56, 40, 16, 8, 32, 40, 48, 48, 40,
-               32, 8, 0, 8, 16, 24, 24, 16, 8, 0}
-local Js_end_KBNK = {99, 90, 80, 70, 60, 50, 40, 40, 90, 80, 60, 50, 40, 30, 20, 40, 80, 60, 40, 30, 20, 10, 30, 50, 70, 50,
-               30, 10, 0, 20, 40, 60, 60, 40, 20, 0, 10, 30, 50, 70, 50, 30, 10, 20, 30, 40, 60, 80, 40, 20, 30, 40, 50,
-               60, 80, 90, 40, 40, 50, 60, 70, 80, 90, 99}
-local Js_knight_pos = {0, 4, 8, 10, 10, 8, 4, 0, 4, 8, 16, 20, 20, 16, 8, 4, 8, 16, 24, 28, 28, 24, 16, 8, 10, 20, 28, 32, 32,
-                 28, 20, 10, 10, 20, 28, 32, 32, 28, 20, 10, 8, 16, 24, 28, 28, 24, 16, 8, 4, 8, 16, 20, 20, 16, 8, 4,
-                 0, 4, 8, 10, 10, 8, 4, 0}
-local Js_bishop_pos = {14, 14, 14, 14, 14, 14, 14, 14, 14, 22, 18, 18, 18, 18, 22, 14, 14, 18, 22, 22, 22, 22, 18, 14, 14, 18,
-                 22, 22, 22, 22, 18, 14, 14, 18, 22, 22, 22, 22, 18, 14, 14, 18, 22, 22, 22, 22, 18, 14, 14, 22, 18, 18,
-                 18, 18, 22, 14, 14, 14, 14, 14, 14, 14, 14, 14}
-local Js_pawn_pos = {0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 0, 0, 4, 4, 4, 6, 8, 2, 10, 10, 2, 8, 6, 6, 8, 12, 16, 16, 12, 8, 6, 8,
-               12, 16, 24, 24, 16, 12, 8, 12, 16, 24, 32, 32, 24, 16, 12, 12, 16, 24, 32, 32, 24, 16, 12, 0, 0, 0, 0, 0,
-               0, 0, 0}
-local Js_valueMap = {0, Js_pawnVal, Js_knightVal, Js_bishopVal, Js_rookVal, Js_queenVal, Js_kingVal}
-local Js_xlat = {0, Js_xltP, Js_xltN, Js_xltB, Js_xltR, Js_xltQ, Js_xltK}
-local Js_pss_pawn0 = {0, 60, 80, 120, 200, 360, 600, 800}
-local Js_pss_pawn1 = {0, 30, 40, 60, 100, 180, 300, 800}
-local Js_pss_pawn2 = {0, 15, 25, 35, 50, 90, 140, 800}
-local Js_pss_pawn3 = {0, 5, 10, 15, 20, 30, 140, 800}
-local Js_isol_pawn = {-12, -16, -20, -24, -24, -20, -16, -12}
-local Js_takeBack = {-6, -10, -15, -21, -28, -28, -28, -28, -28, -28, -28, -28, -28, -28, -28, -28}
-local Js_mobBishop = {-2, 0, 2, 4, 6, 8, 10, 12, 13, 14, 15, 16, 16, 16}
-local Js_mobRook = {0, 2, 4, 6, 8, 10, 11, 12, 13, 14, 14, 14, 14, 14, 14}
-local Js_menaceKing = {0, -8, -20, -36, -52, -68, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80,
-                 -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80}
-local Js_queenRook = {0, 56, 0}
-local Js_kingRook = {7, 63, 0}
-local Js_kingPawn = {4, 60, 0}
-local Js_raw7 = {6, 1, 0}
-local Js_heavy = {false, false, false, true, true, true, false, false}
+Js_upperNot = { " ", "P", "N", "B", "R", "Q", "K" }
+Js_lowerNot = { " ", "p", "n", "b", "r", "q", "k" }
+Js_rgszPiece = { "", "", "N", "B", "R", "Q", "K" }
+Js_asciiMove = { { " ", " ", " ", " ", " ", " " }, { " ", " ", " ", " ", " ", " " }, { " ", " ", " ", " ", " ", " " },
+    { " ", " ", " ", " ", " ", " " } }
+Js_reguBoard = { Js_rook, Js_knight, Js_bishop, Js_queen, Js_king, Js_bishop, Js_knight, Js_rook, Js_pawn, Js_pawn,
+    Js_pawn, Js_pawn, Js_pawn, Js_pawn, Js_pawn, Js_pawn, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, Js_pawn, Js_pawn, Js_pawn, Js_pawn, Js_pawn, Js_pawn, Js_pawn, Js_pawn, Js_rook,
+    Js_knight, Js_bishop, Js_queen, Js_king, Js_bishop, Js_knight, Js_rook }
+Js_reguColor = { Js_white, Js_white, Js_white, Js_white, Js_white, Js_white, Js_white, Js_white, Js_white, Js_white,
+    Js_white, Js_white, Js_white, Js_white, Js_white, Js_white, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, Js_black, Js_black, Js_black, Js_black, Js_black, Js_black, Js_black,
+    Js_black, Js_black, Js_black, Js_black, Js_black, Js_black, Js_black, Js_black, Js_black }
+Js_pieceTyp = { { Js_empty, Js_pawn, Js_knight, Js_bishop, Js_rook, Js_queen, Js_king, Js_empty },
+    { Js_empty, Js_bkPawn, Js_knight, Js_bishop, Js_rook, Js_queen, Js_king, Js_empty } }
+Js_direction = { { 0, 0, 0, 0, 0, 0, 0, 0 }, { 10, 9, 11, 0, 0, 0, 0, 0 }, { 8, -8, 12, -12, 19, -19, 21, -21 },
+    { 9, 11, -9, -11, 0, 0, 0, 0 }, { 1, 10, -1, -10, 0, 0, 0, 0 }, { 1, 10, -1, -10, 9, 11, -9, -11 },
+    { 1, 10, -1, -10, 9, 11, -9, -11 }, { -10, -9, -11, 0, 0, 0, 0, 0 } }
+Js_maxJobs = { 0, 2, 1, 7, 7, 7, 1, 2 }
+Js_virtualBoard = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 1, 2, 3, 4, 5,
+    6, 7, -1, -1, 8, 9, 10, 11, 12, 13, 14, 15, -1, -1, 16, 17, 18, 19, 20, 21, 22, 23, -1, -1, 24, 25, 26, 27, 28, 29,
+    30, 31, -1, -1, 32, 33, 34, 35, 36, 37, 38, 39, -1, -1, 40, 41, 42, 43, 44, 45, 46, 47, -1, -1, 48, 49, 50, 51, 52,
+    53, 54, 55, -1, -1, 56, 57, 58, 59, 60, 61, 62, 63, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1 }
+Js_start_K = { 0, 0, -4, -10, -10, -4, 0, 0, -4, -4, -8, -12, -12, -8, -4, -4, -12, -16, -20, -20, -20, -20, -16, -12,
+    -16, -20, -24, -24, -24, -24, -20, -16, -16, -20, -24, -24, -24, -24, -20, -16, -12, -16, -20, -20, -20, -20, -16,
+    -12, -4, -4, -8, -12, -12, -8, -4, -4, 0, 0, -4, -10, -10, -4, 0, 0 }
+Js_end_K = { 0, 6, 12, 18, 18, 12, 6, 0, 6, 12, 18, 24, 24, 18, 12, 6, 12, 18, 24, 30, 30, 24, 18, 12, 18, 24, 30, 36,
+    36, 30, 24, 18, 18, 24, 30, 36, 36, 30, 24, 18, 12, 18, 24, 30, 30, 24, 18, 12, 6, 12, 18, 24, 24, 18, 12, 6, 0, 6,
+    12, 18, 18, 12, 6, 0 }
+Js_vanish_K = { 0, 8, 16, 24, 24, 16, 8, 0, 8, 32, 40, 48, 48, 40, 32, 8, 16, 40, 56, 64, 64, 56, 40, 16, 24, 48, 64, 72,
+    72, 64, 48, 24, 24, 48, 64, 72, 72, 64, 48, 24, 16, 40, 56, 64, 64, 56, 40, 16, 8, 32, 40, 48, 48, 40, 32, 8, 0, 8,
+    16, 24, 24, 16, 8, 0 }
+Js_end_KBNK = { 99, 90, 80, 70, 60, 50, 40, 40, 90, 80, 60, 50, 40, 30, 20, 40, 80, 60, 40, 30, 20, 10, 30, 50, 70, 50,
+    30, 10, 0, 20, 40, 60, 60, 40, 20, 0, 10, 30, 50, 70, 50, 30, 10, 20, 30, 40, 60, 80, 40, 20, 30, 40, 50, 60, 80, 90,
+    40, 40, 50, 60, 70, 80, 90, 99 }
+Js_knight_pos = { 0, 4, 8, 10, 10, 8, 4, 0, 4, 8, 16, 20, 20, 16, 8, 4, 8, 16, 24, 28, 28, 24, 16, 8, 10, 20, 28, 32, 32,
+    28, 20, 10, 10, 20, 28, 32, 32, 28, 20, 10, 8, 16, 24, 28, 28, 24, 16, 8, 4, 8, 16, 20, 20, 16, 8, 4, 0, 4, 8, 10,
+    10, 8, 4, 0 }
+Js_bishop_pos = { 14, 14, 14, 14, 14, 14, 14, 14, 14, 22, 18, 18, 18, 18, 22, 14, 14, 18, 22, 22, 22, 22, 18, 14, 14, 18,
+    22, 22, 22, 22, 18, 14, 14, 18, 22, 22, 22, 22, 18, 14, 14, 18, 22, 22, 22, 22, 18, 14, 14, 22, 18, 18, 18, 18, 22,
+    14, 14, 14, 14, 14, 14, 14, 14, 14 }
+Js_pawn_pos = { 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 0, 0, 4, 4, 4, 6, 8, 2, 10, 10, 2, 8, 6, 6, 8, 12, 16, 16, 12, 8, 6, 8,
+    12, 16, 24, 24, 16, 12, 8, 12, 16, 24, 32, 32, 24, 16, 12, 12, 16, 24, 32, 32, 24, 16, 12, 0, 0, 0, 0, 0, 0, 0, 0 }
+Js_valueMap = { 0, Js_pawnVal, Js_knightVal, Js_bishopVal, Js_rookVal, Js_queenVal, Js_kingVal }
+Js_xlat = { 0, Js_xltP, Js_xltN, Js_xltB, Js_xltR, Js_xltQ, Js_xltK }
+Js_pss_pawn0 = { 0, 60, 80, 120, 200, 360, 600, 800 }
+Js_pss_pawn1 = { 0, 30, 40, 60, 100, 180, 300, 800 }
+Js_pss_pawn2 = { 0, 15, 25, 35, 50, 90, 140, 800 }
+Js_pss_pawn3 = { 0, 5, 10, 15, 20, 30, 140, 800 }
+Js_isol_pawn = { -12, -16, -20, -24, -24, -20, -16, -12 }
+Js_takeBack = { -6, -10, -15, -21, -28, -28, -28, -28, -28, -28, -28, -28, -28, -28, -28, -28 }
+Js_mobBishop = { -2, 0, 2, 4, 6, 8, 10, 12, 13, 14, 15, 16, 16, 16 }
+Js_mobRook = { 0, 2, 4, 6, 8, 10, 11, 12, 13, 14, 14, 14, 14, 14, 14 }
+Js_menaceKing = { 0, -8, -20, -36, -52, -68, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80,
+    -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80 }
+Js_queenRook = { 0, 56, 0 }
+Js_kingRook = { 7, 63, 0 }
+Js_kingPawn = { 4, 60, 0 }
+Js_raw7 = { 6, 1, 0 }
+Js_heavy = { false, false, false, true, true, true, false, false }
 
-Js_pgn = "" -- save too
+Js_pgn = ""   -- save too
 
 -- Some helping functions for Lua scripting
 
 -- (if ? then : else) substitute
 -- other syntax for binary operators a,b:  cond and a or b
 
-local function iif(ask, ontrue, onfalse)
+function iif(ask, ontrue, onfalse)
     if (ask) then
         return ontrue
     end
@@ -346,17 +344,20 @@ end
 
 --
 
+
 function BoardCpy(a, b)
+    local sq = 0
     for sq = 0, 63, 1 do
         b[1 + sq] = a[1 + sq]
     end
 end
 
 function WatchPosit()
-
     local PawnStorm = false
     local i = 0
+    local side = 0
     local b = 0
+    local sq = 0
 
     local fyle = 0
     local rank = 0
@@ -374,6 +375,8 @@ function WatchPosit()
     local Pd = 0
     local pp = 0
     local z = 0
+    local j = 0
+    local k = 0
     local val = 0
 
     Agression(Js_white, Js_agress[1 + Js_white])
@@ -392,7 +395,6 @@ function WatchPosit()
     Js_withPawn[1 + Js_black] = 0
     for side = Js_white, Js_black, 1 do
         for i = Js_piecesCount[1 + side], 0, -1 do
-
             b = Js_board[1 + Js_pieceMap[1 + side][1 + i]]
             if (b == Js_knight) then
                 Js_withKnight[1 + side] = Js_withKnight[1 + side] + 1
@@ -417,22 +419,20 @@ function WatchPosit()
     end
 
     if (Js_fDevl[1 + Js_white] == 0) then
-
-        Js_fDevl[1 + Js_white] = iif(((Js_board[2] == Js_knight) or (Js_board[3] == Js_bishop) or
-                                         (Js_board[6] == Js_bishop) or (Js_board[7] == Js_knight)), 0, 1)
+        Js_fDevl[1 + Js_white] = iif(
+        ((Js_board[1 + 1] == Js_knight) or (Js_board[1 + 2] == Js_bishop) or (Js_board[1 + 5] == Js_bishop) or (Js_board[1 + 6] == Js_knight)),
+            0, 1)
     end
 
     if (Js_fDevl[1 + Js_black] == 0) then
-
-        Js_fDevl[1 + Js_black] = iif(((Js_board[58] == Js_knight) or (Js_board[59] == Js_bishop) or
-                                         (Js_board[62] == Js_bishop) or (Js_board[63] == Js_knight)), 0, 1)
+        Js_fDevl[1 + Js_black] = iif(
+        ((Js_board[1 + 57] == Js_knight) or (Js_board[1 + 58] == Js_bishop) or (Js_board[1 + 61] == Js_bishop) or (Js_board[1 + 62] == Js_knight)),
+            0, 1)
     end
 
     if ((not (PawnStorm)) and (Js_working < 5)) then
-
-        PawnStorm =
-            ((IColmn(Js_pieceMap[1 + Js_white][1]) < 3) and (IColmn(Js_pieceMap[1 + Js_black][1]) > 4)) or
-                ((IColmn(Js_pieceMap[1 + Js_white][1]) > 4) and (IColmn(Js_pieceMap[1 + Js_black][1]) < 3))
+        PawnStorm = ((IColmn(Js_pieceMap[1 + Js_white][1 + 0]) < 3) and (IColmn(Js_pieceMap[1 + Js_black][1 + 0]) > 4)) or
+            ((IColmn(Js_pieceMap[1 + Js_white][1 + 0]) > 4) and (IColmn(Js_pieceMap[1 + Js_black][1 + 0]) < 3))
     end
 
     -- deep copy
@@ -441,17 +441,16 @@ function WatchPosit()
     BoardCpy(Js_bishop_pos, Js_bishopMvt[1 + Js_white])
     BoardCpy(Js_bishop_pos, Js_bishopMvt[1 + Js_black])
 
-    -- slice is much faster, but copies references only
-    -- Js_knightMvt[1+Js_white] = Js_knight_pos.slice()
-    -- Js_knightMvt[1+Js_black] = Js_knight_pos.slice()
-    -- Js_bishopMvt[1+Js_white] = Js_bishop_pos.slice()
-    -- Js_bishopMvt[1+Js_black] = Js_bishop_pos.slice()
+    --slice is much faster, but copies references only
+    --Js_knightMvt[1+Js_white] = Js_knight_pos.slice()
+    --Js_knightMvt[1+Js_black] = Js_knight_pos.slice()
+    --Js_bishopMvt[1+Js_white] = Js_bishop_pos.slice()
+    --Js_bishopMvt[1+Js_black] = Js_bishop_pos.slice()
 
     MixBoard(Js_start_K, Js_end_K, Js_kingMvt[1 + Js_white])
     MixBoard(Js_start_K, Js_end_K, Js_kingMvt[1 + Js_black])
 
     for sq = 0, 63, 1 do
-
         fyle = IColmn(sq)
         rank = IRaw(sq)
         bstrong = 1
@@ -470,12 +469,12 @@ function WatchPosit()
         end
         bpadv = Js_advX_pawn
         wpadv = Js_advX_pawn
-        if ((((fyle == 0) or (Js_pawnMap[1 + Js_white][1 + (fyle - 1)] == 0))) and
-            (((fyle == 7) or (Js_pawnMap[1 + Js_white][1 + (fyle + 1)] == 0)))) then
+        if ((((fyle == 0) or (Js_pawnMap[1 + Js_white][1 + (fyle - 1)] == 0))) and ((
+                (fyle == 7) or (Js_pawnMap[1 + Js_white][1 + (fyle + 1)] == 0)))) then
             wpadv = Js_isoX_pawn
         end
-        if ((((fyle == 0) or (Js_pawnMap[1 + Js_black][1 + (fyle - 1)] == 0))) and
-            (((fyle == 7) or (Js_pawnMap[1 + Js_black][1 + (fyle + 1)] == 0)))) then
+        if ((((fyle == 0) or (Js_pawnMap[1 + Js_black][1 + (fyle - 1)] == 0))) and ((
+                (fyle == 7) or (Js_pawnMap[1 + Js_black][1 + (fyle + 1)] == 0)))) then
             bpadv = Js_isoX_pawn
         end
         Js_wPawnMvt[1 + sq] = (wpadv * Js_pawn_pos[1 + sq] / 10)
@@ -483,7 +482,7 @@ function WatchPosit()
         Js_wPawnMvt[1 + sq] = Js_wPawnMvt[1 + sq] + Js_pawnPlus
         Js_bPawnMvt[1 + sq] = Js_bPawnMvt[1 + sq] + Js_pawnPlus
         if (Js_nMvtOnBoard[1 + Js_kingPawn[1 + Js_white]] ~= 0) then
-            if ((((fyle < 3) or (fyle > 4))) and (IArrow(sq, Js_pieceMap[1 + Js_white][1]) < 3)) then
+            if ((((fyle < 3) or (fyle > 4))) and (IArrow(sq, Js_pieceMap[1 + Js_white][1 + 0]) < 3)) then
                 Js_wPawnMvt[1 + sq] = Js_wPawnMvt[1 + sq] + Js_castle_pawn
             end
         else
@@ -493,7 +492,7 @@ function WatchPosit()
         end
 
         if (Js_nMvtOnBoard[1 + Js_kingPawn[1 + Js_black]] ~= 0) then
-            if ((((fyle < 3) or (fyle > 4))) and (IArrow(sq, Js_pieceMap[1 + Js_black][1]) < 3)) then
+            if ((((fyle < 3) or (fyle > 4))) and (IArrow(sq, Js_pieceMap[1 + Js_black][1 + 0]) < 3)) then
                 Js_bPawnMvt[1 + sq] = Js_bPawnMvt[1 + sq] + Js_castle_pawn
             end
         else
@@ -503,13 +502,12 @@ function WatchPosit()
         end
 
         if (PawnStorm) then
-
-            if (((IColmn(Js_pieceMap[1 + Js_white][1]) < 4) and (fyle > 4)) or
-                ((IColmn(Js_pieceMap[1 + Js_white][1]) > 3) and (fyle < 3))) then
+            if (((IColmn(Js_pieceMap[1 + Js_white][1 + 0]) < 4) and (fyle > 4)) or (
+                    (IColmn(Js_pieceMap[1 + Js_white][1 + 0]) > 3) and (fyle < 3))) then
                 Js_wPawnMvt[1 + sq] = Js_wPawnMvt[1 + sq] + ((3 * rank) - 21)
             end
-            if (((IColmn(Js_pieceMap[1 + Js_black][1]) < 4) and (fyle > 4)) or
-                ((IColmn(Js_pieceMap[1 + Js_black][1]) > 3) and (fyle < 3))) then
+            if (((IColmn(Js_pieceMap[1 + Js_black][1 + 0]) < 4) and (fyle > 4)) or (
+                    (IColmn(Js_pieceMap[1 + Js_black][1 + 0]) > 3) and (fyle < 3))) then
                 Js_bPawnMvt[1 + sq] = Js_bPawnMvt[1 + sq] - (3 * rank)
             end
         end
@@ -521,15 +519,14 @@ function WatchPosit()
         bwm = Js_bishopMvt[1 + Js_white][1 + sq]
         bbm = Js_bishopMvt[1 + Js_black][1 + sq]
 
-        nwm = nwm + (5 - IArrow(sq, Js_pieceMap[1 + Js_black][1]))
-        nwm = nwm + (5 - IArrow(sq, Js_pieceMap[1 + Js_white][1]))
-        nbm = nbm + (5 - IArrow(sq, Js_pieceMap[1 + Js_white][1]))
-        nbm = nbm + (5 - IArrow(sq, Js_pieceMap[1 + Js_black][1]))
+        nwm = nwm + (5 - IArrow(sq, Js_pieceMap[1 + Js_black][1 + 0]))
+        nwm = nwm + (5 - IArrow(sq, Js_pieceMap[1 + Js_white][1 + 0]))
+        nbm = nbm + (5 - IArrow(sq, Js_pieceMap[1 + Js_white][1 + 0]))
+        nbm = nbm + (5 - IArrow(sq, Js_pieceMap[1 + Js_black][1 + 0]))
         bwm = bwm + Js_bishopPlus
         bbm = bbm + Js_bishopPlus
 
         for i = Js_piecesCount[1 + Js_black], 0, -1 do
-
             pMap2 = Js_pieceMap[1 + Js_black][1 + i]
             if (IArrow(sq, pMap2) < 3) then
                 nwm = nwm + Js_adv_knight
@@ -537,7 +534,6 @@ function WatchPosit()
         end
 
         for i = Js_piecesCount[1 + Js_white], 0, -1 do
-
             pMap2 = Js_pieceMap[1 + Js_white][1 + i]
             if (IArrow(sq, pMap2) < 3) then
                 nbm = nbm + Js_adv_knight
@@ -578,16 +574,15 @@ function WatchPosit()
 
         Js_killArea[1 + Js_white][1 + sq] = 0
         Js_killArea[1 + Js_black][1 + sq] = 0
-        if (IArrow(sq, Js_pieceMap[1 + Js_white][1]) == 1) then
+        if (IArrow(sq, Js_pieceMap[1 + Js_white][1 + 0]) == 1) then
             Js_killArea[1 + Js_black][1 + sq] = Js_king_agress
         end
-        if (IArrow(sq, Js_pieceMap[1 + Js_black][1]) == 1) then
+        if (IArrow(sq, Js_pieceMap[1 + Js_black][1 + 0]) == 1) then
             Js_killArea[1 + Js_white][1 + sq] = Js_king_agress
         end
 
         Pd = 0
         for k = 0, Js_piecesCount[1 + Js_white], 1 do
-
             i = Js_pieceMap[1 + Js_white][1 + k]
             if (Js_board[1 + i] == Js_pawn) then
                 pp = 1
@@ -611,7 +606,6 @@ function WatchPosit()
         end
 
         for k = 0, Js_piecesCount[1 + Js_black], 1 do
-
             i = Js_pieceMap[1 + Js_black][1 + k]
             if (Js_board[1 + i] == Js_pawn) then
                 pp = 1
@@ -641,17 +635,14 @@ function WatchPosit()
             local qb = Js_kingMvt[1 + Js_black]
             qb[1 + sq] = qb[1 + sq] - val
         end
-
     end
 end
 
 function CalcKBNK(winner, king1, king2)
-
     local end_KBNKsq = 0
     local s = 0
     local sq = 0
     for sq = 0, 63, 1 do
-
         if (Js_board[1 + sq] == Js_bishop) then
             if (IRaw(sq) % 2 == IColmn(sq) % 2) then
                 end_KBNKsq = 0
@@ -674,7 +665,6 @@ function CalcKBNK(winner, king1, king2)
 end
 
 function ChangeForce()
-
     local tmatrl = 0
     local s1 = 0
 
@@ -728,36 +718,28 @@ function ChangeForce()
     else
         Js_safe_King = 0
     end
-
 end
 
 function Undo()
-
     local f = Js_movesList[1 + Js_nGameMoves].gamMv >> 8
     local t = Js_movesList[1 + Js_nGameMoves].gamMv & 0xFF
     local from = 0
     local g = 0
 
     if ((Js_board[1 + t] == Js_king) and (IArrow(t, f) > 1)) then
-
         DoCastle(Js_movesList[1 + Js_nGameMoves].color, f, t, 2)
-
     else
-
-        if (((Js_color[1 + t] == Js_white) and (IRaw(f) == 6) and (IRaw(t) == 7)) or
-            ((Js_color[1 + t] == Js_black) and (IRaw(f) == 1) and (IRaw(t) == 0))) then
-
+        if (((Js_color[1 + t] == Js_white) and (IRaw(f) == 6) and (IRaw(t) == 7)) or (
+                (Js_color[1 + t] == Js_black) and (IRaw(f) == 1) and (IRaw(t) == 0))) then
             from = f
             for g = Js_nGameMoves - 1, 1, -1 do
-
-                if (Js_movesList[1 + g].gamMv & 0xFF == from) then
+                if ((Js_movesList[1 + g].gamMv & 0xFF) == from) then
                     from = Js_movesList[1 + g].gamMv >> 8
                 end
             end
 
             if (((Js_color[1 + t] == Js_white) and (IRaw(from) == 1)) or
-                ((Js_color[1 + t] == Js_black) and (IRaw(from) == 6))) then
-
+                    ((Js_color[1 + t] == Js_black) and (IRaw(from) == 6))) then
                 Js_board[1 + t] = Js_pawn
             end
         end
@@ -782,14 +764,12 @@ function Undo()
     Js_flag.mate = false
     Js_depth_Seek = 0
 
-    UpdateDisplay()
+    -- UpdateDisplay()
 
     InitStatus()
-
 end
 
 function ISqAgrs(sq, side)
-
     local xside = Js_otherTroop[1 + side]
     local idir = (Js_pieceTyp[1 + xside][1 + Js_pawn] * 4096) + (sq * 64)
     local u = Js_nextArrow[1 + (idir + sq)]
@@ -804,7 +784,7 @@ function ISqAgrs(sq, side)
             return 1
         end
     end
-    if (IArrow(sq, Js_pieceMap[1 + side][1]) == 1) then
+    if (IArrow(sq, Js_pieceMap[1 + side][1 + 0]) == 1) then
         return 1
     end
 
@@ -815,9 +795,7 @@ function ISqAgrs(sq, side)
 
     repeat
         if (Js_color[1 + u] == Js_hollow) then
-
             u = Js_nextCross[1 + (ipos + u)]
-
         else
             if ((Js_color[1 + u] == side) and (((Js_board[1 + u] == Js_queen) or (Js_board[1 + u] == Js_bishop)))) then
                 return 1
@@ -832,9 +810,7 @@ function ISqAgrs(sq, side)
     u = Js_nextCross[1 + (ipos + sq)]
     repeat
         if (Js_color[1 + u] == Js_hollow) then
-
             u = Js_nextCross[1 + (ipos + u)]
-
         else
             if ((Js_color[1 + u] == side) and (((Js_board[1 + u] == Js_queen) or (Js_board[1 + u] == Js_rook)))) then
                 return 1
@@ -856,12 +832,10 @@ function ISqAgrs(sq, side)
 end
 
 function Iwxy(a, b)
-
     return ((a << 3) | b)
 end
 
 function XRayBR(sq, s, mob)
-
     local Kf = Js_killArea[1 + Js_c1]
     local piece = Js_board[1 + sq]
 
@@ -871,44 +845,36 @@ function XRayBR(sq, s, mob)
     local u = Js_nextCross[1 + (ipos + sq)]
     local pin = -1
 
+
     mob.i = 0
 
     repeat
         s.i = s.i + Kf[1 + u]
 
         if (Js_color[1 + u] == Js_hollow) then
-
             mob.i = mob.i + 1
 
             if (Js_nextCross[1 + (ipos + u)] == Js_nextArrow[1 + (idir + u)]) then
                 pin = -1
             end
             u = Js_nextCross[1 + (ipos + u)]
-
         else
             if (pin < 0) then
-
                 if ((Js_board[1 + u] == Js_pawn) or (Js_board[1 + u] == Js_king)) then
                     u = Js_nextArrow[1 + (idir + u)]
-
                 else
                     if (Js_nextCross[1 + (ipos + u)] ~= Js_nextArrow[1 + (idir + u)]) then
                         pin = u
                     end
                     u = Js_nextCross[1 + (ipos + u)]
                 end
-
             else
-
                 if ((Js_color[1 + u] == Js_c2) and (((Js_board[1 + u] > piece) or (Js_agress2[1 + u] == 0)))) then
-
                     if (Js_color[1 + pin] == Js_c2) then
-
                         s.i = s.i + Js_pinnedVal
                         if ((Js_agress2[1 + pin] == 0) or (Js_agress1[1 + pin] > Js_xlat[1 + Js_board[1 + pin]] + 1)) then
                             Js_pinned[1 + Js_c2] = Js_pinned[1 + Js_c2] + 1
                         end
-
                     else
                         s.i = s.i + Js_crossArrow
                     end
@@ -917,22 +883,20 @@ function XRayBR(sq, s, mob)
                 u = Js_nextArrow[1 + (idir + u)]
             end
         end
-
     until (u == sq)
 end
 
 function ComputerMvt()
-
     if (Js_flag.mate) then
         return
     end
-    --   Js_startTime = playdate.getCurrentTimeMilliseconds()
+    -- Js_startTime = os.clock()
     playdate.resetElapsedTime()
 
     ChoiceMov(Js_computer, 1)
     IfCheck()
     if (not Js_fUserWin_kc) then
-        ShowMov(Js_asciiMove[1])
+        ShowMov(Js_asciiMove[1 + 0])
     end
     if (not CheckMatrl()) then
         Js_bDraw = 1
@@ -959,15 +923,13 @@ function InitMoves()
 
     ptyp = 0
     while (ptyp < 8) do
-
         po = 0
         while (po < 64) do
-
             p0 = 0
             while (p0 < 64) do
                 i = (ptyp * 4096) + (po * 64) + p0
-                Js_nextCross[1 + i] = po -- (char)
-                Js_nextArrow[1 + i] = po -- (char)
+                Js_nextCross[1 + i] = po --(char)
+                Js_nextArrow[1 + i] = po --(char)
                 p0 = p0 + 1
             end
 
@@ -979,39 +941,32 @@ function InitMoves()
 
     ptyp = 1
     while (ptyp < 8) do
-
         po = 21
         while (po < 99) do
-
             if (Js_virtualBoard[1 + po] >= 0) then
-
                 ipos = (ptyp * 4096) + (Js_virtualBoard[1 + po] * 64)
                 idir = ipos
 
                 di = 0
                 d = 0
                 while (d < 8) do
-
                     dest[1 + d] = {} -- creates object
-                    dest[1 + d][1] = Js_virtualBoard[1 + po]
+                    dest[1 + d][1 + 0] = Js_virtualBoard[1 + po]
                     delta = Js_direction[1 + ptyp][1 + d]
                     if (delta ~= 0) then
-
                         p0 = po
                         s = 0
                         while (s < Js_maxJobs[1 + ptyp]) do
-
                             p0 = p0 + delta
 
-                            if ((Js_virtualBoard[1 + p0] < 0) or
-                                ((((ptyp == Js_pawn) or (ptyp == Js_bkPawn))) and (s > 0) and
+                            if ((Js_virtualBoard[1 + p0] < 0) or (
+                                    (((ptyp == Js_pawn) or (ptyp == Js_bkPawn))) and (s > 0) and
                                     (((d > 0) or (Js_reguBoard[1 + Js_virtualBoard[1 + po]] ~= Js_pawn))))) then
                                 break
                             end
                             dest[1 + d][1 + s] = Js_virtualBoard[1 + p0]
                             s = s + 1
                         end
-
                     else
                         s = 0
                     end
@@ -1020,56 +975,49 @@ function InitMoves()
 
                     di = d
                     while ((s > 0) and (di > 0)) do
-
                         if (steps[1 + sorted[1 + (di - 1)]] == 0) then
                             sorted[1 + di] = sorted[1 + (di - 1)]
                         else
                             break
                         end
                         di = di - 1
-
                     end
                     sorted[1 + di] = d
                     d = d + 1
-
                 end
 
                 p0 = Js_virtualBoard[1 + po]
                 if ((ptyp == Js_pawn) or (ptyp == Js_bkPawn)) then
-
                     s = 0
-                    while (s < steps[1]) do
-                        Js_nextCross[1 + (ipos + p0)] = dest[1][1 + s] -- (char)
-                        p0 = dest[1][1 + s]
+                    while (s < steps[1 + 0]) do
+                        Js_nextCross[1 + (ipos + p0)] = dest[1 + 0][1 + s] --(char)
+                        p0 = dest[1 + 0][1 + s]
                         s = s + 1
                     end
                     p0 = Js_virtualBoard[1 + po]
 
                     d = 1
                     while (d < 3) do
-                        Js_nextArrow[1 + (idir + p0)] = dest[1 + d][1] -- (char)
-                        p0 = dest[1 + d][1]
+                        Js_nextArrow[1 + (idir + p0)] = dest[1 + d][1 + 0] --(char)
+                        p0 = dest[1 + d][1 + 0]
                         d = d + 1
                     end
-
                 else
-
-                    Js_nextArrow[1 + (idir + p0)] = dest[1 + sorted[1]][1] -- (char)
+                    Js_nextArrow[1 + (idir + p0)] = dest[1 + sorted[1 + 0]][1 + 0] --(char)
                     d = 0
                     while (d < 8) do
                         s = 0
                         while (s < steps[1 + sorted[1 + d]]) do
-                            Js_nextCross[1 + (ipos + p0)] = dest[1 + sorted[1 + d]][1 + s] -- (char)
+                            Js_nextCross[1 + (ipos + p0)] = dest[1 + sorted[1 + d]][1 + s] --(char)
                             p0 = dest[1 + sorted[1 + d]][1 + s]
                             if (d < 7) then
-                                Js_nextArrow[1 + (idir + p0)] = dest[1 + sorted[1 + (d + 1)]][1] -- (char)
+                                Js_nextArrow[1 + (idir + p0)] = dest[1 + sorted[1 + (d + 1)]][1 + 0] --(char)
                             end
                             s = s + 1
                         end
                         d = d + 1
                     end
                 end
-
             end
 
             po = po + 1
@@ -1077,11 +1025,9 @@ function InitMoves()
 
         ptyp = ptyp + 1
     end
-
 end
 
 function ShowMov(rgchMove)
-
     local fKcastle = false
     local fQcastle = false
     local szM = ""
@@ -1094,8 +1040,8 @@ function ShowMov(rgchMove)
         Js_movCh[1 + i] = " "
     end
 
-    if (not Js_flip) then
 
+    if (not Js_flip) then
         Js_nMovesMade = Js_nMovesMade + 1
         if (Js_nMovesMade < 10) then
             szM = " "
@@ -1103,7 +1049,7 @@ function ShowMov(rgchMove)
         szM = szM .. string.format("%d", Js_nMovesMade) .. "."
     end
 
-    Js_movCh[1] = rgchMove[1]
+    Js_movCh[1 + 0] = rgchMove[1 + 0]
     Js_movCh[1 + 1] = rgchMove[1 + 1]
     Js_movCh[1 + 2] = "-"
 
@@ -1124,7 +1070,7 @@ function ShowMov(rgchMove)
 
     i = 5
     if (string.len(waspromo) > 0) then
-        Js_movCh[1 + (i)] = "="
+        Js_movCh[1 + (i + 0)] = "="
         Js_movCh[1 + (i + 1)] = waspromo
         i = i + 2
     end
@@ -1141,7 +1087,6 @@ function ShowMov(rgchMove)
     mv2 = copyValueOf(Js_movCh)
 
     if (Js_myPiece == "K") then
-
         mv22 = string.sub(mv2, 1, 5)
 
         if ((mv22 == "e1-g1") or (mv22 == "e8-g8")) then
@@ -1153,7 +1098,6 @@ function ShowMov(rgchMove)
     end
 
     if ((fKcastle) or (fQcastle)) then
-
         if (fKcastle) then
             szM = szM .. "O-O" .. Js_movCh[1 + i]
         end
@@ -1167,6 +1111,7 @@ function ShowMov(rgchMove)
     szM = szM .. "  "
     szM = string.sub(szM, 1, string.find(szM, "  "))
 
+
     if (Js_fAbandon) then
         szM = "resign"
     else
@@ -1177,11 +1122,9 @@ function ShowMov(rgchMove)
     MessageOut(szM, Js_flip)
 
     Js_flip = (not Js_flip)
-
 end
 
 function CheckMov(s, iop)
-
     local tempb = _INT()
     local tempc = _INT()
     local tempsf = _INT()
@@ -1191,6 +1134,8 @@ function CheckMov(s, iop)
 
     local cnt = 0
     local pnt = 0
+    local s0 = ""
+    local s1 = ""
 
     if (iop == 2) then
         UnValidateMov(Js_enemy, xnode, tempb, tempc, tempsf, tempst)
@@ -1199,23 +1144,19 @@ function CheckMov(s, iop)
 
     cnt = 0
     AvailMov(Js_enemy, 2)
-    pnt = Js_treePoint[3]
+    pnt = Js_treePoint[1 + 2]
+    s0 = copyValueOf(s)
 
-    while (pnt < Js_treePoint[4]) do
-
+    while (pnt < Js_treePoint[1 + 3]) do
         node = Js_Tree[1 + pnt] -- _BTREE
         pnt = pnt + 1
 
         Lalgb(node.f, node.t, node.flags)
-        if (not ((((s[1] ~= Js_asciiMove[1][1]) or (s[2] ~= Js_asciiMove[1][2]) or
-            (s[3] ~= Js_asciiMove[1][3]) or (s[4] ~= Js_asciiMove[1][4]))) and
-            (((s[1] ~= Js_asciiMove[2][1]) or (s[2] ~= Js_asciiMove[2][2]) or
-                (s[3] ~= Js_asciiMove[2][3]) or (s[4] ~= Js_asciiMove[2][4]))) and
-            (((s[1] ~= Js_asciiMove[3][1]) or (s[2] ~= Js_asciiMove[3][2]) or
-                (s[3] ~= Js_asciiMove[3][3]) or (s[4] ~= Js_asciiMove[3][4]))) and
-            (((s[1] ~= Js_asciiMove[4][1]) or (s[2] ~= Js_asciiMove[4][2]) or
-                (s[3] ~= Js_asciiMove[4][3]) or (s[4] ~= Js_asciiMove[4][4]))))) then
-
+        s1 = copyValueOf(Js_asciiMove[1 + 0])
+        if (not ((((s[1 + 0] ~= Js_asciiMove[1 + 0][1 + 0]) or (s[1 + 1] ~= Js_asciiMove[1 + 0][1 + 1]) or (s[1 + 2] ~= Js_asciiMove[1 + 0][1 + 2]) or (s[1 + 3] ~= Js_asciiMove[1 + 0][1 + 3]))) and
+                (((s[1 + 0] ~= Js_asciiMove[1 + 1][1 + 0]) or (s[1 + 1] ~= Js_asciiMove[1 + 1][1 + 1]) or (s[1 + 2] ~= Js_asciiMove[1 + 1][1 + 2]) or (s[1 + 3] ~= Js_asciiMove[1 + 1][1 + 3]))) and
+                (((s[1 + 0] ~= Js_asciiMove[1 + 2][1 + 0]) or (s[1 + 1] ~= Js_asciiMove[1 + 2][1 + 1]) or (s[1 + 2] ~= Js_asciiMove[1 + 2][1 + 2]) or (s[1 + 3] ~= Js_asciiMove[1 + 2][1 + 3]))) and ((
+                    (s[1 + 0] ~= Js_asciiMove[1 + 3][1 + 0]) or (s[1 + 1] ~= Js_asciiMove[1 + 3][1 + 1]) or (s[1 + 2] ~= Js_asciiMove[1 + 3][1 + 2]) or (s[1 + 3] ~= Js_asciiMove[1 + 3][1 + 3]))))) then
             cnt = cnt + 1
             xnode = node
             break
@@ -1223,10 +1164,8 @@ function CheckMov(s, iop)
     end
 
     if (cnt == 1) then
-
         ValidateMov(Js_enemy, xnode, tempb, tempc, tempsf, tempst, Js_gainScore)
-        if (ISqAgrs(Js_pieceMap[1 + Js_enemy][1], Js_computer) ~= 0) then
-
+        if (ISqAgrs(Js_pieceMap[1 + Js_enemy][1 + 0], Js_computer) ~= 0) then
             UnValidateMov(Js_enemy, xnode, tempb, tempc, tempsf, tempst)
 
             return 0
@@ -1235,11 +1174,11 @@ function CheckMov(s, iop)
         if (iop == 1) then
             return 1
         end
-        UpdateDisplay()
+        -- UpdateDisplay()
 
         Js_fEat = ((xnode.flags & Js_capture) ~= 0)
         if ((Js_board[1 + xnode.t] == Js_pawn) or ((xnode.flags & Js_capture) ~= 0) or
-            ((xnode.flags & Js_castle_msk) ~= 0)) then
+                ((xnode.flags & Js_castle_msk) ~= 0)) then
             Js_fiftyMoves = Js_nGameMoves
         end
 
@@ -1253,7 +1192,6 @@ function CheckMov(s, iop)
 end
 
 function UnValidateMov(side, node, tempb, tempc, tempsf, tempst)
-
     local xside = Js_otherTroop[1 + side]
     local f = node.f
     local t = node.t
@@ -1278,7 +1216,6 @@ function UnValidateMov(side, node, tempb, tempc, tempsf, tempst)
         end
 
         if (tempc.i ~= Js_hollow) then
-
             UpdatePiecMap(tempc.i, t, 2)
             if (tempb.i == Js_pawn) then
                 Js_pawnMap[1 + tempc.i][1 + IColmn(t)] = Js_pawnMap[1 + tempc.i][1 + IColmn(t)] + 1
@@ -1300,19 +1237,16 @@ function UnValidateMov(side, node, tempb, tempc, tempsf, tempst)
         end
 
         Js_nMvtOnBoard[1 + f] = Js_nMvtOnBoard[1 + f] - 1
-
     end
 end
 
 function FJunk(sq)
-
     local piece = Js_board[1 + sq]
     local ipos = (Js_pieceTyp[1 + Js_c1][1 + piece] * 4096) + (sq * 64)
     local idir = ipos
     local u = Js_nextCross[1 + (ipos + sq)]
 
     if (piece == Js_pawn) then
-
         if (Js_color[1 + u] == Js_hollow) then
             if (Js_agress1[1 + u] >= Js_agress2[1 + u]) then
                 return false
@@ -1332,9 +1266,7 @@ function FJunk(sq)
         if (Js_color[1 + u] == Js_c2) then
             return false
         end
-
     else
-
         repeat
             if ((Js_color[1 + u] ~= Js_c1) and (((Js_agress2[1 + u] == 0) or (Js_board[1 + u] >= piece)))) then
                 return false
@@ -1350,7 +1282,6 @@ function FJunk(sq)
 end
 
 function ShowThink(score4, best)
-
     local s = ""
     local i = 0
 
@@ -1372,25 +1303,23 @@ function ShowThink(score4, best)
 
     i = 1
     while (best[1 + i] > 0) do
+        Lalgb((best[1 + i] >> 8), (best[1 + i] & 0xFF), 0)
 
-        Lalgb(best[1 + i] >> 8, (best[1 + i] & 0xFF), 0)
-
-        Js_tmpCh[1] = Js_asciiMove[1][1]
-        Js_tmpCh[1 + 1] = Js_asciiMove[1][1 + 1]
+        Js_tmpCh[1 + 0] = Js_asciiMove[1 + 0][1 + 0]
+        Js_tmpCh[1 + 1] = Js_asciiMove[1 + 0][1 + 1]
         Js_tmpCh[1 + 2] = "-"
-        Js_tmpCh[1 + 3] = Js_asciiMove[1][1 + 2]
-        Js_tmpCh[1 + 4] = Js_asciiMove[1][1 + 3]
+        Js_tmpCh[1 + 3] = Js_asciiMove[1 + 0][1 + 2]
+        Js_tmpCh[1 + 4] = Js_asciiMove[1 + 0][1 + 3]
         Js_tmpCh[1 + 5] = 0
         s = s .. copyValueOf(Js_tmpCh) .. " "
         i = i + 1
     end
-    -- MessageOut("Thinking: "..s , true)
+    --MessageOut("Thinking: "..s , true)
 
-    -- ShowScore(score4)
+    --ShowScore(score4)
 end
 
 function ResetData()
-
     local i = 0
     local j = 0
 
@@ -1450,13 +1379,13 @@ function ResetData()
         end
     end
 
+
     for i = 0, 63, 1 do
         Js_wPawnMvt[1 + i] = 0
         Js_bPawnMvt[1 + i] = 0
     end
 
     for i = 0, 1, 1 do
-
         Js_knightMvt[1 + i] = {} -- creates object
         Js_bishopMvt[1 + i] = {} -- creates object
         Js_kingMvt[1 + i] = {} -- creates object
@@ -1470,6 +1399,7 @@ function ResetData()
         end
     end
 
+
     -- this takes longer, maybe it is possible to optimize via (undefined?0:value)
 
     for i = 0, 10000, 1 do
@@ -1480,14 +1410,14 @@ function ResetData()
         Js_nextCross[1 + i] = 0
         Js_nextArrow[1 + i] = 0
     end
-
 end
 
 function InChecking(side)
-
     local i = 0
     for i = 0, 63, 1 do
-        if ((Js_board[1 + i] == Js_king) and (Js_color[1 + i] == side) and (ISqAgrs(i, Js_otherTroop[1 + side]) ~= 0)) then
+        if ((Js_board[1 + i] == Js_king) and
+                (Js_color[1 + i] == side) and
+                (ISqAgrs(i, Js_otherTroop[1 + side]) ~= 0)) then
             return true
         end
     end
@@ -1496,7 +1426,6 @@ function InChecking(side)
 end
 
 function ShowScore(score5)
-
     local fMinus = score5 < 0
     local sz = ""
 
@@ -1517,7 +1446,6 @@ function ShowScore(score5)
 end
 
 function MixBoard(a, b, c)
-
     local sq = 0
     for sq = 0, 63, 1 do
         c[1 + sq] = ((a[1 + sq] * (10 - Js_working) + b[1 + sq] * Js_working) / 10)
@@ -1525,6 +1453,7 @@ function MixBoard(a, b, c)
 end
 
 function InitGame()
+    local i = 0
 
     ResetData()
 
@@ -1541,6 +1470,7 @@ function InitGame()
     Js_fStalemate = false
     Js_fAbandon = false
     Js_fUserWin_kc = false
+
 
     InitArrow()
     InitMoves()
@@ -1569,10 +1499,10 @@ function InitGame()
     Js_fDevl[1 + Js_black] = 0
     Js_roquer[1 + Js_white] = 0
     Js_roquer[1 + Js_black] = 0
-    Js_menacePawn[1] = 0
-    Js_flagEat[1] = 0
-    Js_scorePP[1] = 12000
-    Js_scoreTP[1] = 12000
+    Js_menacePawn[1 + 0] = 0
+    Js_flagEat[1 + 0] = 0
+    Js_scorePP[1 + 0] = 12000
+    Js_scoreTP[1 + 0] = 12000
 
     for i = 0, 63, 1 do
         Js_board[1 + i] = Js_reguBoard[1 + i]
@@ -1591,19 +1521,17 @@ function InitGame()
     InitStatus()
 
     Js_pgn = ""
-
 end
 
 function IColmn(a)
-    return a & 7
+    return (a & 7)
 end
 
 function IRaw(a)
-    return a >> 3
+    return (a >> 3)
 end
 
 function ShowStat()
-
     local sz = ""
 
     if ((Js_fMate_kc) and (not (Js_fCheck_kc))) then
@@ -1656,12 +1584,10 @@ function ShowStat()
 end
 
 function CalcKPK(side, winner, loser, king1, king2, sq)
-
     local s = iif((Js_piecesCount[1 + winner] == 1), 50, 120)
     local r = 0
 
     if (winner == Js_white) then
-
         if (side == loser) then
             r = IRaw(sq) - 1
         else
@@ -1681,9 +1607,7 @@ function CalcKPK(side, winner, loser, king1, king2, sq)
                 sq = sq + 8
             end
         end
-
     else
-
         if (side == loser) then
             r = IRaw(sq) + 1
         else
@@ -1709,7 +1633,6 @@ function CalcKPK(side, winner, loser, king1, king2, sq)
 end
 
 function CalcKg(side, score)
-
     local winner = 0
     local loser = 0
     local king1 = 0
@@ -1721,8 +1644,8 @@ function CalcKg(side, score)
 
     winner = iif((Js_matrl[1 + Js_white] > Js_matrl[1 + Js_black]), Js_white, Js_black)
     loser = Js_otherTroop[1 + winner]
-    king1 = Js_pieceMap[1 + winner][1]
-    king2 = Js_pieceMap[1 + loser][1]
+    king1 = Js_pieceMap[1 + winner][1 + 0]
+    king2 = Js_pieceMap[1 + loser][1 + 0]
     s = 0
 
     if (Js_pmatrl[1 + winner] > 0) then
@@ -1740,7 +1663,6 @@ function CalcKg(side, score)
     end
 
     score.i = iif((side == winner), s, -s)
-
 end
 
 function IArrow(a, b)
@@ -1756,7 +1678,6 @@ function MoveTree(to, from)
 end
 
 function PrisePassant(xside, f, t, iop)
-
     local l = iif((t > f), t - 8, t + 8)
 
     if (iop == 1) then
@@ -1767,11 +1688,9 @@ function PrisePassant(xside, f, t, iop)
         Js_color[1 + l] = xside
     end
     InitStatus()
-
 end
 
 function GetAlgMvt(ch)
-
     local i = 0
     for i = 0, 63, 1 do
         if (ch == string.sub(Js_szIdMvt, i + 1, i + 1)) then
@@ -1783,7 +1702,6 @@ function GetAlgMvt(ch)
 end
 
 function copyValueOf(a)
-
     local str = ""
     local i = 0
     for i = 0, #a - 1, 1 do
@@ -1799,7 +1717,6 @@ function copyValueOf(a)
 end
 
 function Agression(side, a)
-
     local i = 0
     local sq = 0
     local piece = 0
@@ -1817,15 +1734,15 @@ function Agression(side, a)
         sq = Js_pieceMap[1 + side][1 + i]
         piece = Js_board[1 + sq]
         c = Js_xlat[1 + piece]
-        if (Js_heavy[1 + piece] ~= false) then
 
+        if (Js_heavy[1 + piece] ~= false) then
             ipos = (piece * 4096) + (sq * 64)
             idir = ipos
 
             u = Js_nextCross[1 + (ipos + sq)]
             repeat
                 a[1 + u] = a[1 + u] + 1
-                a[1 + u] = a[1 + u] | c
+                a[1 + u] = (a[1 + u] | c)
 
                 Js_agress[1 + side][1 + u] = Js_agress[1 + side][1 + u] + 1
                 Js_agress[1 + side][1 + u] = (Js_agress[1 + side][1 + u] | c)
@@ -1836,18 +1753,16 @@ function Agression(side, a)
                     u = Js_nextArrow[1 + (idir + u)]
                 end
             until (u == sq)
-
         else
-
             idir = (Js_pieceTyp[1 + side][1 + piece] * 4096) + (sq * 64)
 
             u = Js_nextArrow[1 + (idir + sq)]
             repeat
                 a[1 + u] = a[1 + u] + 1
-                a[1 + u] = a[1 + u] | c
+                a[1 + u] = (a[1 + u] | c)
 
                 Js_agress[1 + side][1 + u] = Js_agress[1 + side][1 + u] + 1
-                Js_agress[1 + side][1 + u] = Js_agress[1 + side][1 + u] | c
+                Js_agress[1 + side][1 + u] = (Js_agress[1 + side][1 + u] | c)
 
                 u = Js_nextArrow[1 + (idir + u)]
             until (u == sq)
@@ -1856,7 +1771,6 @@ function Agression(side, a)
 end
 
 function InitArrow()
-
     local a = 0
     local b = 0
     local d = 0
@@ -1865,7 +1779,6 @@ function InitArrow()
     while (a < 64) do
         b = 0
         while (b < 64) do
-
             d = math.abs(IColmn(a) - IColmn(b))
             di = math.abs(IRaw(a) - IRaw(b))
 
@@ -1878,27 +1791,20 @@ function InitArrow()
 end
 
 function IfCheck()
-
     local i = 0
     for i = 0, 63, 1 do
         if (Js_board[1 + i] == Js_king) then
-
             if (Js_color[1 + i] == Js_white) then
-
                 if (ISqAgrs(i, Js_black) ~= 0) then
                     Js_fCheck_kc = true
                     return
                 end
-
             else
-
                 if (ISqAgrs(i, Js_white) ~= 0) then
                     Js_fCheck_kc = true
                     return
                 end
-
             end
-
         end
     end
 
@@ -1910,23 +1816,19 @@ function Anyagress(c, u)
 end
 
 function KnightPts(sq, side)
-
     local s = Js_knightMvt[1 + Js_c1][1 + sq]
     local a1 = 0
-    local a2 = Js_agress2[1 + sq] & 0x4FFF
+    local a2 = (Js_agress2[1 + sq] & 0x4FFF)
 
     if (a2 > 0) then
-
-        a1 = Js_agress1[1 + sq] & 0x4FFF
+        a1 = (Js_agress1[1 + sq] & 0x4FFF)
         if ((a1 == 0) or (a2 > Js_xltBN + 1)) then
-
             s = s + Js_pinned_p
             Js_pinned[1 + Js_c1] = Js_pinned[1 + Js_c1] + 1
 
             if (FJunk(sq)) then
                 Js_pinned[1 + Js_c1] = Js_pinned[1 + Js_c1] + 1
             end
-
         else
             if ((a2 >= Js_xltBN) or (a1 < Js_xltP)) then
                 s = s + Js_agress_across
@@ -1937,25 +1839,22 @@ function KnightPts(sq, side)
 end
 
 function QueenPts(sq, side)
-
-    local s = iif((IArrow(sq, Js_pieceMap[1 + Js_c2][1]) < 3), 12, 0)
+    local s = iif((IArrow(sq, Js_pieceMap[1 + Js_c2][1 + 0]) < 3), 12, 0)
     local a1 = 0
-    local a2 = Js_agress2[1 + sq] & 0x4FFF
+    local a2 = (Js_agress2[1 + sq] & 0x4FFF)
 
     if (Js_working > 2) then
-        s = s + (14 - Js_crossData[1 + ((sq * 64) + Js_pieceMap[1 + Js_c2][1])])
+        s = s + (14 - Js_crossData[1 + ((sq * 64) + Js_pieceMap[1 + Js_c2][1 + 0])])
     end
 
     if (a2 > 0) then
-        a1 = Js_agress1[1 + sq] & 0x4FFF
+        a1 = (Js_agress1[1 + sq] & 0x4FFF)
         if ((a1 == 0) or (a2 > Js_xltQ + 1)) then
-
             s = s + Js_pinned_p
             Js_pinned[1 + Js_c1] = Js_pinned[1 + Js_c1] + 1
             if (FJunk(sq)) then
                 Js_pinned[1 + Js_c1] = Js_pinned[1 + Js_c1] + 1
             end
-
         else
             if ((a2 >= Js_xltQ) or (a1 < Js_xltP)) then
                 s = s + Js_agress_across
@@ -1966,8 +1865,7 @@ function QueenPts(sq, side)
 end
 
 function PositPts(side, score)
-
-    local pscore = {0, 0}
+    local pscore = { 0, 0 }
     local xside = 0
     local i = 0
     local sq = 0
@@ -1980,14 +1878,12 @@ function PositPts(side, score)
     pscore[1 + Js_white] = 0
 
     for Js_c1 = Js_white, Js_black, 1 do
-
         Js_c2 = Js_otherTroop[1 + Js_c1]
         Js_agress1 = Js_agress[1 + Js_c1]
         Js_agress2 = Js_agress[1 + Js_c2]
         Js_pawc1 = Js_pawnMap[1 + Js_c1]
         Js_pawc2 = Js_pawnMap[1 + Js_c2]
         for i = Js_piecesCount[1 + Js_c1], 0, -1 do
-
             sq = Js_pieceMap[1 + Js_c1][1 + i]
 
             if (Js_board[1 + sq] == Js_pawn) then
@@ -2060,8 +1956,7 @@ function PositPts(side, score)
 end
 
 function PlayMov()
-
-    --   UpdateDisplay()
+    -- UpdateDisplay()
 
     Js_currentScore = Js_root.score
     Js_fSoonMate_kc = false
@@ -2089,11 +1984,9 @@ function PlayMov()
         end
     end
     ShowScore(Js_currentScore)
-
 end
 
 function IRepeat(cnt)
-
     local c = 0
     local i = 0
 
@@ -2103,15 +1996,14 @@ function IRepeat(cnt)
 
     cnt = 0
     if (Js_nGameMoves > Js_fiftyMoves + 3) then
-
         for i = 0, 63, 1 do
             Js_b_r[1 + i] = 0
         end
 
         for i = Js_nGameMoves, Js_fiftyMoves + 1, -1 do
             m = Js_movesList[1 + i].gamMv
-            f = m >> 8
-            t = m & 0xFF
+            f = (m >> 8)
+            t = (m & 0xFF)
             Js_b_r[1 + f] = Js_b_r[1 + f] + 1
             c = c + iif((Js_b_r[1 + f] == 0), -1, 1)
             Js_b_r[1 + t] = Js_b_r[1 + t] - 1
@@ -2131,7 +2023,6 @@ function IRepeat(cnt)
 end
 
 function ChoiceMov(side, iop)
-
     local tempb = _INT()
     local tempc = _INT()
     local tempsf = _INT()
@@ -2157,7 +2048,6 @@ function ChoiceMov(side, iop)
     PositPts(side, score)
 
     if (Js_depth_Seek == 0) then
-
         for i = 0, 10000, 1 do
             Js_storage[1 + i] = 0
         end
@@ -2181,7 +2071,7 @@ function ChoiceMov(side, iop)
         beta = score.i + Js_N9
         rpt.i = 0
         Js_treePoint[1 + 1] = 0
-        Js_root = Js_Tree[1]
+        Js_root = Js_Tree[1 + 0]
         AvailMov(side, 1)
 
         for i = Js_treePoint[1 + 1], Js_treePoint[1 + 2] - 1, 1 do
@@ -2194,6 +2084,7 @@ function ChoiceMov(side, iop)
         Js_scoreDither = 0
         Js_dxDither = 20
     end
+
     while ((not Js_flag.timeout) and (Js_depth_Seek < Js_maxDepthSeek)) do
         coroutine.yield()
         Js_depth_Seek = Js_depth_Seek + 1
@@ -2202,14 +2093,13 @@ function ChoiceMov(side, iop)
         for i = 1, Js_depth_Seek, 1 do
             Js_eliminate0[1 + i] = Js_variants[1 + i]
         end
-
         if (score.i < alpha) then
             score.i = Seek(side, 1, Js_depth_Seek, -9000, score.i, Js_variants, rpt)
         end
-
         if ((score.i > beta) and ((Js_root.flags & Js__idem) == 0)) then
             score.i = Seek(side, 1, Js_depth_Seek, score.i, 9000, Js_variants, rpt)
         end
+
         score.i = Js_root.score
 
         for i = Js_treePoint[1 + 1] + 1, Js_treePoint[1 + 2] - 1, 1 do
@@ -2229,7 +2119,7 @@ function ChoiceMov(side, iop)
         end
 
         if (not Js_flag.timeout) then
-            Js_scoreTP[1] = score.i
+            Js_scoreTP[1 + 0] = score.i
             Js_scoreDither = iif((Js_scoreDither == 0), score.i, ((Js_scoreDither + score.i) / 2))
         end
         Js_dxDither = (20 + math.abs(Js_scoreDither / 12))
@@ -2239,7 +2129,6 @@ function ChoiceMov(side, iop)
         else
             alpha = score.i - Js__alpha - Js_dxDither
         end
-        -- coroutine.yield()
     end
 
     score.i = Js_root.score
@@ -2256,16 +2145,11 @@ function ChoiceMov(side, iop)
     end
 
     if ((score.i > -9999) and (rpt.i <= 2)) then
-
         if (score.i < Js_realBestScore) then
-
-            m_f = Js_realBestMove >> 8
-            m_t = Js_realBestMove & 0xFF
+            m_f = (Js_realBestMove >> 8)
+            m_t = (Js_realBestMove & 0xFF)
             for i = 0, 2000, 1 do
-
-                if ((m_f == Js_Tree[1 + i].f) and (m_t == Js_Tree[1 + i].t) and
-                    (Js_realBestScore == Js_Tree[1 + i].score)) then
-
+                if ((m_f == Js_Tree[1 + i].f) and (m_t == Js_Tree[1 + i].t) and (Js_realBestScore == Js_Tree[1 + i].score)) then
                     Js_root = Js_Tree[1 + i]
 
                     break
@@ -2283,7 +2167,6 @@ function ChoiceMov(side, iop)
             Lalgb(Js_root.f, Js_root.t, Js_root.flags)
             PlayMov()
         end
-
     else
         if (Js_bDraw == 0) then
             Lalgb(0, 0, 0)
@@ -2299,7 +2182,7 @@ function ChoiceMov(side, iop)
         Js_hint = 0
     end
     if ((Js_board[1 + Js_root.t] == Js_pawn) or ((Js_root.flags & Js_capture) ~= 0) or
-        ((Js_root.flags & Js_castle_msk) ~= 0)) then
+            ((Js_root.flags & Js_castle_msk) ~= 0)) then
         Js_fiftyMoves = Js_nGameMoves
     end
     Js_movesList[1 + Js_nGameMoves].score = score.i
@@ -2312,7 +2195,6 @@ function ChoiceMov(side, iop)
 end
 
 function MultiMov(ply, sq, side, xside)
-
     local piece = Js_board[1 + sq]
 
     local i = (Js_pieceTyp[1 + side][1 + piece] * 4096) + (sq * 64)
@@ -2320,9 +2202,7 @@ function MultiMov(ply, sq, side, xside)
     local idir = i
     local u = Js_nextCross[1 + (ipos + sq)]
     if (piece == Js_pawn) then
-
         if (Js_color[1 + u] == Js_hollow) then
-
             AttachMov(ply, sq, u, 0, xside)
 
             u = Js_nextCross[1 + (ipos + u)]
@@ -2335,7 +2215,7 @@ function MultiMov(ply, sq, side, xside)
             AttachMov(ply, sq, u, Js_capture, xside)
         else
             if (u == Js_indenSqr) then
-                AttachMov(ply, sq, u, Js_capture | Js_enpassant_msk, xside)
+                AttachMov(ply, sq, u, (Js_capture | Js_enpassant_msk), xside)
             end
         end
         u = Js_nextArrow[1 + (idir + u)]
@@ -2343,12 +2223,10 @@ function MultiMov(ply, sq, side, xside)
             AttachMov(ply, sq, u, Js_capture, xside)
         else
             if (u == Js_indenSqr) then
-                AttachMov(ply, sq, u, Js_capture | Js_enpassant_msk, xside)
+                AttachMov(ply, sq, u, (Js_capture | Js_enpassant_msk), xside)
             end
         end
-
     else
-
         repeat
             if (Js_color[1 + u] == Js_hollow) then
                 AttachMov(ply, sq, u, 0, xside)
@@ -2364,7 +2242,6 @@ function MultiMov(ply, sq, side, xside)
 end
 
 function XRayKg(sq, s)
-
     local cnt = 0
     local u = 0
     local ipos = 0
@@ -2372,13 +2249,13 @@ function XRayKg(sq, s)
     local ok = false
 
     if ((Js_withBishop[1 + Js_c2] ~= 0) or (Js_withQueen[1 + Js_c2] ~= 0)) then
-
         ipos = (Js_bishop * 4096) + (sq * 64)
         idir = ipos
 
         u = Js_nextCross[1 + (ipos + sq)]
         repeat
-            if (((Js_agress2[1 + u] & Js_xltBQ) ~= 0) and (Js_color[1 + u] ~= Js_c2)) then
+            if (((Js_agress2[1 + u] & Js_xltBQ) ~= 0) and
+                    (Js_color[1 + u] ~= Js_c2)) then
                 if ((Js_agress1[1 + u] == 0) or ((Js_agress2[1 + u] & 0xFF) > 1)) then
                     cnt = cnt + 1
                 else
@@ -2394,13 +2271,13 @@ function XRayKg(sq, s)
     end
 
     if ((Js_withRook[1 + Js_c2] ~= 0) or (Js_withQueen[1 + Js_c2] ~= 0)) then
-
         ipos = (Js_rook * 4096) + (sq * 64)
         idir = ipos
 
         u = Js_nextCross[1 + (ipos + sq)]
         repeat
-            if (((Js_agress2[1 + u] & Js_xltRQ) ~= 0) and (Js_color[1 + u] ~= Js_c2)) then
+            if (((Js_agress2[1 + u] & Js_xltRQ) ~= 0) and
+                    (Js_color[1 + u] ~= Js_c2)) then
                 if ((Js_agress1[1 + u] == 0) or ((Js_agress2[1 + u] & 0xFF) > 1)) then
                     cnt = cnt + 1
                 else
@@ -2416,12 +2293,12 @@ function XRayKg(sq, s)
     end
 
     if (Js_withKnight[1 + Js_c2] ~= 0) then
-
         idir = (Js_knight * 4096) + (sq * 64)
 
         u = Js_nextArrow[1 + (idir + sq)]
         repeat
-            if (((Js_agress2[1 + u] & Js_xltNN) ~= 0) and (Js_color[1 + u] ~= Js_c2)) then
+            if (((Js_agress2[1 + u] & Js_xltNN) ~= 0) and
+                    (Js_color[1 + u] ~= Js_c2)) then
                 if ((Js_agress1[1 + u] == 0) or ((Js_agress2[1 + u] & 0xFF) > 1)) then
                     cnt = cnt + 1
                 else
@@ -2446,8 +2323,8 @@ function XRayKg(sq, s)
 
         if (Js_agress2[1 + u] > Js_agress1[1 + u]) then
             cnt = cnt + 1
-            if (((Js_agress2[1 + u] & Js_xltQ) ~= 0) and (Js_agress2[1 + u] > Js_xltQ + 1) and
-                (Js_agress1[1 + u] < Js_xltQ)) then
+            if (((Js_agress2[1 + u] & Js_xltQ) ~= 0) and
+                    (Js_agress2[1 + u] > Js_xltQ + 1) and (Js_agress1[1 + u] < Js_xltQ)) then
                 s.i = s.i - (4 * Js_safe_King)
             end
         end
@@ -2463,7 +2340,6 @@ function XRayKg(sq, s)
 end
 
 function DoCastle(side, kf, kt, iop)
-
     local xside = Js_otherTroop[1 + side]
     local rf = 0
     local rt = 0
@@ -2478,13 +2354,13 @@ function DoCastle(side, kf, kt, iop)
     end
 
     if (iop == 0) then
-        if ((kf ~= Js_kingPawn[1 + side]) or (Js_board[1 + kf] ~= Js_king) or (Js_board[1 + rf] ~= Js_rook) or
-            (Js_nMvtOnBoard[1 + kf] ~= 0) or (Js_nMvtOnBoard[1 + rf] ~= 0) or (Js_color[1 + kt] ~= Js_hollow) or
-            (Js_color[1 + rt] ~= Js_hollow) or (Js_color[1 + (kt - 1)] ~= Js_hollow) or (ISqAgrs(kf, xside) ~= 0) or
-            (ISqAgrs(kt, xside) ~= 0) or (ISqAgrs(rt, xside) ~= 0)) then
+        if ((kf ~= Js_kingPawn[1 + side]) or (Js_board[1 + kf] ~= Js_king) or
+                (Js_board[1 + rf] ~= Js_rook) or (Js_nMvtOnBoard[1 + kf] ~= 0) or
+                (Js_nMvtOnBoard[1 + rf] ~= 0) or (Js_color[1 + kt] ~= Js_hollow) or
+                (Js_color[1 + rt] ~= Js_hollow) or (Js_color[1 + (kt - 1)] ~= Js_hollow) or
+                (ISqAgrs(kf, xside) ~= 0) or (ISqAgrs(kt, xside) ~= 0) or (ISqAgrs(rt, xside) ~= 0)) then
             return 0
         end
-
     else
         if (iop == 1) then
             Js_roquer[1 + side] = 1
@@ -2519,7 +2395,6 @@ function DoCastle(side, kf, kt, iop)
 end
 
 function DoCalc(side, ply, alpha, beta, gainScore, slk, InChk)
-
     local s = _INT()
     local xside = Js_otherTroop[1 + side]
     local evflag = false
@@ -2528,41 +2403,39 @@ function DoCalc(side, ply, alpha, beta, gainScore, slk, InChk)
     Js_pinned[1 + Js_black] = 0
     Js_pinned[1 + Js_white] = 0
 
-    if (((Js_matrl[1 + Js_white] == Js_kingVal) and (((Js_pmatrl[1 + Js_black] == 0) or (Js_ematrl[1 + Js_black] == 0)))) or
-        ((Js_matrl[1 + Js_black] == Js_kingVal) and (((Js_pmatrl[1 + Js_white] == 0) or (Js_ematrl[1 + Js_white] == 0))))) then
+    if (((Js_matrl[1 + Js_white] == Js_kingVal) and (((Js_pmatrl[1 + Js_black] == 0) or
+                (Js_ematrl[1 + Js_black] == 0)))) or
+            ((Js_matrl[1 + Js_black] == Js_kingVal) and (((Js_pmatrl[1 + Js_white] == 0) or
+                (Js_ematrl[1 + Js_white] == 0))))) then
         slk.i = 1
     else
         slk.i = 0
     end
 
     if (slk.i == 0) then
-
-        evflag = (ply == 1) or (ply < Js_depth_Seek) or
-                     ((((ply == Js_depth_Seek + 1) or (ply == Js_depth_Seek + 2))) and
-                         ((((s.i > alpha - Js_dxAlphaBeta) and (s.i < beta + Js_dxAlphaBeta)) or
-                             ((ply > Js_depth_Seek + 2) and (s.i >= alpha - 25) and (s.i <= beta + 25)))))
+        evflag = (ply == 1) or (ply < Js_depth_Seek) or (
+            (((ply == Js_depth_Seek + 1) or (ply == Js_depth_Seek + 2))) and ((
+                ((s.i > alpha - Js_dxAlphaBeta) and (s.i < beta + Js_dxAlphaBeta)) or (
+                    (ply > Js_depth_Seek + 2) and (s.i >= alpha - 25) and (s.i <= beta + 25)))))
     end
 
     if (evflag) then
-
         Js_cCompNodes = Js_cCompNodes + 1
         Agression(side, Js_agress[1 + side])
 
-        if (Anyagress(side, Js_pieceMap[1 + xside][1]) == 1) then
+        if (Anyagress(side, Js_pieceMap[1 + xside][1 + 0]) == 1) then
             return (10001 - ply)
         end
 
         Agression(xside, Js_agress[1 + xside])
 
-        InChk.i = Anyagress(xside, Js_pieceMap[1 + side][1])
+        InChk.i = Anyagress(xside, Js_pieceMap[1 + side][1 + 0])
         PositPts(side, s)
-
     else
-
-        if (ISqAgrs(Js_pieceMap[1 + xside][1], side) ~= 0) then
+        if (ISqAgrs(Js_pieceMap[1 + xside][1 + 0], side) ~= 0) then
             return (10001 - ply)
         end
-        InChk.i = ISqAgrs(Js_pieceMap[1 + side][1], xside)
+        InChk.i = ISqAgrs(Js_pieceMap[1 + side][1 + 0], xside)
 
         if (slk.i ~= 0) then
             CalcKg(side, s)
@@ -2581,108 +2454,101 @@ function DoCalc(side, ply, alpha, beta, gainScore, slk, InChk)
 end
 
 function Lalgb(f, t, flag)
-
+    local i = 0
+    local y = 0
     local m3p = 0
 
     if (f ~= t) then
-        local a0 = Js_asciiMove[1]
-        local a1 = Js_asciiMove[2]
-        local a2 = Js_asciiMove[3]
-        local a3 = Js_asciiMove[4]
-        a0[1] = (97 + IColmn(f)) -- (char)
-        a0[2] = (49 + IRaw(f)) -- (char)
-        a0[3] = (97 + IColmn(t)) -- (char)
-        a0[4] = (49 + IRaw(t)) -- (char)
-        a0[5] = 0
+        local a0 = Js_asciiMove[1 + 0]
+        local a1 = Js_asciiMove[1 + 1]
+        local a2 = Js_asciiMove[1 + 2]
+        local a3 = Js_asciiMove[1 + 3]
+        a0[1 + 0] = (97 + IColmn(f)) --(char)
+        a0[1 + 1] = (49 + IRaw(f)) --(char)
+        a0[1 + 2] = (97 + IColmn(t)) --(char)
+        a0[1 + 3] = (49 + IRaw(t)) --(char)
+        a0[1 + 4] = 0
 
-        a3[1] = 0
-        a1[1] = Js_upperNot[1 + Js_board[1 + f]]
+        a3[1 + 0] = 0
+        a1[1 + 0] = Js_upperNot[1 + Js_board[1 + f]]
 
-        if (a1[1] == "P") then
-
-            if (a0[1] == a0[3]) then
-                a1[1] = a0[3]
-                a2[1] = a1[1]
-                a1[2] = a0[4]
-                a2[2] = a1[2]
+        if (a1[1 + 0] == "P") then
+            if (a0[1 + 0] == a0[1 + 2]) then
+                a1[1 + 0] = a0[1 + 2]
+                a2[1 + 0] = a1[1 + 0]
+                a1[1 + 1] = a0[1 + 3]
+                a2[1 + 1] = a1[1 + 1]
                 m3p = 2
             else
-                a1[1] = a0[1]
-                a2[1] = a1[1]
-                a1[2] = a0[3]
-                a2[2] = a1[2]
-                a2[3] = a0[4]
+                a1[1 + 0] = a0[1 + 0]
+                a2[1 + 0] = a1[1 + 0]
+                a1[1 + 1] = a0[1 + 2]
+                a2[1 + 1] = a1[1 + 1]
+                a2[1 + 2] = a0[1 + 3]
                 m3p = 3
             end
 
-            a1[3] = 0
+            a1[1 + 2] = 0
             a2[1 + m3p] = 0
             if ((flag & Js_promote) ~= 0) then
-                a1[3] = Js_lowerNot[1 + (flag & Js_pawn_msk)]
-                a2[1 + m3p] = a1[3]
-                a0[5] = a1[3]
-                a0[6] = 0
+                a1[1 + 2] = Js_lowerNot[1 + (flag & Js_pawn_msk)]
+                a2[1 + m3p] = a1[1 + 2]
+                a0[1 + 4] = a1[1 + 2]
+                a0[1 + 5] = 0
                 a2[1 + (m3p + 1)] = 0
-                a1[4] = 0
+                a1[1 + 3] = 0
             end
-
         else
-
-            a2[1] = a1[1]
-            a2[2] = a0[2]
-            a1[2] = a0[3]
-            a2[3] = a1[2]
-            a1[3] = a0[4]
-            a2[4] = a1[3]
-            a1[4] = 0
-            a2[5] = 0
-            for i = 0, 5 do
+            a2[1 + 0] = a1[1 + 0]
+            a2[1 + 1] = a0[1 + 1]
+            a1[1 + 1] = a0[1 + 2]
+            a2[1 + 2] = a1[1 + 1]
+            a1[1 + 2] = a0[1 + 3]
+            a2[1 + 3] = a1[1 + 2]
+            a1[1 + 3] = 0
+            a2[1 + 4] = 0
+            for i = 0, 5, 1 do
                 a3[1 + i] = a2[1 + i]
             end
 
-            a3[2] = a0[1]
+            a3[1 + 1] = a0[1 + 0]
             if ((flag & Js_castle_msk) ~= 0) then
-
                 if (t > f) then
+                    a1[1 + 0] = 111
+                    a1[1 + 1] = 45
+                    a1[1 + 2] = 111
+                    a1[1 + 3] = 0
 
-                    a1[1] = 111
-                    a1[2] = 45
-                    a1[3] = 111
-                    a1[4] = 0
-
-                    a2[1] = 111
-                    a2[2] = 45
-                    a2[3] = 111
-                    a2[4] = 0
-
+                    a2[1 + 0] = 111
+                    a2[1 + 1] = 45
+                    a2[1 + 2] = 111
+                    a2[1 + 3] = 0
                 else
+                    a1[1 + 0] = 111
+                    a1[1 + 1] = 45
+                    a1[1 + 2] = 111
+                    a1[1 + 3] = 45
+                    a1[1 + 4] = 111
+                    a1[1 + 5] = 0
 
-                    a1[1] = 111
-                    a1[2] = 45
-                    a1[3] = 111
-                    a1[4] = 45
-                    a1[5] = 111
-                    a1[6] = 0
-
-                    a2[1] = 111
-                    a2[2] = 45
-                    a2[3] = 111
-                    a2[4] = 45
-                    a2[5] = 111
-                    a2[6] = 0
+                    a2[1 + 0] = 111
+                    a2[1 + 1] = 45
+                    a2[1 + 2] = 111
+                    a2[1 + 3] = 45
+                    a2[1 + 4] = 111
+                    a2[1 + 5] = 0
                 end
             end
         end
-
     else
-
-        for i = 0, 3 do
-            Js_asciiMove[1 + i][1] = 0
+        for i = 0, 3, 1 do
+            Js_asciiMove[1 + i][1 + 0] = 0
         end
     end
 end
 
 function UpdatePiecMap(side, sq, iop)
+    local i = 0
     if (iop == 1) then
         Js_piecesCount[1 + side] = Js_piecesCount[1 + side] - 1
         for i = Js_pieceIndex[1 + sq], Js_piecesCount[1 + side], 1 do
@@ -2701,14 +2567,15 @@ function getBoard()
     local BB = {} -- 8x8
     local iCol = 0
     local iLine = 0
+    local i = 0
     local s = ""
     local ch = ""
 
-    for i = 0, 7 do
+    for i = 0, 7, 1 do
         BB[1 + i] = {} -- create object
     end
 
-    for i = 0, 63 do
+    for i = 0, 63, 1 do
         iCol = i % 8
         iLine = (i - iCol) / 8
         if (Js_board[1 + i] == Js_empty) then
@@ -2730,18 +2597,19 @@ function getBoard()
 end
 
 function UpdateDisplay()
-
     local BB = {} -- 8x8
     local iCol = 0
     local iLine = 0
+    local i = 0
     local s = ""
     local ch = ""
 
-    for i = 0, 7 do
+    for i = 0, 7, 1 do
         BB[1 + i] = {} -- create object
     end
 
-    for i = 0, 63 do
+
+    for i = 0, 63, 1 do
         iCol = i % 8
         iLine = (i - iCol) / 8
         if (Js_board[1 + i] == Js_empty) then
@@ -2752,6 +2620,7 @@ function UpdateDisplay()
         BB[1 + iLine][1 + iCol] = ch
     end
 
+    print("")
     for iLine = 7, 0, -1 do
         s = ""
         for iCol = 0, 7, 1 do
@@ -2759,18 +2628,18 @@ function UpdateDisplay()
         end
         print(s)
     end
-    --   print()
 end
 
 function AvailCaptur(side, ply)
-
     local xside = Js_otherTroop[1 + side]
     local Tpt = Js_treePoint[1 + ply]
     local Tpt1 = Tpt
 
-    local node = Js_Tree[1 + Tpt] -- _BTREE
+    local node = Js_Tree[1 + Tpt] --_BTREE
     local inext = Tpt + 1
     local r7 = Js_raw7[1 + side]
+    local ipl = side
+    local i = 0
 
     local sq = 0
     local piece = 0
@@ -2779,13 +2648,11 @@ function AvailCaptur(side, ply)
     local u = 0
     local fl = 0
 
-    for i = 0, Js_piecesCount[1 + side] do
-
+    for i = 0, Js_piecesCount[1 + side], 1 do
         sq = Js_pieceMap[1 + side][1 + i]
         piece = Js_board[1 + sq]
 
         if (Js_heavy[1 + piece] ~= false) then
-
             ipos = (piece * 4096) + (sq * 64)
             idir = ipos
 
@@ -2807,12 +2674,9 @@ function AvailCaptur(side, ply)
                     u = Js_nextArrow[1 + (idir + u)]
                 end
             until (u == sq)
-
         else
-
             idir = (Js_pieceTyp[1 + side][1 + piece] * 4096) + (sq * 64)
             if ((piece == Js_pawn) and (IRaw(sq) == r7)) then
-
                 fl = ((Js_capture | Js_promote) | Js_queen)
 
                 u = Js_nextArrow[1 + (idir + sq)]
@@ -2841,7 +2705,7 @@ function AvailCaptur(side, ply)
 
                 ipos = (Js_pieceTyp[1 + side][1 + piece] * 4096) + (sq * 64)
 
-                fl = Js_promote | Js_queen
+                fl = (Js_promote | Js_queen)
 
                 u = Js_nextCross[1 + (ipos + sq)]
                 if (Js_color[1 + u] == Js_hollow) then
@@ -2854,9 +2718,7 @@ function AvailCaptur(side, ply)
                     inext = inext + 1
                     Tpt1 = Tpt1 + 1
                 end
-
             else
-
                 u = Js_nextArrow[1 + (idir + sq)]
                 repeat
                     if (Js_color[1 + u] == xside) then
@@ -2877,11 +2739,11 @@ function AvailCaptur(side, ply)
     end
 
     Js_treePoint[1 + (ply + 1)] = Tpt1
-
 end
 
 function InitStatus()
-
+    local i = 0
+    local sq = 0
     local c = 0
     local c2 = 0
 
@@ -2899,14 +2761,12 @@ function InitStatus()
     Js_piecesCount[1 + Js_black] = 0
     Js_piecesCount[1 + Js_white] = 0
 
-    for sq = 0, 63 do
-
+    for sq = 0, 63, 1 do
         if (Js_color[1 + sq] ~= Js_hollow) then
             c = Js_color[1 + sq]
 
             Js_matrl[1 + c] = Js_matrl[1 + c] + Js_valueMap[1 + Js_board[1 + sq]]
             if (Js_board[1 + sq] == Js_pawn) then
-
                 Js_pmatrl[1 + c] = Js_pmatrl[1 + c] + Js_pawnVal
                 c2 = IColmn(sq)
                 Js_pawnMap[1 + c][1 + c2] = Js_pawnMap[1 + c][1 + c2] + 1
@@ -2915,12 +2775,10 @@ function InitStatus()
             if (Js_board[1 + sq] == Js_king) then
                 Js_pieceIndex[1 + sq] = 0
             else
-
                 Js_piecesCount[1 + c] = Js_piecesCount[1 + c] + 1
                 Js_pieceIndex[1 + sq] = Js_piecesCount[1 + c]
             end
             Js_pieceMap[1 + c][1 + Js_pieceIndex[1 + sq]] = sq
-
         end
     end
 end
@@ -2940,6 +2798,7 @@ function Pagress(c, u)
 end
 
 function CheckMatrl()
+    local flag = true
 
     local nP = 0
     local nK = 0
@@ -2952,8 +2811,9 @@ function CheckMatrl()
     local nB1 = 0
     local nB2 = 0
 
-    for i = 0, 63 do
+    local i = 0
 
+    for i = 0, 63, 1 do
         if (Js_board[1 + i] == Js_pawn) then
             nP = nP + 1
         else
@@ -2981,7 +2841,6 @@ function CheckMatrl()
                 end
             end
         end
-
     end
 
     if (nP ~= 0) then
@@ -3005,15 +2864,15 @@ function CheckMatrl()
 end
 
 function AttachMov(ply, f, t, flag, xside)
-
     local Tpt1 = Js_treePoint[1 + (ply + 1)]
-    local node = Js_Tree[1 + Tpt1] -- _BTREE
+    local node = Js_Tree[1 + Tpt1] --_BTREE
 
     local inext = Tpt1 + 1
 
     local mv = ((f << 8) | t)
     local s = 0
     local z = ((f << 6) | t)
+
 
     if (mv == Js_scoreWin0) then
         s = 2000
@@ -3036,13 +2895,12 @@ function AttachMov(ply, f, t, flag, xside)
     end
 
     if (xside == Js_white) then
-        z = z | 4096
+        z = (z | 4096)
     end
 
     s = s + Js_storage[1 + z]
 
     if (Js_color[1 + t] ~= Js_hollow) then
-
         if (t == Js_destSquare) then
             s = s + 500
         end
@@ -3050,17 +2908,15 @@ function AttachMov(ply, f, t, flag, xside)
     end
 
     if (Js_board[1 + f] == Js_pawn) then
-
         if ((IRaw(t) == 0) or (IRaw(t) == 7)) then
-
-            flag = flag | Js_promote
+            flag = (flag | Js_promote)
 
             s = s + 800
 
             node.f = f
             node.t = t
             node.replay = 0
-            node.flags = flag | Js_queen
+            node.flags = (flag | Js_queen)
             node.score = (s - 20000)
             node = Js_Tree[1 + inext]
             inext = inext + 1
@@ -3071,7 +2927,7 @@ function AttachMov(ply, f, t, flag, xside)
             node.f = f
             node.t = t
             node.replay = 0
-            node.flags = flag | Js_knight
+            node.flags = (flag | Js_knight)
             node.score = (s - 20000)
             node = Js_Tree[1 + inext]
             inext = inext + 1
@@ -3082,19 +2938,17 @@ function AttachMov(ply, f, t, flag, xside)
             node.f = f
             node.t = t
             node.replay = 0
-            node.flags = flag | Js_rook
+            node.flags = (flag | Js_rook)
             node.score = (s - 20000)
             node = Js_Tree[1 + inext]
             inext = inext + 1
             Tpt1 = Tpt1 + 1
 
-            flag = flag | Js_bishop
+            flag = (flag | Js_bishop)
             s = s - 50
-
         else
             if ((IRaw(t) == 1) or (IRaw(t) == 6)) then
-
-                flag = flag | Js_menace_pawn
+                flag = (flag | Js_menace_pawn)
                 s = s + 600
             end
         end
@@ -3110,28 +2964,28 @@ function AttachMov(ply, f, t, flag, xside)
     Tpt1 = Tpt1 + 1
 
     Js_treePoint[1 + (ply + 1)] = Tpt1
-
 end
 
 function PawnPts(sq, side)
-
-    local a1 = Js_agress1[1 + sq] & 0x4FFF
-    local a2 = Js_agress2[1 + sq] & 0x4FFF
+    local a1 = (Js_agress1[1 + sq] & 0x4FFF)
+    local a2 = (Js_agress2[1 + sq] & 0x4FFF)
     local rank = IRaw(sq)
     local fyle = IColmn(sq)
     local s = 0
     local r = 0
     local in_square = false
     local e = 0
+    local j = 0
 
     if (Js_c1 == Js_white) then
-
         s = Js_wPawnMvt[1 + sq]
-        if (((sq == 11) and (Js_color[20] ~= Js_hollow)) or ((sq == 12) and (Js_color[21] ~= Js_hollow))) then
+        if (((sq == 11) and (Js_color[1 + 19] ~= Js_hollow)) or (
+                (sq == 12) and (Js_color[1 + 20] ~= Js_hollow))) then
             s = s + Js_junk_pawn
         end
 
-        if ((((fyle == 0) or (Js_pawc1[1 + (fyle - 1)] == 0))) and (((fyle == 7) or (Js_pawc1[1 + (fyle + 1)] == 0)))) then
+        if ((((fyle == 0) or (Js_pawc1[1 + (fyle - 1)] == 0))) and ((
+                (fyle == 7) or (Js_pawc1[1 + (fyle + 1)] == 0)))) then
             s = s + Js_isol_pawn[1 + fyle]
         else
             if (Js_pawc1[1 + fyle] > 1) then
@@ -3140,23 +2994,20 @@ function PawnPts(sq, side)
         end
 
         if ((a1 < Js_xltP) and (Js_agress1[1 + (sq + 8)] < Js_xltP)) then
-
-            s = s + Js_takeBack[1 + a2 & 0xFF]
+            s = s + Js_takeBack[1 + (a2 & 0xFF)]
             if (Js_pawc2[1 + fyle] == 0) then
                 s = s + Js_bad_pawn
             end
             if (Js_color[1 + (sq + 8)] ~= Js_hollow) then
                 s = s + Js_stopped_pawn
             end
-
         end
 
         if (Js_pawc2[1 + fyle] == 0) then
-
             r = rank + iif((side == Js_black), -1, 0)
 
-            in_square = (IRaw(Js_pieceMap[1 + Js_black][1]) >= r) and
-                            (IArrow(sq, Js_pieceMap[1 + Js_black][1]) < (8 - r))
+            in_square = (IRaw(Js_pieceMap[1 + Js_black][1 + 0]) >= r) and
+            (IArrow(sq, Js_pieceMap[1 + Js_black][1 + 0]) < (8 - r))
 
             e = iif(((a2 == 0) or (side == Js_white)), 0, 1)
 
@@ -3183,20 +3034,17 @@ function PawnPts(sq, side)
                     end
                 end
             end
-
         end
-
     else
-
         if (Js_c1 == Js_black) then
-
             s = Js_bPawnMvt[1 + sq]
-            if (((sq == 51) and (Js_color[44] ~= Js_hollow)) or ((sq == 52) and (Js_color[45] ~= Js_hollow))) then
+            if (((sq == 51) and (Js_color[1 + 43] ~= Js_hollow)) or (
+                    (sq == 52) and (Js_color[1 + 44] ~= Js_hollow))) then
                 s = s + Js_junk_pawn
             end
 
-            if ((((fyle == 0) or (Js_pawc1[1 + (fyle - 1)] == 0))) and
-                (((fyle == 7) or (Js_pawc1[1 + (fyle + 1)] == 0)))) then
+            if ((((fyle == 0) or (Js_pawc1[1 + (fyle - 1)] == 0))) and ((
+                    (fyle == 7) or (Js_pawc1[1 + (fyle + 1)] == 0)))) then
                 s = s + Js_isol_pawn[1 + fyle]
             else
                 if (Js_pawc1[1 + fyle] > 1) then
@@ -3204,9 +3052,9 @@ function PawnPts(sq, side)
                 end
             end
 
-            if ((a1 < Js_xltP) and (Js_agress1[1 + (sq - 8)] < Js_xltP)) then
 
-                s = s + Js_takeBack[1 + a2 & 0xFF]
+            if ((a1 < Js_xltP) and (Js_agress1[1 + (sq - 8)] < Js_xltP)) then
+                s = s + Js_takeBack[1 + (a2 & 0xFF)]
                 if (Js_pawc2[1 + fyle] == 0) then
                     s = s + Js_bad_pawn
                 end
@@ -3216,11 +3064,10 @@ function PawnPts(sq, side)
             end
 
             if (Js_pawc2[1 + fyle] == 0) then
-
                 r = rank + iif((side == Js_white), 1, 0)
 
-                in_square = (IRaw(Js_pieceMap[1 + Js_white][1]) <= r) and
-                                (IArrow(sq, Js_pieceMap[1 + Js_white][1]) < (r + 1))
+                in_square = (IRaw(Js_pieceMap[1 + Js_white][1 + 0]) <= r) and
+                (IArrow(sq, Js_pieceMap[1 + Js_white][1 + 0]) < (r + 1))
 
                 e = iif(((a2 == 0) or (side == Js_black)), 0, 1)
 
@@ -3247,21 +3094,17 @@ function PawnPts(sq, side)
                         end
                     end
                 end
-
             end
         end
     end
 
     if (a2 > 0) then
-
         if ((a1 == 0) or (a2 > Js_xltP + 1)) then
-
             s = s + Js_pinned_p
             Js_pinned[1 + Js_c1] = Js_pinned[1 + Js_c1] + 1
             if (FJunk(sq)) then
                 Js_pinned[1 + Js_c1] = Js_pinned[1 + Js_c1] + 1
             end
-
         else
             if (a2 > a1) then
                 s = s + Js_agress_across
@@ -3273,7 +3116,6 @@ function PawnPts(sq, side)
 end
 
 function RookPts(sq, side)
-
     local s = _INT()
     local mob = _INT()
     local fyle = IColmn(sq)
@@ -3295,20 +3137,18 @@ function RookPts(sq, side)
     end
 
     if (Js_working > 2) then
-        s.i = s.i + (14 - Js_crossData[1 + (sq * 64 + Js_pieceMap[1 + Js_c2][1])])
+        s.i = s.i + (14 - Js_crossData[1 + (sq * 64 + Js_pieceMap[1 + Js_c2][1 + 0])])
     end
 
-    a2 = Js_agress2[1 + sq] & 0x4FFF
+    a2 = (Js_agress2[1 + sq] & 0x4FFF)
     if (a2 > 0) then
-        a1 = Js_agress1[1 + sq] & 0x4FFF
+        a1 = (Js_agress1[1 + sq] & 0x4FFF)
         if ((a1 == 0) or (a2 > Js_xltR + 1)) then
-
             s.i = s.i + Js_pinned_p
             Js_pinned[1 + Js_c1] = Js_pinned[1 + Js_c1] + 1
             if (FJunk(sq)) then
                 Js_pinned[1 + Js_c1] = Js_pinned[1 + Js_c1] + 1
             end
-
         else
             if ((a2 >= Js_xltR) or (a1 < Js_xltP)) then
                 s.i = s.i + Js_agress_across
@@ -3319,15 +3159,14 @@ function RookPts(sq, side)
 end
 
 function KingPts(sq, side)
-
     local s = _INT()
     local fyle = IColmn(sq)
     local a1 = 0
     local a2 = 0
 
     s.i = Js_kingMvt[1 + Js_c1][1 + sq]
-    if ((Js_safe_King > 0) and (((Js_fDevl[1 + Js_c2] ~= 0) or (Js_working > 0)))) then
-
+    if ((Js_safe_King > 0) and ((
+            (Js_fDevl[1 + Js_c2] ~= 0) or (Js_working > 0)))) then
         XRayKg(sq, s)
     end
 
@@ -3355,7 +3194,6 @@ function KingPts(sq, side)
             s.i = s.i + Js_semiOpen_kingOther
         end
     else
-
         if (fyle == 6) then
             if (Js_pawc1[1 + (fyle + 1)] == 0) then
                 s.i = s.i + Js_semiOpen_king
@@ -3364,16 +3202,14 @@ function KingPts(sq, side)
                 s.i = s.i + Js_semiOpen_kingOther
             end
         else
-
             if (fyle == 2) then
-                if (Js_pawc1[1] == 0) then
+                if (Js_pawc1[1 + 0] == 0) then
                     s.i = s.i + Js_semiOpen_king
                 end
-                if (Js_pawc2[1] == 0) then
+                if (Js_pawc2[1 + 0] == 0) then
                     s.i = s.i + Js_semiOpen_kingOther
                 end
             else
-
                 if (fyle == 7) then
                     if (Js_pawc1[1 + (fyle - 1)] == 0) then
                         s.i = s.i + Js_semiOpen_king
@@ -3381,15 +3217,15 @@ function KingPts(sq, side)
                     if (Js_pawc2[1 + (fyle - 1)] == 0) then
                         s.i = s.i + Js_semiOpen_kingOther
                     end
-
                 end
             end
         end
     end
 
-    a2 = Js_agress2[1 + sq] & 0x4FFF
+
+    a2 = (Js_agress2[1 + sq] & 0x4FFF)
     if (a2 > 0) then
-        a1 = Js_agress1[1 + sq] & 0x4FFF
+        a1 = (Js_agress1[1 + sq] & 0x4FFF)
         if ((a1 == 0) or (a2 > Js_xltK + 1)) then
             s.i = s.i + Js_pinned_p
             Js_pinned[1 + Js_c1] = Js_pinned[1 + Js_c1] + 1
@@ -3401,7 +3237,6 @@ function KingPts(sq, side)
 end
 
 function AvailMov(side, ply)
-
     local xside = Js_otherTroop[1 + side]
     local i = 0
     local square = 0
@@ -3424,7 +3259,7 @@ function AvailMov(side, ply)
         return
     end
 
-    f = Js_pieceMap[1 + side][1]
+    f = Js_pieceMap[1 + side][1 + 0]
     if (DoCastle(side, f, f + 2, 0) ~= 0) then
         AttachMov(ply, f, f + 2, Js_castle_msk, xside)
     end
@@ -3435,7 +3270,6 @@ function AvailMov(side, ply)
 end
 
 function BishopPts(sq, side)
-
     local s = _INT()
     local mob = _INT()
     local a1 = 0
@@ -3445,9 +3279,9 @@ function BishopPts(sq, side)
     XRayBR(sq, s, mob)
     s.i = s.i + Js_mobBishop[1 + mob.i]
 
-    a2 = Js_agress2[1 + sq] & 0x4FFF
+    a2 = (Js_agress2[1 + sq] & 0x4FFF)
     if (a2 > 0) then
-        a1 = Js_agress1[1 + sq] & 0x4FFF
+        a1 = (Js_agress1[1 + sq] & 0x4FFF)
         if ((a1 == 0) or (a2 > Js_xltBN + 1)) then
             s.i = s.i + Js_pinned_p
             Js_pinned[1 + Js_c1] = Js_pinned[1 + Js_c1] + 1
@@ -3464,7 +3298,6 @@ function BishopPts(sq, side)
 end
 
 function ValidateMov(side, node, tempb, tempc, tempsf, tempst, gainScore)
-
     local xside = Js_otherTroop[1 + side]
     local f = node.f
     local t = node.t
@@ -3479,13 +3312,10 @@ function ValidateMov(side, node, tempb, tempc, tempsf, tempst, gainScore)
     gainScore.i = 0
     Js_movesList[1 + Js_nGameMoves].gamMv = ((f << 8) | t)
     if ((node.flags & Js_castle_msk) ~= 0) then
-
         Js_movesList[1 + Js_nGameMoves].piece = Js_empty
         Js_movesList[1 + Js_nGameMoves].color = side
         DoCastle(side, f, t, 1)
-
     else
-
         cf = IColmn(f)
         ct = IColmn(t)
 
@@ -3496,10 +3326,8 @@ function ValidateMov(side, node, tempb, tempc, tempsf, tempst, gainScore)
         Js_movesList[1 + Js_nGameMoves].piece = tempb.i
         Js_movesList[1 + Js_nGameMoves].color = tempc.i
         if (tempc.i ~= Js_hollow) then
-
             UpdatePiecMap(tempc.i, t, 1)
             if (tempb.i == Js_pawn) then
-
                 Js_pawnMap[1 + tempc.i][1 + ct] = Js_pawnMap[1 + tempc.i][1 + ct] - 1
             end
 
@@ -3548,11 +3376,10 @@ function ValidateMov(side, node, tempb, tempc, tempsf, tempst, gainScore)
         end
 
         if ((node.flags & Js_promote) ~= 0) then
-
             if (Js_proPiece ~= 0) then
                 Js_board[1 + t] = Js_proPiece
             else
-                Js_board[1 + t] = node.flags & Js_pawn_msk
+                Js_board[1 + t] = (node.flags & Js_pawn_msk)
             end
 
             if (Js_board[1 + t] == Js_queen) then
@@ -3587,14 +3414,12 @@ function ValidateMov(side, node, tempb, tempc, tempsf, tempst, gainScore)
 end
 
 function Peek(p1, p2)
-
     local s0 = Js_Tree[1 + p1].score
     local p0 = p1
     local p = 0
     local s = 0
 
     for p = p1 + 1, p2, 1 do
-
         s = Js_Tree[1 + p].score
         if (s > s0) then
             s0 = s
@@ -3612,7 +3437,6 @@ function Peek(p1, p2)
 end
 
 function Seek(side, ply, depth, alpha, beta, bstline, rpt)
-
     local tempb = _INT()
     local tempc = _INT()
     local tempsf = _INT()
@@ -3643,7 +3467,6 @@ function Seek(side, ply, depth, alpha, beta, bstline, rpt)
     end
 
     if ((rpt.i == 1) and (ply > 1)) then
-
         if (Js_nMovesMade <= 11) then
             return 100
         end
@@ -3652,41 +3475,34 @@ function Seek(side, ply, depth, alpha, beta, bstline, rpt)
 
     score3 = DoCalc(side, ply, alpha, beta, Js_gainScore.i, slk, InChk)
     if (score3 > 9000) then
-
         bstline[1 + ply] = 0
         return score3
     end
 
     if (depth > 0) then
-
         if (InChk.i ~= 0) then
             if (depth < 2) then
                 depth = 2
             end
         else
-            if ((Js_menacePawn[1 + (ply - 1)] ~= 0) or
-                ((Js_flag.recapture) and (score3 > alpha) and (score3 < beta) and (ply > 2) and
-                    (Js_flagEat[1 + (ply - 1)] ~= 0) and (Js_flagEat[1 + (ply - 2)] ~= 0))) then
-
+            if ((Js_menacePawn[1 + (ply - 1)] ~= 0) or (
+                    (Js_flag.recapture) and (score3 > alpha) and (score3 < beta) and
+                    (ply > 2) and (Js_flagEat[1 + (ply - 1)] ~= 0) and (Js_flagEat[1 + (ply - 2)] ~= 0))) then
                 depth = depth + 1
             end
         end
-
     else
-
-        if ((score3 >= alpha) and
-            (((InChk.i ~= 0) or (Js_menacePawn[1 + (ply - 1)] ~= 0) or
-                ((Js_pinned[1 + side] > 1) and (ply == Js_depth_Seek + 1))))) then
-
+        if ((score3 >= alpha) and ((
+                (InChk.i ~= 0) or (Js_menacePawn[1 + (ply - 1)] ~= 0) or (
+                    (Js_pinned[1 + side] > 1) and (ply == Js_depth_Seek + 1))))) then
             depth = depth + 1
         else
-            if ((score3 <= beta) and (ply < Js_depth_Seek + 4) and (ply > 4) and (Js_flagCheck[1 + (ply - 2)] ~= 0) and
-                (Js_flagCheck[1 + (ply - 4)] ~= 0) and (Js_flagCheck[1 + (ply - 2)] ~= Js_flagCheck[1 + (ply - 4)])) then
-
+            if ((score3 <= beta) and
+                    (ply < Js_depth_Seek + 4) and (ply > 4) and (Js_flagCheck[1 + (ply - 2)] ~= 0) and
+                    (Js_flagCheck[1 + (ply - 4)] ~= 0) and (Js_flagCheck[1 + (ply - 2)] ~= Js_flagCheck[1 + (ply - 4)])) then
                 depth = depth + 1
             end
         end
-
     end
 
     d = iif((Js_depth_Seek == 1), 7, 11)
@@ -3723,7 +3539,7 @@ function Seek(side, ply, depth, alpha, beta, bstline, rpt)
             Peek(pnt, Js_treePoint[1 + (ply + 1)] - 1)
         end
 
-        node = Js_Tree[1 + pnt] -- _BTREE
+        node = Js_Tree[1 + pnt] --_BTREE
 
         mv = ((node.f << 8) | node.t)
         nxtline[1 + (ply + 1)] = 0
@@ -3733,27 +3549,25 @@ function Seek(side, ply, depth, alpha, beta, bstline, rpt)
         end
 
         if ((node.flags & Js__idem) == 0) then
-
             ValidateMov(side, node, tempb, tempc, tempsf, tempst, Js_gainScore)
-            Js_flagEat[1 + ply] = node.flags & Js_capture
-            Js_menacePawn[1 + ply] = node.flags & Js_menace_pawn
+            Js_flagEat[1 + ply] = (node.flags & Js_capture)
+            Js_menacePawn[1 + ply] = (node.flags & Js_menace_pawn)
             Js_scoreTP[1 + ply] = node.score
             Js_ptValue = node.replay
 
             node.score = (-Seek(xside, ply + 1, iif((depth > 0), depth - 1, 0), -beta, -alpha, nxtline, rcnt))
 
             if (math.abs(node.score) > 9000) then
-                node.flags = node.flags | Js__idem
+                node.flags = (node.flags | Js__idem)
             else
                 if (rcnt.i == 1) then
                     node.score = node.score / 2
                 end
             end
 
-            if ((rcnt.i >= 2) or (Js_nGameMoves - Js_fiftyMoves > 99) or
-                ((node.score == 9999 - ply) and (Js_flagCheck[1 + ply] == 0))) then
-
-                node.flags = node.flags | Js__idem
+            if ((rcnt.i >= 2) or (Js_nGameMoves - Js_fiftyMoves > 99) or (
+                    (node.score == 9999 - ply) and (Js_flagCheck[1 + ply] == 0))) then
+                node.flags = (node.flags | Js__idem)
                 if (side == Js_computer) then
                     node.score = Js_specialScore
                 else
@@ -3763,12 +3577,11 @@ function Seek(side, ply, depth, alpha, beta, bstline, rpt)
             node.replay = nxtline[1 + (ply + 1)]
 
             UnValidateMov(side, node, tempb, tempc, tempsf, tempst)
-
         end
 
         if ((node.score > best) and (not Js_flag.timeout)) then
-
-            if ((depth > 0) and (node.score > alpha) and ((node.flags & Js__idem) == 0)) then
+            if ((depth > 0) and
+                    (node.score > alpha) and ((node.flags & Js__idem) == 0)) then
                 node.score = node.score + depth
             end
             best = node.score
@@ -3784,14 +3597,12 @@ function Seek(side, ply, depth, alpha, beta, bstline, rpt)
             bstline[1 + j] = 0
             bstline[1 + ply] = mv
             if (ply == 1) then
-
                 if (best > Js_root.score) then
-
                     MoveTree(Js_tmpTree, Js_Tree[1 + pnt])
                     for j = pnt - 1, 0, -1 do
                         MoveTree(Js_Tree[1 + (j + 1)], Js_Tree[1 + j])
                     end
-                    MoveTree(Js_Tree[1], Js_tmpTree)
+                    MoveTree(Js_Tree[1 + 0], Js_tmpTree)
                     pbst = 0
                 end
 
@@ -3807,19 +3618,21 @@ function Seek(side, ply, depth, alpha, beta, bstline, rpt)
 
         pnt = pnt + 1
     end
-    node = Js_Tree[1 + pbst] -- _BTREE
+
+
+    node = Js_Tree[1 + pbst] --_BTREE
 
     mv = ((node.f << 8) | node.t)
 
-    if (depth > 0) then
 
+    if (depth > 0) then
         j = ((node.f << 6) | node.t)
         if (side == Js_black) then
-            j = j | 4096
+            j = (j | 4096)
         end
 
         if (Js_storage[1 + j] < 150) then
-            Js_storage[1 + j] = (Js_storage[1 + j] + (depth * 2)) -- (short)
+            Js_storage[1 + j] = (Js_storage[1 + j] + (depth * 2)) --(short)
         end
 
         if (node.t ~= (Js_movesList[1 + Js_nGameMoves].gamMv & 0xFF)) then
@@ -3836,10 +3649,9 @@ function Seek(side, ply, depth, alpha, beta, bstline, rpt)
         Js_eliminate0[1 + ply] = iif((best > 9000), mv, 0)
     end
 
-    if playdate.getElapsedTime() > Js_searchTimeout then
-        --   if (playdate.getCurrentTimeMilliseconds() - Js_startTime > Js_searechTimeout) then
+    -- if (os.clock() - Js_startTime > Js_searchTimeout) then
+    if (playdate.getElapsedTime() > Js_searchTimeout) then
         Js_flag.timeout = true
-        print("search for move timed out")
     end
 
     return best
@@ -3847,23 +3659,19 @@ end
 
 -- This sets active side
 function SwitchSides(oposit)
-
     local whitemove = (Js_nGameMoves % 2 == 0)
     local whitecomp = (Js_computer == Js_white)
     if (oposit == (whitemove == whitecomp)) then
-
         Js_player = Js_otherTroop[1 + Js_player]
         Js_computer = Js_otherTroop[1 + Js_computer]
         Js_enemy = Js_otherTroop[1 + Js_enemy]
 
         Js_JESTER_TOPLAY = Js_otherTroop[1 + Js_JESTER_TOPLAY]
-
     end
     Js_fUserWin_kc = false
 end
 
 function GetFen()
-
     local fen = ""
     local piece = ""
     local i = 64 - 8
@@ -3941,20 +3749,18 @@ function GetFen()
     fen = fen .. string.format("%d", mv50) .. " " .. string.format("%d", mvNum)
 
     return fen
-
 end
 
 -- for Js_enemy move only
 -- use SwitchSides before if oposit movement required
 -- ignores checkmate status flag
--- returns true if move is valid else false
-function EnterMove(from_sq, to_sq, promo)
 
+function EnterMove(from_sq, to_sq, promo)
     local mvt = 0
     local fsq_mvt = 0
     local tsq_mvt = 0
     local i = 0
-    local rgch = {} -- new char[1+8]
+    local rgch = {} --new char[1+8]
     local iflag = 0
     local iMvt = 0
 
@@ -3983,16 +3789,15 @@ function EnterMove(from_sq, to_sq, promo)
     Js_myPiece = Js_rgszPiece[1 + Js_board[1 + fsq_mvt]]
 
     if (Js_board[1 + fsq_mvt] == Js_pawn) then
-
         if ((tsq_mvt < 8) or (tsq_mvt > 55)) then
-            iflag = Js_promote | Js_proPiece
+            iflag = (Js_promote | Js_proPiece)
         end
         Lalgb(fsq_mvt, tsq_mvt, iflag)
     end
 
-    rgch[1] = string.byte(from_sq, 1) -- (char)
+    rgch[1 + 0] = string.byte(from_sq, 1) --(char)
     rgch[1 + 1] = string.byte(from_sq, 2)
-    rgch[1 + 2] = string.byte(to_sq, 1) -- (char)
+    rgch[1 + 2] = string.byte(to_sq, 1)  --(char)
     rgch[1 + 3] = string.byte(to_sq, 2)
     i = 4
 
@@ -4009,7 +3814,6 @@ function EnterMove(from_sq, to_sq, promo)
     iMvt = CheckMov(rgch, 0)
 
     if (iMvt ~= 0) then
-
         WatchPosit()
         -- UpdateDisplay()
         IfCheck()
@@ -4023,17 +3827,14 @@ function EnterMove(from_sq, to_sq, promo)
         Js_depth_Seek = 0
         return true
     else
-        -- print("invalid move")
         return false
     end
-
 end
 
 -- ignores flags...
 -- use after InitGame
 
 function SetFen(fen)
-
     local fen2 = ""
     local ch = ""
 
@@ -4051,7 +3852,6 @@ function SetFen(fen)
     local st = 0
 
     for i = 0, l - 1, 1 do
-
         ch = string.sub(fen, i + 1, i + 1)
         pt = string.byte(ch, 1) - 48
         if (pt > 0 and pt < 8) then
@@ -4090,7 +3890,6 @@ function SetFen(fen)
         if (i % 8 == 0) then
             i = i - 16
         end
-
     until (i < 0)
 
     Js_roquer[1 + Js_white] = 1
@@ -4101,7 +3900,6 @@ function SetFen(fen)
     Js_root.flags = 0
 
     for i = 0, l - 1, 1 do
-
         ch = string.sub(fen, i + 1, i + 1)
         if (ch == " ") then
             st = st + 1
@@ -4110,7 +3908,6 @@ function SetFen(fen)
                 side = ch
             else
                 if (st == 2) then
-
                     if (ch == "k" or ch == "q") then
                         Js_roquer[1 + Js_black] = 0
                         Js_nMvtOnBoard[1 + Js_kingPawn[1 + Js_black]] = 0
@@ -4134,7 +3931,6 @@ function SetFen(fen)
                             Js_nMvtOnBoard[1 + Js_kingRook[1 + Js_white]] = 0
                         end
                     end
-
                 else
                     if (st == 3) then
                         enp = enp .. ch
@@ -4147,7 +3943,6 @@ function SetFen(fen)
                             end
                         end
                     end
-
                 end
             end
         end
@@ -4158,7 +3953,7 @@ function SetFen(fen)
             if (Js_szAlgMvt[1 + i] == enp) then
                 Js_root.f = iif((i < 32), i - 8, i + 8)
                 Js_root.t = iif((i < 32), i + 8, i - 8)
-                Js_root.flags = Js_root.flags | Js_enpassant_msk
+                Js_root.flags = (Js_root.flags | Js_enpassant_msk)
             end
         end
     end
@@ -4183,11 +3978,9 @@ function SetFen(fen)
         Js_bDraw = 1
     end
     ShowStat()
-
 end
 
 function ResetFlags()
-
     Js_fInGame = true
     Js_fCheck_kc = false
     Js_fMate_kc = false
@@ -4198,7 +3991,6 @@ function ResetFlags()
 end
 
 function Jst_Play()
-
     SwitchSides(false)
 
     Js_fEat = false
@@ -4210,18 +4002,16 @@ function Jst_Play()
 
     ComputerMvt()
 
-    UpdateDisplay()
+    -- UpdateDisplay()
 end
 
 function UndoMov()
-
     if (Js_nGameMoves > 0) then
-
         SwitchSides(false)
 
         Undo()
 
-        UpdateDisplay()
+        -- UpdateDisplay()
 
         ResetFlags()
 
@@ -4234,7 +4024,6 @@ function UndoMov()
         else
             Js_flip = true
         end
-
     end
 end
 
@@ -4242,62 +4031,62 @@ end
 -- SAMPLES...
 -------------------------------------------
 
--- moves entering
-function autosample1()
+-- -- moves entering
+-- function autosample1()
+--     EnterMove("e2", "e4", "")
+--     EnterMove("c7", "c5", "")
+--     EnterMove("f1", "e2", "")
+--     EnterMove("c5", "c4", "")
+--     EnterMove("b2", "b4", "")
+--     EnterMove("c4", "b3", "")
+--     EnterMove("g1", "f3", "")
+--     EnterMove("b3", "b2", "")
+--     EnterMove("e1", "g1", "")
+--     EnterMove("b2", "a1", "R") -- promote rook
+--     MessageOut("FEN:" .. GetFen(), true)
+-- end
 
-    EnterMove("e2", "e4", "")
-    EnterMove("c7", "c5", "")
-    EnterMove("f1", "e2", "")
-    EnterMove("c5", "c4", "")
-    EnterMove("b2", "b4", "")
-    EnterMove("c4", "b3", "")
-    EnterMove("g1", "f3", "")
-    EnterMove("b3", "b2", "")
-    EnterMove("e1", "g1", "")
-    EnterMove("b2", "a1", "R") -- promote rook
-    MessageOut("FEN:" .. GetFen(), true)
-end
+-- -- automatic game
+-- function autosample2()
+--     print("Thinking, autogame...")
+--     while ((not Js_fGameOver) and (not Js_fAbandon) and (not Js_fMate_kc) and (not Js_fStalemate)) do
+--         Jst_Play()                  -- next move
+--         print("nodes " .. Js_cCompNodes) -- to see performance
+--     end
+--     print(Js_pgn)
+-- end
 
--- automatic game
-function autosample2()
-    print("Thinking, autogame...")
-    while ((not Js_fGameOver) and (not Js_fAbandon) and (not Js_fMate_kc) and (not Js_fStalemate)) do
-        Jst_Play() -- next move
-        print("nodes " .. Js_cCompNodes) -- to see performance
-    end
-    print(Js_pgn)
-end
+-- -- undo cases
+-- function autosample3()
+--     EnterMove("e2", "e4", "")
+--     UndoMov()
+--     EnterMove("a2", "a4", "")
+--     EnterMove("c7", "c5", "")
+--     UndoMov()
+--     Jst_Play()
+--     UndoMov()
+--     MessageOut(GetFen(), true)
+-- end
 
--- undo cases
-function autosample3()
+-- -- set FEN case
+-- function autosample4()
+--     SetFen("7k/Q7/2P2K2/8/8/8/8/8 w - - 0 40") -- set given FEN
+--     MessageOut(GetFen(), true)
 
-    EnterMove("e2", "e4", "")
-    UndoMov()
-    EnterMove("a2", "a4", "")
-    EnterMove("c7", "c5", "")
-    UndoMov()
-    Jst_Play()
-    print("nodes " .. Js_cCompNodes) -- to see performance
-    UndoMov()
-    MessageOut(GetFen(), true)
-end
+--     Jst_Play()
+--     MessageOut(GetFen(), true)
+-- end
 
--- set FEN case
-function autosample4()
+-- InitGame()  -- Also to start a new game again
 
-    SetFen("7k/Q7/2P2K2/8/8/8/8/8 w - - 0 40") -- set given FEN
-    MessageOut(GetFen(), true)
 
-    Jst_Play()
-    MessageOut(GetFen(), true)
-end
-
--- InitGame()		-- Also to start a new game again
 -- UpdateDisplay()
--- autosample1()
+
+--autosample1()
+
 -- autosample2()
--- autosample3()
--- autosample4()
+--autosample3()
+--autosample4()
 
 GAME_STATE = {
     NEW_GAME = "New Game",
@@ -4314,16 +4103,17 @@ GAME_STATE = {
     COMPUTER_THINKING = "Computer Thinking"
 }
 
-class('ChessGame', {
-    white = true
-}).extends()
+class('ChessGame').extends()
 
-function ChessGame:init(white)
+function ChessGame:init()
     ChessGame.super.init(self)
     print("initialized jester engine")
     print("search depth = " .. Js_maxDepth .. " search timeout = " .. (Js_searchTimeout) .. " seconds")
+    self:newGame()
+end
+
+function ChessGame:newGame()
     self.state = GAME_STATE.NEW_GAME
-    self.white = white
     self.timer = nil
     self.computerThinking = false
     self.whitesCapturedPieces = {}
@@ -4335,7 +4125,6 @@ end
 function ChessGame:move(from, to, isUser, moveDoneCallback, onProgressCallback)
     -- move the user or the computer
     if isUser then
-
         if from == "" or to == "" then
             self.state = GAME_STATE.INVALID_MOVE
             print("state = " .. self.state)
@@ -4354,25 +4143,22 @@ function ChessGame:move(from, to, isUser, moveDoneCallback, onProgressCallback)
     else
         -- launches a coroutine to calculate the computers move.
         -- computer will yield() a few times during its calculation.
-        -- timer will check coroutine status every 500 ms if coroutine is paused 
+        -- timer will check coroutine status every x ms if coroutine is paused
         -- it will resume coroutine
         local computersMove = coroutine.create(function()
             self.computerThinking = true
             Jst_Play()
-            print("nodes searched: " .. Js_cCompNodes .. " time: " .. playdate.getElapsedTime()) -- to see performance
+            self.timer:remove()
+            print("nodes searched: " .. Js_cCompNodes .. " time: " .. playdate.getElapsedTime())     -- to see performance
             self.computerThinking = false
             self.state = GAME_STATE.VALID_MOVE
             self:checkIfGameIsOver()
             moveDoneCallback()
         end)
         playdate.resetElapsedTime()
-        self.timer = playdate.timer.keyRepeatTimerWithDelay(0, 100, function()
-
+        self.timer = playdate.timer.keyRepeatTimerWithDelay(0, 200, function()
             onProgressCallback((playdate.getElapsedTime() / Js_searchTimeout) * 100)
-
-            if coroutine.status(computersMove) == "dead" then
-                self.timer:remove()
-            elseif coroutine.status(computersMove) == "suspended" then
+            if coroutine.status(computersMove) == "suspended" then
                 coroutine.resume(computersMove)
             end
         end)
@@ -4382,12 +4168,11 @@ end
 function ChessGame:isGameOver()
     return
         self.state == GAME_STATE.COMPUTER_WON or self.state == GAME_STATE.USER_WON or self.state == GAME_STATE.DRAW or
-            self.state == GAME_STATE.DRAW_BY_REPITION or self.state == GAME_STATE.INSUFFICIENT_MATERIAL or self.state ==
-            GAME_STATE.STALEMATE or self.state == GAME_STATE.RESIGN
+        self.state == GAME_STATE.DRAW_BY_REPITION or self.state == GAME_STATE.INSUFFICIENT_MATERIAL or self.state ==
+        GAME_STATE.STALEMATE or self.state == GAME_STATE.RESIGN
 end
 
 function ChessGame:checkIfGameIsOver()
-
     ShowStat()
 
     if Js_fCheck_kc then
@@ -4440,7 +4225,7 @@ end
 function ChessGame:setDifficulty(params)
     Js_searchTimeout = params[1]
     Js_maxDepth = params[2]
-    print("difficulty set to: timeout = " .. Js_searchTimeout .. " seconds, depth = "..Js_maxDepth)
+    print("difficulty set to: timeout = " .. Js_searchTimeout .. " seconds, depth = " .. Js_maxDepth)
 end
 
 -- start will all the pieces then remove pieces you see
@@ -4472,7 +4257,7 @@ function ChessGame:getMissingPieces(board)
     local boardPieces = boardToUse:gsub("[%c%p%s]", "")
 
     for i = 1, boardPieces:len() do
-        local piece = boardPieces:sub(i,i)
+        local piece = boardPieces:sub(i, i)
         pieceCount[piece] -= 1
     end
 

@@ -30,7 +30,7 @@ local GAME_DIFFICULTY <const> = {
 chessGame:setDifficulty(GAME_DIFFICULTY["easy"])
 
 local function newGame()
-    chessGame = ChessGame()
+    chessGame:newGame()
     boardGridView:clearGameData()
     boardGridView:addBoard(chessGame:getBoard())
     wCapturedPieces:clear()
