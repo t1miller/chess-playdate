@@ -1,15 +1,3 @@
--- BitOp
--- require "bit"
-
--- local bit = import "lua53bit"
-
-
--- Or an alternative is bitwises emulation.
--- This loads and executes other .lua file
--- (substitutes "bit" object)
--- loadfile("noBitOp.lua")
-
-
 -- This is a Lua version of
 -- Jester (http://www.ludochess.com/) - a strong java chess engine
 -- A real treasure for the Chess society!
@@ -21,7 +9,15 @@
 --
 -- Lua (via javascript) work by http://chessforeva.blogspot.com
 -- sorry for hack, just very good source for lua
+import 'utils'
 
+local iff, BoardCpy, WatchPosit, CalcKBNK, ChangeForce, Undo, ISqAgrs, Iwxy, XRayBR, ComputerMvt, InitMoves,
+CheckMov, UnValidateMov, FJunk, ShowThink, ResetData, InChecking, ShowScore, MixBoard, InitGame, IColmn, IRaw, 
+ShowStat, CalcKPK, CalcKg, IArrow, MoveTree, PrisePassant, GetAlgMvt, copyValueOf, Agression, InitArrow, IfCheck, 
+Anyagress, KnightPts, QueenPts, PositPts, PlayMov, IRepeat, ChoiceMov, MultiMov, XRayKg, DoCastle, DoCalc, Lalgb, 
+UpdatePiecMap, getBoard, UpdateDisplay, AvailCaptur, InitStatus, MessageOut, Pagress, CheckMatrl, AttachMov, PawnPts, 
+RookPts, KingPts, AvailMov, BishopPts, ValidateMov, Peek, Seek, SwitchSides, GetFen, EnterMove, SetFen, ResetFlags, 
+Jst_Play, UndoMov, _BTREE, _GAMESTATS, _INT, _MOVES
 
 function _BTREE()
     local b = {}
@@ -60,7 +56,7 @@ Js_maxDepth = 6         -- Search Depth setting for lua (no timeout option)
 
 Js_searchTimeout = 12   -- 9 seconds for search allowed
 
-Js_startTime = 0
+-- Js_startTime = 0
 Js_nMovesMade = 0
 Js_computer = 0
 Js_player = 0
@@ -341,9 +337,6 @@ function iif(ask, ontrue, onfalse)
     end
     return onfalse
 end
-
---
-
 
 function BoardCpy(a, b)
     local sq = 0
@@ -1314,7 +1307,7 @@ function ShowThink(score4, best)
         s = s .. copyValueOf(Js_tmpCh) .. " "
         i = i + 1
     end
-    --MessageOut("Thinking: "..s , true)
+    -- MessageOut("Thinking: "..s , true)
 
     --ShowScore(score4)
 end
@@ -2084,7 +2077,6 @@ function ChoiceMov(side, iop)
         Js_scoreDither = 0
         Js_dxDither = 20
     end
-
     while ((not Js_flag.timeout) and (Js_depth_Seek < Js_maxDepthSeek)) do
         coroutine.yield()
         Js_depth_Seek = Js_depth_Seek + 1
@@ -2105,6 +2097,7 @@ function ChoiceMov(side, iop)
         for i = Js_treePoint[1 + 1] + 1, Js_treePoint[1 + 2] - 1, 1 do
             Peek(i, Js_treePoint[1 + 2] - 1)
         end
+
 
         for i = 1, Js_depth_Seek, 1 do
             Js_eliminate0[1 + i] = Js_variants[1 + i]
@@ -2160,6 +2153,7 @@ function ChoiceMov(side, iop)
         Js_myPiece = Js_rgszPiece[1 + Js_board[1 + Js_root.f]]
 
         ValidateMov(side, Js_root, tempb, tempc, tempsf, tempst, Js_gainScore)
+
         if (InChecking(Js_computer)) then
             UnValidateMov(side, Js_root, tempb, tempc, tempsf, tempst)
             Js_fAbandon = true
@@ -2421,6 +2415,10 @@ function DoCalc(side, ply, alpha, beta, gainScore, slk, InChk)
 
     if (evflag) then
         Js_cCompNodes = Js_cCompNodes + 1
+        if (Js_cCompNodes % 200 == 0) then
+            print("yield")
+            coroutine.yield()
+        end
         Agression(side, Js_agress[1 + side])
 
         if (Anyagress(side, Js_pieceMap[1 + xside][1 + 0]) == 1) then
@@ -3459,6 +3457,10 @@ function Seek(side, ply, depth, alpha, beta, bstline, rpt)
     local mv = 0
 
     Js_cNodes = Js_cNodes + 1
+    -- if (Js_cNodes % 250 == 0) then
+    --     print("yield")
+    --     coroutine.yield()
+    -- end
 
     if (ply <= Js_depth_Seek + 3) then
         rpt.i = IRepeat(rpt.i)
@@ -3533,7 +3535,6 @@ function Seek(side, ply, depth, alpha, beta, bstline, rpt)
 
     pbst = Js_treePoint[1 + ply]
     pnt = pbst
-
     while ((pnt < Js_treePoint[1 + (ply + 1)]) and (best <= beta)) do
         if (ply > 1) then
             Peek(pnt, Js_treePoint[1 + (ply + 1)] - 1)
@@ -3618,7 +3619,6 @@ function Seek(side, ply, depth, alpha, beta, bstline, rpt)
 
         pnt = pnt + 1
     end
-
 
     node = Js_Tree[1 + pbst] --_BTREE
 
@@ -4027,6 +4027,18 @@ function UndoMov()
     end
 end
 
+local function removeLastTwoMovesPgn()
+    print("removeLast2MovesPgn() before pgn: "..Js_pgn)
+    local movesFlattened = splitString(Js_pgn, " ")
+    table.remove(movesFlattened)
+    table.remove(movesFlattened)
+    Js_pgn = ""
+    for i = 1, #movesFlattened do
+        Js_pgn = Js_pgn..movesFlattened[i].." "
+    end
+    print("removeLast2MovesPgn() after pgn: "..Js_pgn)
+end
+
 -------------------------------------------
 -- SAMPLES...
 -------------------------------------------
@@ -4116,8 +4128,6 @@ function ChessGame:newGame()
     self.state = GAME_STATE.NEW_GAME
     self.timer = nil
     self.computerThinking = false
-    self.whitesCapturedPieces = {}
-    self.blacksCapturedPieces = {}
     InitGame()
     UpdateDisplay()
 end
@@ -4156,7 +4166,8 @@ function ChessGame:move(from, to, isUser, moveDoneCallback, onProgressCallback)
             moveDoneCallback()
         end)
         playdate.resetElapsedTime()
-        self.timer = playdate.timer.keyRepeatTimerWithDelay(0, 200, function()
+
+        self.timer = playdate.timer.keyRepeatTimerWithDelay(0, 10, function()
             onProgressCallback((playdate.getElapsedTime() / Js_searchTimeout) * 100)
             if coroutine.status(computersMove) == "suspended" then
                 coroutine.resume(computersMove)
@@ -4211,11 +4222,13 @@ end
 
 function ChessGame:undoLastTwoMoves()
     if Js_nGameMoves < 2 then
-        return
+        return false
     end
     UndoMov()
     UndoMov()
+    removeLastTwoMovesPgn()
     self.state = GAME_STATE.VALID_MOVE
+    return true
 end
 
 function ChessGame:isComputerThinking()
@@ -4225,10 +4238,11 @@ end
 function ChessGame:setDifficulty(params)
     Js_searchTimeout = params[1]
     Js_maxDepth = params[2]
-    print("difficulty set to: timeout = " .. Js_searchTimeout .. " seconds, depth = " .. Js_maxDepth)
+    print("difficulty set: timeout = " .. Js_searchTimeout .. " seconds, depth = " .. Js_maxDepth)
 end
 
 -- start will all the pieces then remove pieces you see
+-- todo handle case with multiple queens
 function ChessGame:getMissingPieces(board)
     local pieceCount = {
         ["p"] = 8,
@@ -4261,6 +4275,8 @@ function ChessGame:getMissingPieces(board)
         pieceCount[piece] -= 1
     end
 
+    -- todo, negative pieces
+
     return pieceCount
 end
 
@@ -4270,6 +4286,22 @@ end
 
 function ChessGame:getBoard()
     return getBoard()
+end
+
+function ChessGame:getMoves()
+    print("getMoves() pgn: "..Js_pgn)
+    local movesFlattened = splitString(Js_pgn, " ")
+    local moves = {}
+    local j = 1
+    for i = 1, #movesFlattened, 2 do
+        if i + 1 <= #movesFlattened then
+            moves[j] = {movesFlattened[i],movesFlattened[i+1]}
+        else
+            moves[j] = {movesFlattened[i]}
+        end
+        j += 1
+    end
+    return reverseTable(moves)
 end
 
 function ChessGame:setUserHasMateInOne()
@@ -4288,3 +4320,4 @@ function ChessGame:setUserInCheck()
     -- todo  this doesnt work
     -- SetFen("7k/K7/8/8/8/8/8/6Q1 w - - 0 40")
 end
+

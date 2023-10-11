@@ -5,6 +5,7 @@ import "CoreLibs/ui"
 import "CoreLibs/nineslice"
 
 import 'ui/imageCache'
+import 'ui/rectangle'
 
 local FILES <const> = {
 	[1] = "a",
@@ -17,10 +18,10 @@ local FILES <const> = {
 	[8] = "h",
 }
 local gfx <const> = playdate.graphics
+local img <const> = playdate.graphics.image
 local BOARD_WIDTH <const> = 228
 local BORDER_OFFSET <const> = 2
 local BORDER_X_THICKNESS <const> = 12
-local BORDER_Y_THICKNESS <const> = 10
 
 local imageCache = ImageCache()
 local boards = {}
@@ -29,6 +30,7 @@ local clicked = {
 	{ -1, -1, "", "" },
 	{ -1, -1, "", "" }
 }
+local borderSprite = nil
 
 
 -- Board Representation
@@ -51,43 +53,59 @@ class('BoardGridView').extends()
 function BoardGridView:init(newBoard)
 	BoardGridView.super.init(self)
 
+	borderSprite = Rectangle(0, 0, 25, 25, RECT_TYPE.FILLED, nil, img.kDitherTypeBayer8x8)
+
 	-- initialize gridview
 	self.gridview = playdate.ui.gridview.new(27, 27)
 	self.gridview:setNumberOfColumns(8)
 	self.gridview:setNumberOfRows(8)
-	self.gridview.backgroundImage = gfx.nineSlice.new("images/gridBackground", 7, 7, 18, 18)
+	-- self.gridview.backgroundImage = gfx.nineSlice.new("images/gridBackground", 7, 7, 18, 18)
 	self.gridview:setContentInset(6, 6, 6, 6)
 
 	-- sprite that holds image
 	self.gridviewSprite = gfx.sprite.new()
 	self.gridviewSprite:setCenter(0, 0)
 	self.gridviewSprite:moveTo(0, 0)
-	-- self.gridviewSprite:moveTo(17, 0)
 	self.gridviewSprite:add()
+
+	-- sprite that is board background
+	local backgroundImg = img.new("images/wood3")
+	backgroundImg = backgroundImg:fadedImage(.5, img.kDitherTypeFloydSteinberg)
+	self.backgroundSprite = gfx.sprite.new(backgroundImg)
+	self.backgroundSprite:setCenter(0, 0)
+	self.backgroundSprite:setZIndex(-1000)
+	self.backgroundSprite:moveTo(BORDER_OFFSET, 0)
+	self.backgroundSprite:add()
 
 	function self.gridview:drawCell(section, row, column, selected, x, y, width, height)
 		gfx.pushContext()
-			-- draw the background square color
+			-- draw the board squares
 			if (row + column) % 2 == 0 then
-				-- gfx.setColor(gfx.kColorClear)
 				gfx.setColor(gfx.kColorWhite)
 			else
-				-- gfx.setColor(gfx.kColorBlack)
-				gfx.setDitherPattern(.6, gfx.image.kDitherTypeBayer8x8)
+				gfx.setColor(gfx.kColorBlack)
 			end
 			gfx.fillRect(x, y, width, height)
 
-			-- add border to selected cell
+			-- add background to selected cell
 			if selected then
-				gfx.setLineWidth(3)
-				gfx.setColor(gfx.kColorBlack)
-				gfx.drawRect(x, y, width, height)
+				if (row + column) % 2 == 0 then
+					borderSprite:setColor(gfx.kColorBlack)
+				else
+					borderSprite:setColor(gfx.kColorWhite)
+				end
+				borderSprite:moveTo(x+1, y+1)
 			end
 
-			-- highlight last clicked cell
+			-- add background to clicked cell
 			if clicked[#clicked][1] == row and clicked[#clicked][2] == column then
-				gfx.setColor(gfx.kColorBlack)
-				gfx.setDitherPattern(.2, gfx.image.kDitherTypeBayer8x8)
+				if (row + column) % 2 == 0 then
+					gfx.setColor(gfx.kColorBlack)
+					gfx.setDitherPattern(.2, img.kDitherTypeBayer8x8)
+				else
+					gfx.setColor(gfx.kColorWhite)
+					gfx.setDitherPattern(.6, img.kDitherTypeBayer8x8)
+				end
 				gfx.fillRect(x, y, width, height)
 			end
 
@@ -96,14 +114,10 @@ function BoardGridView:init(newBoard)
 			-- draw piece image
 			if boards[boardIdx] then
 				local piece = getPieceAt(boards[boardIdx], row, column)
-				local pieceImage = imageCache:getPieceImage(piece)
+				local pieceImage = imageCache:getLargePieceImage(piece)
 				if pieceImage then
 					pieceImage:draw(x-2, y-2)
 				end
-				-- local piecePath = PIECES_IMG_PATHS[piece]
-				-- if cachedPieceImages[piecePath] then
-				-- 	cachedPieceImages[piecePath]:draw(x + 1, y + 1)
-				-- end
 			end
 		gfx.popContext()
 	end
@@ -117,19 +131,25 @@ function BoardGridView:init(newBoard)
 	print("Board Grid View: grid view initialized")
 end
 
-function BoardGridView:drawGridView()
-	-- print("drawGridView()")
-	local gridviewImage = gfx.image.new(BOARD_WIDTH+2*BORDER_X_THICKNESS+2, BOARD_WIDTH+BORDER_Y_THICKNESS)
+function BoardGridView:draw()
+	-- print("draw()")
+	local gridviewImage = img.new(BOARD_WIDTH+28, BOARD_WIDTH+12)
 	gfx.pushContext(gridviewImage)
-		-- draw border
-		gfx.drawRect(BORDER_OFFSET, 0, BOARD_WIDTH+2*BORDER_X_THICKNESS-1, BOARD_WIDTH+BORDER_Y_THICKNESS)
+		-- draw outer border
+		gfx.setLineWidth(2)
+		gfx.drawRect(BORDER_OFFSET, 0, BOARD_WIDTH+25, BOARD_WIDTH+10)
+
+		-- draw inner border
+		gfx.setLineWidth(2)
+		gfx.drawRect(19, 5, BOARD_WIDTH - 10, BOARD_WIDTH - 10)
+
 		-- draw chess board
 		self.gridview:drawInRect(BORDER_OFFSET+BORDER_X_THICKNESS, 0, BOARD_WIDTH, BOARD_WIDTH)
 		self.gridviewSprite:setImage(gridviewImage)
 	gfx.popContext()
 end
 
-function BoardGridView:createTextSprite(text, x, y)
+function BoardGridView:drawText(text, x, y)
 	gfx.pushContext()
 		-- gfx.setImageDrawMode(gfx.kDrawModeInverted) -- draw text white instead of black
 		local textSprite = gfx.sprite.spriteWithText(text, 20, 20)
@@ -141,14 +161,14 @@ end
 function BoardGridView:drawFiles()
 	local files = { "a", "b", "c", "d", "e", "f", "g", "h" }
 	for i = 1, #files do
-		self:createTextSprite(files[i], 7 + i * 27, 232)
+		self:drawText(files[i], 7 + i * 27, 232)
 	end
 end
 
 function BoardGridView:drawRanks()
 	local j = 8
 	for i = 1, 8, 1 do
-		self:createTextSprite(tostring(i), 11, j * 27 - 4)
+		self:drawText(tostring(i), 11, j * 27 - 4)
 		j -= 1
 	end
 end
@@ -156,7 +176,7 @@ end
 function BoardGridView:addBoard(newBoard)
 	table.insert(boards, newBoard)
 	boardIdx += 1
-	self:drawGridView()
+	self:draw()
 end
 
 function BoardGridView:removeBoard()
@@ -165,7 +185,13 @@ function BoardGridView:removeBoard()
 	end
 	boardIdx -= 1
 	table.remove(boards)
-	self:drawGridView()
+	self:draw()
+end
+
+function BoardGridView:setBoardToActivePos()
+	if boardIdx == #boards then return end
+	boardIdx = #boards
+	self:draw()
 end
 
 function BoardGridView:getVisibleBoard()
@@ -180,7 +206,7 @@ function BoardGridView:previousPosition()
 	if boardIdx == 0 then
 		boardIdx = 1
 	end
-	self:drawGridView()
+	self:draw()
 end
 
 function BoardGridView:nextPosition()
@@ -188,7 +214,7 @@ function BoardGridView:nextPosition()
 	if boardIdx >= #boards then
 		boardIdx = #boards
 	end
-	self:drawGridView()
+	self:draw()
 end
 
 function BoardGridView:needsDisplay()
@@ -202,32 +228,32 @@ function BoardGridView:clickCell()
 	table.insert(clicked, { r, c, position, piece })
 	local move = clicked[#clicked - 1][3] .. clicked[#clicked][3]
 	print("Board Grid View: move: " .. move)
-	self:drawGridView()
+	self:draw()
 	return clicked[#clicked - 1][3], clicked[#clicked][3]
 end
 
 function BoardGridView:selectNextRow(select)
 	self.gridview:selectNextRow(select)
-	self:drawGridView()
+	self:draw()
 end
 
 function BoardGridView:selectPreviousRow(select)
 	self.gridview:selectPreviousRow(select)
-	self:drawGridView()
+	self:draw()
 end
 
 function BoardGridView:selectNextColumn(select)
 	self.gridview:selectNextColumn(select)
-	self:drawGridView()
+	self:draw()
 end
 
 function BoardGridView:selectPreviousColumn(select)
 	self.gridview:selectPreviousColumn(select)
-	self:drawGridView()
+	self:draw()
 end
 
 -- clear saved boards and tiles clicked
-function BoardGridView:clearGameData()
+function BoardGridView:clear()
 	boards = {}
 	boardIdx = 0
 	clicked = {

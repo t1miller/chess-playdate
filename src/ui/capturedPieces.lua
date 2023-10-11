@@ -5,21 +5,26 @@ import "CoreLibs/graphics"
 import 'ui/imageCache'
 
 local gfx <const> = playdate.graphics
--- local WIDTH <const> = 130
--- local HEIGHT <const> = 70
+local BLACK_PIECES = {
+	["p"] = 0,
+	["n"] = 0,
+	["b"] = 0,
+	["r"] = 0,
+	["q"] = 0,
+}
 local imageCache = ImageCache()
--- local PIECE_VALUE <const> = {
--- 	["p"] = 1,
--- 	["P"] = 1,
--- 	["n"] = 3,
--- 	["N"] = 3,
--- 	["b"] = 3,
--- 	["B"] = 3,
--- 	["r"] = 5,
--- 	["R"] = 5,
--- 	["q"] = 9,
--- 	["Q"] = 9,
--- }
+local PIECE_VALUE <const> = {
+	["p"] = 1,
+	["P"] = 1,
+	["n"] = 3,
+	["N"] = 3,
+	["b"] = 3,
+	["B"] = 3,
+	["r"] = 5,
+	["R"] = 5,
+	["q"] = 9,
+	["Q"] = 9,
+}
 
 class('CapturedPieces').extends()
 
@@ -42,6 +47,8 @@ function CapturedPieces:init(x, y, isWhite)
 		["k"] = {},
 		["K"] = {},
 	}
+	self.textSprite = nil
+	self:drawScore({})
 end
 
 function CapturedPieces:clear()
@@ -50,11 +57,12 @@ function CapturedPieces:clear()
 			sprites[j]:remove()
 		end
 	end
+	self:drawScore({})
 end
 
 function CapturedPieces:createPieceSprite(piece)
 	-- create sprite
-	local pieceImage = imageCache:getPieceImage(piece)
+	local pieceImage = imageCache:getLargePieceImage(piece)
 	local pieceSprite = gfx.sprite.new(pieceImage)
 
 	-- add to sprite table
@@ -64,7 +72,8 @@ end
 function CapturedPieces:addPieces(missingPieces)
 	self:clear()
 	self:createMissingSprites(missingPieces)
-	self:draw(missingPieces)
+	self:drawPieces(missingPieces)
+	self:drawScore(missingPieces)
 end
 
 function CapturedPieces:createMissingSprites(missingPieces)
@@ -79,13 +88,14 @@ function CapturedPieces:createMissingSprites(missingPieces)
 	end
 end
 
-function CapturedPieces:draw(missingPieces)
+function CapturedPieces:drawPieces(missingPieces)
 	local xOffset = 0
-	local yOffset = 0
+	local yOffset = 20
 	local drawCount = 0
-	local pieceOrder =  {"P","N","B","R","Q"}
+	local pieceOrder = {"P","N","B","R","Q"}
 	if self.isWhite then
 		pieceOrder = {"p","n","b","r","q"}
+		yOffset = -24
 	end
 
 	for i = 1, #pieceOrder do
@@ -93,25 +103,73 @@ function CapturedPieces:draw(missingPieces)
 		for j = 1, missingPieces[pieceOrder[i]] do
 			sprites[j]:add()
 			sprites[j]:moveTo(self.x + xOffset, self.y + yOffset)
-			xOffset += 23
+			xOffset += 12
 			drawCount += 1
 
 			-- draw on the next row
-			if drawCount == 6 or drawCount == 12 then
-				yOffset += 24
+			if drawCount == 10 then
+				if self.isWhite then
+					yOffset -= 24 
+				else
+					yOffset += 24
+				end
 				xOffset = 0
 			end
 		end
 	end
 end
 
--- score diff = your pieces captured - oponents
-function CapturedPieces:calculateScore()
-	local score = 0
-	for i = 1, #self.pieces do
-		local piece = self.pieces[i]
-		score += PIECE_VALUE[piece]
+function CapturedPieces:drawScore(missingPieces)
+	-- draw score
+	local score = self:calculateScore(missingPieces)
+	local scoreString = string.format("+%.1f",score)
+	if self.textSprite ~= nil then
+		self.textSprite:remove()
+		self.textSprite = nil
 	end
-	return score
+	gfx.pushContext()
+		-- gfx.setFont(gfx.font.new("fonts/Mini Mono 2X"))
+		-- [backgroundColor, [leadingAdjustment, [truncationString, [alignment, [font]]]]]
+		-- gfx.setFont(gfx.font.new("fonts/Roobert-10-Bold"))
+		self.textSprite = gfx.sprite.spriteWithText(scoreString, 150, 25, nil, nil, nil, kTextAlignment.left, gfx.font.new("fonts/Roobert-10-Bold"))
+		self.textSprite:setCenter(0,0)
+		self.textSprite:moveTo(self.x-10, self.y-9)
+		self.textSprite:add()
+	gfx.popContext()
+end
+
+
+-- add up the the score of the pieces you took
+-- and subtract the score of what your opponent took
+-- return abs(score, 0)
+function CapturedPieces:calculateScore(missingPieces)
+	local whitesScore = 0.0
+	local blacksScore = 0.0
+	for piece,count in pairs(missingPieces) do
+		if count > 0 then
+			if BLACK_PIECES[piece] then
+				whitesScore += PIECE_VALUE[piece] * count
+			else
+				blacksScore += PIECE_VALUE[piece] * count
+			end
+		end
+	end
+
+	local score = 0.0
+	if self.isWhite then
+		score = whitesScore - blacksScore
+		if score < 0 then
+			return 0.0
+		else
+			return score
+		end
+	else
+		score = blacksScore - whitesScore
+		if score < 0 then
+			return 0.0
+		else
+			return score
+		end
+	end
 end
 

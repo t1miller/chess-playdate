@@ -23,7 +23,7 @@ function DialogBox:init(x, y, text)
     self.state = DIALOG_STATE.NOT_SHOWING
     self:setSize(WIDTH, HEIGHT)
     self:moveTo(x, y)
-    self:setZIndex(900)
+    self:setZIndex(10000)
     self.text = text
     self.currentChar = 1 -- we'll use these for the animation
     self.currentText = ""
