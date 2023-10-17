@@ -9,7 +9,9 @@
 --
 -- Lua (via javascript) work by http://chessforeva.blogspot.com
 -- sorry for hack, just very good source for lua
-import 'utils'
+import 'Utils'
+
+local DEBUG <const> = false
 
 local iff, BoardCpy, WatchPosit, CalcKBNK, ChangeForce, Undo, ISqAgrs, Iwxy, XRayBR, ComputerMvt, InitMoves,
 CheckMov, UnValidateMov, FJunk, ShowThink, ResetData, InChecking, ShowScore, MixBoard, InitGame, IColmn, IRaw, 
@@ -57,6 +59,16 @@ Js_maxDepth = 6         -- Search Depth setting for lua (no timeout option)
 Js_searchTimeout = 12   -- 9 seconds for search allowed
 
 -- Js_startTime = 0
+-- used for ChessGame GAME_STATE
+Js_castled = false
+Js_captured = false
+Js_userInCheck = false
+Js_userMoved = false
+Js_computerMoved = false
+Js_userInvalidMove = false
+
+
+
 Js_nMovesMade = 0
 Js_computer = 0
 Js_player = 0
@@ -883,9 +895,10 @@ function ComputerMvt()
     if (Js_flag.mate) then
         return
     end
+    Js_computerMoved =  true
     -- Js_startTime = os.clock()
     playdate.resetElapsedTime()
-
+    
     ChoiceMov(Js_computer, 1)
     IfCheck()
     if (not Js_fUserWin_kc) then
@@ -1048,6 +1061,7 @@ function ShowMov(rgchMove)
 
     if (((Js_root.flags & Js_capture) ~= 0) or Js_fEat) then
         Js_movCh[1 + 2] = "x"
+        Js_captured = true
     end
 
     Js_movCh[1 + 3] = rgchMove[1 + 2]
@@ -1066,6 +1080,8 @@ function ShowMov(rgchMove)
         Js_movCh[1 + (i + 0)] = "="
         Js_movCh[1 + (i + 1)] = waspromo
         i = i + 2
+        -- promotion deostn work here
+        -- printDebug("computer promoted: "..waspromo, DEBUG)
     end
     if (Js_bDraw ~= 0) then
         Js_movCh[1 + i] = "="
@@ -1097,6 +1113,7 @@ function ShowMov(rgchMove)
         if (fQcastle) then
             szM = szM .. "O-O-O" .. Js_movCh[1 + i]
         end
+        Js_castled = true
     else
         szM = szM .. Js_myPiece .. mv2
     end
@@ -1160,7 +1177,7 @@ function CheckMov(s, iop)
         ValidateMov(Js_enemy, xnode, tempb, tempc, tempsf, tempst, Js_gainScore)
         if (ISqAgrs(Js_pieceMap[1 + Js_enemy][1 + 0], Js_computer) ~= 0) then
             UnValidateMov(Js_enemy, xnode, tempb, tempc, tempsf, tempst)
-
+            Js_userInCheck = true
             return 0
         end
 
@@ -1526,7 +1543,7 @@ end
 
 function ShowStat()
     local sz = ""
-
+    local tmpPgn = ""
     if ((Js_fMate_kc) and (not (Js_fCheck_kc))) then
         Js_fStalemate = true
     end
@@ -1557,10 +1574,12 @@ function ShowStat()
     end
 
     if (Js_fMate_kc or Js_fAbandon) then
-        sz = sz .. " " .. iif(Js_flip, "1-0", "0-1")
+        tmpPgn = " " .. iif(Js_flip, "1-0", "0-1")
+        sz = sz .. tmpPgn
     end
     if (Js_bDraw > 0 or Js_fStalemate) then
-        sz = sz .. " 1/2-1/2"
+        tmpPgn = " 1/2-1/2"
+        sz = sz .. tmpPgn
     end
 
     if ((not Js_fMate_kc) and (Js_bDraw == 0) and (not Js_fStalemate) and (not Js_fAbandon)) then
@@ -1572,7 +1591,7 @@ function ShowStat()
 
     if (string.len(sz) > 0) then
         MessageOut(sz, true)
-        Js_pgn = Js_pgn .. "{" .. sz .. "}"
+        Js_pgn = Js_pgn .. tmpPgn
     end
 end
 
@@ -2415,8 +2434,9 @@ function DoCalc(side, ply, alpha, beta, gainScore, slk, InChk)
 
     if (evflag) then
         Js_cCompNodes = Js_cCompNodes + 1
-        if (Js_cCompNodes % 200 == 0) then
-            print("yield")
+        -- if (Js_cCompNodes % 200 == 0) then
+        if (Js_cCompNodes % 40 == 0) then
+            printDebug("yield", DEBUG)
             coroutine.yield()
         end
         Agression(side, Js_agress[1 + side])
@@ -2618,13 +2638,13 @@ function UpdateDisplay()
         BB[1 + iLine][1 + iCol] = ch
     end
 
-    print("")
+    printDebug("", DEBUG)
     for iLine = 7, 0, -1 do
         s = ""
         for iCol = 0, 7, 1 do
             s = s .. BB[1 + iLine][1 + iCol]
         end
-        print(s)
+        printDebug(s, DEBUG)
     end
 end
 
@@ -2786,7 +2806,7 @@ function MessageOut(msg, fNL)
 
     -- fNL means new line
     if (fNL) then
-        print(Js_Message) -- prints buffer
+        printDebug(Js_Message, DEBUG) -- prints buffer
         Js_Message = ""
     end
 end
@@ -3395,7 +3415,8 @@ function ValidateMov(side, node, tempb, tempc, tempsf, tempst, gainScore)
                     end
                 end
             end
-
+            -- promot might work her idk
+            -- printDebug("promoted pawn Js_promote:"..tostring(Js_promote), DEBUG)
             Js_pawnMap[1 + side][1 + ct] = Js_pawnMap[1 + side][1 + ct] - 1
             Js_matrl[1 + side] = Js_matrl[1 + side] + Js_valueMap[1 + Js_board[1 + t]] - Js_pawnVal
             Js_pmatrl[1 + side] = Js_pmatrl[1 + side] - Js_pawnVal
@@ -3457,10 +3478,6 @@ function Seek(side, ply, depth, alpha, beta, bstline, rpt)
     local mv = 0
 
     Js_cNodes = Js_cNodes + 1
-    -- if (Js_cNodes % 250 == 0) then
-    --     print("yield")
-    --     coroutine.yield()
-    -- end
 
     if (ply <= Js_depth_Seek + 3) then
         rpt.i = IRepeat(rpt.i)
@@ -3764,6 +3781,14 @@ function EnterMove(from_sq, to_sq, promo)
     local iflag = 0
     local iMvt = 0
 
+    -- added by trent
+    Js_castled = false
+    Js_captured = false
+    Js_userInCheck = false
+    Js_userMoved = false
+    Js_computerMoved = false
+    Js_userInvalidMove = false
+
     SwitchSides(true)
 
     for i = 0, 63, 1 do
@@ -3779,6 +3804,8 @@ function EnterMove(from_sq, to_sq, promo)
     for i = 2, 5, 1 do
         if (Js_upperNot[1 + i] == promo) then
             Js_proPiece = i
+            -- promote might work here idk
+            -- printDebug("promote piece = "..Js_proPiece, DEBUG)
         end
     end
 
@@ -3791,6 +3818,8 @@ function EnterMove(from_sq, to_sq, promo)
     if (Js_board[1 + fsq_mvt] == Js_pawn) then
         if ((tsq_mvt < 8) or (tsq_mvt > 55)) then
             iflag = (Js_promote | Js_proPiece)
+            -- promote might work her idk
+            printDebug("user promotes "..Js_promote)
         end
         Lalgb(fsq_mvt, tsq_mvt, iflag)
     end
@@ -3805,6 +3834,8 @@ function EnterMove(from_sq, to_sq, promo)
         rgch[1 + 4] = "="
         rgch[1 + 5] = promo
         i = 6
+        -- promote might work her idk
+        -- printDebug("user promotes "..Js_promote)
     end
 
     rgch[1 + i] = 0
@@ -3825,10 +3856,11 @@ function EnterMove(from_sq, to_sq, promo)
         ShowMov(rgch)
 
         Js_depth_Seek = 0
+        Js_userMoved = true
         return true
-    else
-        return false
     end
+    Js_userInvalidMove = true
+    return false
 end
 
 -- ignores flags...
@@ -3993,7 +4025,13 @@ end
 function Jst_Play()
     SwitchSides(false)
 
+    Js_userInvalidMove = false
+    Js_userMoved = false
+    Js_computerMoved = true
+    Js_captured = false
+    Js_castled = false
     Js_fEat = false
+
     ResetFlags()
 
     Js_realBestScore = -20000
@@ -4001,7 +4039,6 @@ function Jst_Play()
     Js_realBestMove = 0
 
     ComputerMvt()
-
     -- UpdateDisplay()
 end
 
@@ -4028,7 +4065,7 @@ function UndoMov()
 end
 
 local function removeLastTwoMovesPgn()
-    print("removeLast2MovesPgn() before pgn: "..Js_pgn)
+    printDebug("removeLast2MovesPgn() before pgn: "..Js_pgn, DEBUG)
     local movesFlattened = splitString(Js_pgn, " ")
     table.remove(movesFlattened)
     table.remove(movesFlattened)
@@ -4036,7 +4073,7 @@ local function removeLastTwoMovesPgn()
     for i = 1, #movesFlattened do
         Js_pgn = Js_pgn..movesFlattened[i].." "
     end
-    print("removeLast2MovesPgn() after pgn: "..Js_pgn)
+    printDebug("removeLast2MovesPgn() after pgn: "..Js_pgn, DEBUG)
 end
 
 -------------------------------------------
@@ -4102,93 +4139,145 @@ end
 
 GAME_STATE = {
     NEW_GAME = "New Game",
-    INVALID_MOVE = "Invalid Move",
     USER_WON = "Checkmate\nWhite Wins!",
     COMPUTER_WON = "Checkmate\nBlack Wins!",
     RESIGN = "Black Resigned\nWhite Wins!",
-    DRAW_BY_REPITION = "Draw By Repetition!",
+    DRAW_BY_REPITITION = "Draw By Threefold\nRepetition!",
     DRAW = "Draw!",
     CHECK = "Check!",
-    INSUFFICIENT_MATERIAL = "Insufficient Material\nDraw!",
+    INSUFFICIENT_MATERIAL = "Insufficient Material. Draw!",
     STALEMATE = "Stalemate!",
-    VALID_MOVE = "Valid Move",
-    COMPUTER_THINKING = "Computer Thinking"
+    -- COMPUTER_THINKING = "Computer Thinking",
+    USER_IN_CHECK = "User In Check",
+    CASTLED = "Castled",
+    PROMOTED = "Promoted",
+    CAPTURED = "Captured",
+    USER_MOVED = "User Moved",
+    COMPUTER_MOVED = "Computer Moved",
+    NOP = "NOP",
 }
 
 class('ChessGame').extends()
 
 function ChessGame:init()
     ChessGame.super.init(self)
-    print("initialized jester engine")
-    print("search depth = " .. Js_maxDepth .. " search timeout = " .. (Js_searchTimeout) .. " seconds")
+    printDebug("initialized jester engine", DEBUG)
+    printDebug("search depth = " .. Js_maxDepth .. " search timeout = " .. (Js_searchTimeout) .. " seconds", DEBUG)
     self:newGame()
+    self.rowColLookup = self:squareToRowCol()
 end
 
 function ChessGame:newGame()
     self.state = GAME_STATE.NEW_GAME
-    self.timer = nil
     self.computerThinking = false
+    self.timer = nil
+    self.computersMove = {}
+    self.usersMove = {}
     InitGame()
     UpdateDisplay()
 end
 
-function ChessGame:move(from, to, isUser, moveDoneCallback, onProgressCallback)
-    -- move the user or the computer
-    if isUser then
-        if from == "" or to == "" then
-            self.state = GAME_STATE.INVALID_MOVE
-            print("state = " .. self.state)
-            return
-        end
-
-        local isValid = EnterMove(from, to, "")
-        if isValid == false then
-            self.state = GAME_STATE.INVALID_MOVE
-            print("state = " .. self.state)
-            return
-        end
-
-        self.state = GAME_STATE.VALID_MOVE
-        self:checkIfGameIsOver()
-    else
-        -- launches a coroutine to calculate the computers move.
-        -- computer will yield() a few times during its calculation.
-        -- timer will check coroutine status every x ms if coroutine is paused
-        -- it will resume coroutine
-        local computersMove = coroutine.create(function()
-            self.computerThinking = true
-            Jst_Play()
-            self.timer:remove()
-            print("nodes searched: " .. Js_cCompNodes .. " time: " .. playdate.getElapsedTime())     -- to see performance
-            self.computerThinking = false
-            self.state = GAME_STATE.VALID_MOVE
-            self:checkIfGameIsOver()
-            moveDoneCallback()
-        end)
-        playdate.resetElapsedTime()
-
-        self.timer = playdate.timer.keyRepeatTimerWithDelay(0, 10, function()
-            onProgressCallback((playdate.getElapsedTime() / Js_searchTimeout) * 100)
-            if coroutine.status(computersMove) == "suspended" then
-                coroutine.resume(computersMove)
-            end
-        end)
+function ChessGame:moveUser(from, to)
+    self.state = GAME_STATE.NOP
+    if from == "" or to == "" then
+        -- self.state = GAME_STATE.INVALID_MOVE
+        return false
     end
+
+    local isValid = EnterMove(from, to, "")
+    if isValid == false then
+        -- self.state = GAME_STATE.INVALID_MOVE
+        -- todo check for invalid move because check
+        self:updateState()
+        return false
+    end
+    self.usersMove = {self.rowColLookup[Js_origSquare][1],
+                      self.rowColLookup[Js_origSquare][2],
+                      self.rowColLookup[Js_destSquare][1],
+                      self.rowColLookup[Js_destSquare][2]}
+
+    -- self.state = GAME_STATE.VALID_MOVE
+    self.state = GAME_STATE.USER_MOVED
+    self:updateState()
+    return true
+end
+
+function ChessGame:moveComputer(moveDoneCallback, onProgressCallback, onStartCallback)
+    self.state = GAME_STATE.NOP
+    local computersMoveCoroutine = coroutine.create(function()
+        self.computerThinking = true
+        Jst_Play()
+        self.computersMove = {self.rowColLookup[Js_origSquare][1],
+                              self.rowColLookup[Js_origSquare][2],
+                              self.rowColLookup[Js_destSquare][1],
+                              self.rowColLookup[Js_destSquare][2]}
+
+        printDebug("nodes searched: " .. Js_cCompNodes .. " time: " .. playdate.getElapsedTime(), DEBUG)     -- to see performance
+        self.computerThinking = false
+        -- -- self.state = GAME_STATE.VALID_MOVE
+        -- self.state = GAME_STATE.COMPUTER_MOVED
+        self:updateState()
+        moveDoneCallback()
+    end)
+
+    playdate.resetElapsedTime()
+    
+    self.timer = playdate.timer.keyRepeatTimerWithDelay(0, 10, function()
+        onProgressCallback((playdate.getElapsedTime() / Js_searchTimeout) * 100)
+        if coroutine.status(computersMoveCoroutine) == "suspended" then
+            coroutine.resume(computersMoveCoroutine)
+        elseif coroutine.status(computersMoveCoroutine) == "dead" then
+            self.timer:remove()
+        end
+    end)
 end
 
 function ChessGame:isGameOver()
     return
         self.state == GAME_STATE.COMPUTER_WON or self.state == GAME_STATE.USER_WON or self.state == GAME_STATE.DRAW or
-        self.state == GAME_STATE.DRAW_BY_REPITION or self.state == GAME_STATE.INSUFFICIENT_MATERIAL or self.state ==
+        self.state == GAME_STATE.DRAW_BY_REPITITION or self.state == GAME_STATE.INSUFFICIENT_MATERIAL or self.state ==
         GAME_STATE.STALEMATE or self.state == GAME_STATE.RESIGN
 end
 
-function ChessGame:checkIfGameIsOver()
-    ShowStat()
+function ChessGame:updateState()
+    -- ShowStat()
+    printDebug("Js_castled = "..tostring(Js_castled).."\nJs_captured = "..tostring(Js_captured).."\nJs_userInCheck = "..tostring(Js_userInCheck).."\nJs_userMoved = "..tostring(Js_userMoved).."\nJs_computerMoved = "..tostring(Js_computerMoved).."\nJs_userInvalidMove = "..tostring(Js_userInvalidMove), DEBUG)
 
-    if Js_fCheck_kc then
+    if Js_userMoved then
+        self.state = GAME_STATE.USER_MOVED
+    end
+
+    if Js_computerMoved then
+        self.state = GAME_STATE.COMPUTER_MOVED
+    end
+
+    if ((Js_fMate_kc) and (not (Js_fCheck_kc))) then
+        Js_fStalemate = true
+    end
+
+    if Js_captured then
+        self.state = GAME_STATE.CAPTURED
+    end
+
+    if Js_castled then
+        self.state = GAME_STATE.CASTLED
+    end
+
+    if Js_fCheck_kc and Js_userInvalidMove ~= true then
         self.state = GAME_STATE.CHECK
     end
+
+    if Js_userInCheck then
+        self.state = GAME_STATE.USER_IN_CHECK
+    end
+
+    -- if Js_userInvalidMove == true and Js_fCheck_kc then
+    --     self.state = GAME_STATE.USER_IN_CHECK
+    -- end
+    -- printDebug("USER+IN+CHECK: Js_userInvalidMove:"..tostring(Js_userInvalidMove).." Js_fCheck_kc:"..tostring(Js_fCheck_kc))
+    -- if Js_userInvalidMove and Js_fCheck_kc then
+    --     self.state = GAME_STATE.USER_IN_CHECK
+    -- end
 
     if Js_fMate_kc then
         if Js_fUserWin_kc then
@@ -4211,23 +4300,24 @@ function ChessGame:checkIfGameIsOver()
     end
 
     if Js_bDraw == 3 then
-        self.state = GAME_STATE.DRAW_BY_REPITION
+        self.state = GAME_STATE.DRAW_BY_REPITITION
     else
         if (Js_bDraw == 1) then
             self.state = GAME_STATE.INSUFFICIENT_MATERIAL
         end
     end
-    print("state = " .. self.state)
+    printDebug("state = " .. self.state, DEBUG)
 end
 
 function ChessGame:undoLastTwoMoves()
     if Js_nGameMoves < 2 then
         return false
     end
+    -- todo update state here
     UndoMov()
     UndoMov()
     removeLastTwoMovesPgn()
-    self.state = GAME_STATE.VALID_MOVE
+    -- self.state = GAME_STATE.VALID_MOVE
     return true
 end
 
@@ -4238,7 +4328,7 @@ end
 function ChessGame:setDifficulty(params)
     Js_searchTimeout = params[1]
     Js_maxDepth = params[2]
-    print("difficulty set: timeout = " .. Js_searchTimeout .. " seconds, depth = " .. Js_maxDepth)
+    printDebug("difficulty set: timeout = " .. Js_searchTimeout .. " seconds, depth = " .. Js_maxDepth, DEBUG)
 end
 
 -- start will all the pieces then remove pieces you see
@@ -4275,8 +4365,6 @@ function ChessGame:getMissingPieces(board)
         pieceCount[piece] -= 1
     end
 
-    -- todo, negative pieces
-
     return pieceCount
 end
 
@@ -4288,8 +4376,8 @@ function ChessGame:getBoard()
     return getBoard()
 end
 
-function ChessGame:getMoves()
-    print("getMoves() pgn: "..Js_pgn)
+function ChessGame:getPGNMoves()
+    printDebug("getMoves() pgn: "..Js_pgn, DEBUG)
     local movesFlattened = splitString(Js_pgn, " ")
     local moves = {}
     local j = 1
@@ -4304,8 +4392,39 @@ function ChessGame:getMoves()
     return reverseTable(moves)
 end
 
+function ChessGame:getComputersMove()
+    return self.computersMove
+end
+
+function ChessGame:getUsersMove()
+    return self.usersMove
+end
+
+function ChessGame:squareToRowCol()
+    local result = {}
+    local row = 1
+    local col = 8
+    for i = 63, 0, -1 do
+        result[i] = {row, col}
+        col -= 1
+        if col == 0 then
+            col = 8
+            row += 1
+        end
+    end
+    return result
+end
+
+function ChessGame:setUserHasFiveQueens()
+    SetFen("7k/QQQQQ3/2P3K1/8/8/8/8/8 w - - 0 40")
+end
+
 function ChessGame:setUserHasMateInOne()
     SetFen("7k/4Q3/2P3K1/8/8/8/8/8 w - - 0 40")
+end
+
+function ChessGame:setComputerHasFiveQueens()
+    SetFen("7K/qqqqq3/2p3k1/8/8/8/8/8 w - - 0 40")
 end
 
 function ChessGame:setComputerHasMateInOne()
@@ -4313,7 +4432,15 @@ function ChessGame:setComputerHasMateInOne()
 end
 
 function ChessGame:setUserPromotePawn()
-    SetFen("7k/P7/K7/8/8/8/8/8 w - - 0 40")
+    SetFen("7b/P7/K7/8/8/8/7k/8 w - - 0 40")
+end
+
+function ChessGame:setComputerPromotePawn()
+    SetFen("7K/p7/k7/8/8/8/8/8 w - - 0 40")
+end
+
+function ChessGame:setCapturedPieceScoreChanges()
+    SetFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - - 0 40")
 end
 
 function ChessGame:setUserInCheck()
