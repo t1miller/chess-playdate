@@ -9,9 +9,9 @@
 --
 -- Lua (via javascript) work by http://chessforeva.blogspot.com
 -- sorry for hack, just very good source for lua
-import 'Utils'
+import 'helper/Utils'
 
-local DEBUG <const> = false
+local DEBUG <const> = true
 
 local iff, BoardCpy, WatchPosit, CalcKBNK, ChangeForce, Undo, ISqAgrs, Iwxy, XRayBR, ComputerMvt, InitMoves,
 CheckMov, UnValidateMov, FJunk, ShowThink, ResetData, InChecking, ShowScore, MixBoard, InitGame, IColmn, IRaw, 
@@ -3415,8 +3415,7 @@ function ValidateMov(side, node, tempb, tempc, tempsf, tempst, gainScore)
                     end
                 end
             end
-            -- promot might work her idk
-            -- printDebug("promoted pawn Js_promote:"..tostring(Js_promote), DEBUG)
+            -- promot might work her idk buba
             Js_pawnMap[1 + side][1 + ct] = Js_pawnMap[1 + side][1 + ct] - 1
             Js_matrl[1 + side] = Js_matrl[1 + side] + Js_valueMap[1 + Js_board[1 + t]] - Js_pawnVal
             Js_pmatrl[1 + side] = Js_pmatrl[1 + side] - Js_pawnVal
@@ -3805,7 +3804,7 @@ function EnterMove(from_sq, to_sq, promo)
         if (Js_upperNot[1 + i] == promo) then
             Js_proPiece = i
             -- promote might work here idk
-            -- printDebug("promote piece = "..Js_proPiece, DEBUG)
+            printDebug("promote piece2 = "..Js_proPiece, DEBUG)
         end
     end
 
@@ -3819,7 +3818,7 @@ function EnterMove(from_sq, to_sq, promo)
         if ((tsq_mvt < 8) or (tsq_mvt > 55)) then
             iflag = (Js_promote | Js_proPiece)
             -- promote might work her idk
-            printDebug("user promotes "..Js_promote)
+            printDebug("user promotes3 "..Js_promote)
         end
         Lalgb(fsq_mvt, tsq_mvt, iflag)
     end
@@ -3835,7 +3834,7 @@ function EnterMove(from_sq, to_sq, promo)
         rgch[1 + 5] = promo
         i = 6
         -- promote might work her idk
-        -- printDebug("user promotes "..Js_promote)
+        printDebug("user promotes3 "..Js_promote)
     end
 
     rgch[1 + i] = 0
@@ -4030,6 +4029,7 @@ function Jst_Play()
     Js_computerMoved = true
     Js_captured = false
     Js_castled = false
+
     Js_fEat = false
 
     ResetFlags()
@@ -4263,6 +4263,10 @@ function ChessGame:updateState()
         self.state = GAME_STATE.CASTLED
     end
 
+    -- if Js_promoted then
+    --     self.state = GAME_STATE.PROMOTED
+    -- end
+
     if Js_fCheck_kc and Js_userInvalidMove ~= true then
         self.state = GAME_STATE.CHECK
     end
@@ -4270,14 +4274,6 @@ function ChessGame:updateState()
     if Js_userInCheck then
         self.state = GAME_STATE.USER_IN_CHECK
     end
-
-    -- if Js_userInvalidMove == true and Js_fCheck_kc then
-    --     self.state = GAME_STATE.USER_IN_CHECK
-    -- end
-    -- printDebug("USER+IN+CHECK: Js_userInvalidMove:"..tostring(Js_userInvalidMove).." Js_fCheck_kc:"..tostring(Js_fCheck_kc))
-    -- if Js_userInvalidMove and Js_fCheck_kc then
-    --     self.state = GAME_STATE.USER_IN_CHECK
-    -- end
 
     if Js_fMate_kc then
         if Js_fUserWin_kc then
@@ -4436,7 +4432,7 @@ function ChessGame:setUserPromotePawn()
 end
 
 function ChessGame:setComputerPromotePawn()
-    SetFen("7K/p7/k7/8/8/8/8/8 w - - 0 40")
+    SetFen("7K/8/k7/8/8/8/p7/8 w - - 0 40")
 end
 
 function ChessGame:setCapturedPieceScoreChanges()

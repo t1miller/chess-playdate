@@ -1,0 +1,33 @@
+[
+    {
+        "name": "stickman_shakehands",
+        "firstFrameIndex": 1,
+        "framesCount": 131,
+        "tickStep": 1,
+        "loop": false
+    },
+    {
+        "name": "stickman_shakehands_reverse",
+        "framesCount": 104,
+        "tickStep": 1,
+        "loop": false,
+        "flip": 1
+    },
+    {
+        "name": "robot_shakehands",
+        "firstFrameIndex": 1,
+        "framesCount": 131,
+        "tickStep": 1,
+        "loop": false,
+        "flip": 1
+    },
+    {
+        "name": "robot_shakehands_reverse",
+        "firstFrameIndex": 1,
+        "framesCount": 104,
+        "tickStep": 1,
+        "loop": false,
+        "reverse": true
+    }
+
+]

@@ -3,8 +3,9 @@
 import "CoreLibs/sprites"
 import "CoreLibs/graphics"
 
-import '../AnimatedSprite'
-import 'Utils'
+import 'ui/AnimatedSprite'
+import 'helper/Utils'
+import 'helper/ResourceCache'
 
 local gfx <const> = playdate.graphics
 local DEBUG <const> = false
@@ -25,37 +26,44 @@ function ProgressBar:init(x, y)
     self.state = PROGRESS_BAR_STATE.NOT_SHOWING
     self.percent = 0
 
+    self.cache = ResourceCache()
+
+    self:initTextSprite()
+    self:initBackgroundSprite()
+    self:initAnimationSprite()
+
+    self:updateProgress(0.0)
+end
+
+function ProgressBar:initTextSprite()
     local textImage = gfx.imageWithText("Thinking...(0%)", 150, 20, nil, nil, nil, kTextAlignment.left, PROGRESS_FONT)
     self.textSprite = gfx.sprite.new(textImage)
     self.textSprite:setImageDrawMode(gfx.kDrawModeFillWhite)
     self.textSprite:setZIndex(PROGRESS_BAR_Z)
     self.textSprite:setCenter(0, 0)
-    self.textSprite:moveTo(x + 32, y + 8)
+    self.textSprite:moveTo(self.x + 32,self.y + 8)
+end
 
+function ProgressBar:initBackgroundSprite()
     local backgroundImage = gfx.image.new(140, 32)
-    assert(backgroundImage)
     gfx.pushContext(backgroundImage)
         -- gfx.setImageDrawMode(gfx.kDrawModeNXOR)
         gfx.fillRoundRect(0, 0, 140, 32, 10)
     gfx.popContext()
+
     self.backgroundSprite = gfx.sprite.new(backgroundImage)
     self.backgroundSprite:setCenter(0, 0)
-    self.backgroundSprite:moveTo(x+1, y-2)
+    self.backgroundSprite:moveTo(self.x+1, self.y-2)
+end
 
-    self.robotImageTable = gfx.imagetable.new("images/robot-dither")
-    self.animatedSprite = AnimatedSprite.new(self.robotImageTable,{
-        name = "default",
-        firstFrameIndex = 1,
-        framesCount = 7,
-        tickStep = 1,
-        loop = true,
-    })
-    -- self.animatedSprite:setImageDrawMode(gfx.kDrawModeFillWhite)
+function ProgressBar:initAnimationSprite()
+    self.animatedSprite = AnimatedSprite.new(
+        self.cache:getAnimationImage("robot-progress"),
+        self.cache:getAnimationConfig("robot-progress")
+    )
     self.animatedSprite:setZIndex(PROGRESS_BAR_Z)
     self.animatedSprite:setCenter(0, 0)
-    self.animatedSprite:moveTo(x+3, y)
-
-    self:updateProgress(0.0)
+    self.animatedSprite:moveTo(self.x+3, self.y)
 end
 
 function ProgressBar:hide()

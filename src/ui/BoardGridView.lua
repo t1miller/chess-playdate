@@ -5,9 +5,9 @@ import "CoreLibs/ui"
 import "CoreLibs/nineslice"
 import 'CoreLibs/animator'
 
-import 'ui/ImageCache'
+import 'helper/Utils'
+import 'helper/ResourceCache'
 import 'ui/RectangleView'
-import 'Utils'
 
 local FILES <const> = {
 	[1] = "a",
@@ -24,7 +24,7 @@ local Animator = playdate.graphics.animator
 local gfx <const> = playdate.graphics
 local img <const> = gfx.image
 local DEBUG <const> = false
-local DISABLE_ANIMATION <const> = false
+local TESTING <const> = true
 local BOARD_WIDTH <const> = 228
 local BORDER_OFFSET <const> = 2
 local BORDER_X_THICKNESS <const> = 12
@@ -36,7 +36,6 @@ local CLICKED_SQUARE_Z <const> = -970
 local PIECE_IMAGE_Z <const> = -960
 local SELECT_SQUARE_Z <const> = -950
 local EMPTY_SQUARE <const> = "."
-local imageCache = ImageCache()
 
 -- Board Representation
 -- rnbqkbnr\n
@@ -51,6 +50,8 @@ class('BoardGridView').extends()
 
 function BoardGridView:init(newBoard)
 	BoardGridView.super.init(self)
+
+	self.resourceCache = ResourceCache()
 
 	-- keep track of clicked squares
 	-- r, c, position, piece
@@ -133,10 +134,6 @@ function BoardGridView:init(newBoard)
 
 	self:addBoard(newBoard)
 end
-
--- function BoardGridView:setAnimationDoneCallback(callback)
--- 	self.animationDoneCallback = callback
--- end
 
 function BoardGridView:addMove(move, callback)
 	printDebug("BoardGridView: move added to the list",DEBUG)
@@ -343,8 +340,6 @@ function BoardGridView:drawBoardSquares()
 	end
 end
 
--- function fastForwardPieces()
-
 -- if sprite at r, c is the same piece then do nothing
 -- if sprite at r, c is different remove sprite and draw new sprite
 function BoardGridView:drawPieceSprite(r, c)
@@ -355,14 +350,13 @@ function BoardGridView:drawPieceSprite(r, c)
 		-- same piece already drawn at this board position
 		return
 	elseif self.piecesSprites[r][c][1] ~= nil then
-		-- new piece is different than the existing piece 
+		-- new piece is different than the existing piece
 		self.piecesSprites[r][c][1]:remove()
 		printDebug("removing piece "..self.piecesSprites[r][c][2].." at r="..r.." c="..c, DEBUG)
 		self.piecesSprites[r][c][2] = EMPTY_SQUARE
 	end
-	local pieceImage = imageCache:getPieceImage(piece)
+	local pieceImage = self.resourceCache:getPieceImage(piece)
 	if pieceImage then
-		-- printDebug("creating sprite for piece: "..piece, DEBUG)
 		self.piecesSprites[r][c] = {gfx.sprite.new(), piece}
 		self.piecesSprites[r][c][1]:setImage(pieceImage)
 		self.piecesSprites[r][c][1]:setCenter(0, 0)
@@ -371,14 +365,17 @@ function BoardGridView:drawPieceSprite(r, c)
 
 		local newX, newY = self:calculateXYfromRowCol(r, c)
 
-		if #self.moveList == 0 or DISABLE_ANIMATION then
+		if #self.moveList == 0 then
 			-- this is a new game, draw all the pieces
 			-- w/out animation
 			self.piecesSprites[r][c][1]:moveTo(newX, newY)
 			return
 		end
 
-		local oldX, oldY = self:calculatePieceOldXY()
+		local oldX, oldY = 0,0
+		if TESTING == false then
+			oldX, oldY = self:calculatePieceOldXY()
+		end
 		-- if oldX == newX and oldY == newY then
 		-- 	self.piecesSprites[r][c][1]:moveTo(newX, newY)
 		-- 	return
@@ -411,12 +408,6 @@ function BoardGridView:drawPieceSprite(r, c)
 		end
 
 		self.piecesSprites[r][c][1]:setAnimator(animator)
-		---------------------------------------------------------------
-		-- printDebug("moving piece: "..piece, DEBUG)
-		-- self.piecesSprites[r][c][1]:setUpdatesEnabled(true)
-		-- self:pieceAnimation(self.piecesSprites[r][c][2], r, c, self.piecesSprites[r][c][1], newX, newY)
-		-- printDebug("to newRow:"..r.." newCol:"..c, DEBUG)
-		-- printDebug("\n", DEBUG)
 	end
 end
 

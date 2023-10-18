@@ -4,7 +4,7 @@ import "CoreLibs/graphics"
 import "CoreLibs/ui"
 import "CoreLibs/nineslice"
 
-import 'Utils'
+import 'helper/Utils'
 
 local gfx<const> = playdate.graphics
 local DEBUG <const> = false
