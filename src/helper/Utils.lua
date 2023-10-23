@@ -31,6 +31,7 @@ function deepcompare(t1,t2,ignore_mt)
     -- as well as tables which have the metamethod __eq
     local mt = getmetatable(t1)
     if not ignore_mt and mt and mt.__eq then return t1 == t2 end
+
     for k1,v1 in pairs(t1) do
         local v2 = t2[k1]
         if v2 == nil or not deepcompare(v1,v2) then return false end
@@ -55,20 +56,18 @@ function printDebug(msg, debug)
 end
 
 local TOAST_FONT <const> = gfx.font.new("fonts/Roobert-10-Bold")
-
 function showToast(text, duration)
     printDebug("Utils: showing toast message: "..text.." for "..duration.." frames", DEBUG)
-    local width <const> = TOAST_FONT:getTextWidth(text)
-    local height <const> = TOAST_FONT:getHeight()
+    -- local width <const> = TOAST_FONT:getTextWidth(text)
+    -- local height <const> = TOAST_FONT:getHeight()
     local PADDING <const> = 20
-    local X <const> = 140
-    local Y <const> = 100
-    print(width)
-    print(height)
+    local X <const> = 200
+    local Y <const> = 200
     local t = playdate.frameTimer.new(duration)
     t.updateCallback = function()
         gfx.pushContext()
             gfx.setFont(TOAST_FONT)
+            local width, height = gfx.getTextSize(text)
             gfx.fillRoundRect(X-width/2-PADDING/2, Y-PADDING/2, width+PADDING, height+PADDING, 9)
             gfx.setColor(gfx.kColorWhite)
             gfx.drawRoundRect(X-width/2-PADDING/2, Y-PADDING/2, width+PADDING, height+PADDING, 9)
@@ -77,3 +76,56 @@ function showToast(text, duration)
         gfx.popContext()
     end
 end
+
+function iif(statement, arg1, arg2)
+    if statement then
+        return arg1
+    else
+        return arg2
+    end
+end
+
+function sleep(delayMs)
+    playdate.resetElapsedTime()
+    while playdate.getElapsedTime()*100 < delayMs do end
+end
+
+function longRunningTask(delayMs, totalTime, coroutineToRun, onProgressCallback)
+    playdate.resetElapsedTime()
+    local timer = nil
+    local t = playdate.timer.keyRepeatTimerWithDelay(delayMs, delayMs, function ()
+        onProgressCallback(playdate.getElapsedTime()*100/totalTime)
+        if coroutine.status(coroutineToRun) == "suspended" then
+            coroutine.resume(coroutineToRun)
+        elseif coroutine.status(coroutineToRun) == "dead" then
+            if timer then
+                timer:remove()
+            end
+        end
+    end)
+    timer = t
+    if timer then
+        timer:start()
+    end
+end
+
+-- function runAfterDelay(delay, functionToRun)
+--     local firstRun = true
+--     local delayedTimer = playdate.timer.keyRepeatTimerWithDelay(delay, 0, function ()
+--         print("running")
+--         if firstRun then
+--             firstRun = false
+--         else
+--             functionToRun()
+--             if delayedTimer then
+--                 delayedTimer:remove()
+--             end
+--             print("done running")
+--         end
+--     end)
+
+--     if delayedTimer then
+--         delayedTimer:start()
+--     end
+
+-- end

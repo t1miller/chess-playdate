@@ -8,32 +8,8 @@ import 'helper/Utils'
 
 local gfx<const> = playdate.graphics
 local DEBUG <const> = false
-local WIDTH<const> = 147
-local HEIGHT<const> = 73
-local EMPTY_MOVE<const> = "   ..."
--- local MOVE_FONT<const> = gfx.font.new("fonts/font-Bitmore-Medieval-Bold")
 local MOVE_FONT<const> = gfx.font.new("fonts/Roobert-10-Bold")
 local MOVE_GRID_Z<const> = -150
-local moveGridOffset = 0
-local moveGrid = {
-    {EMPTY_MOVE,EMPTY_MOVE},
-    -- {"12.Ne2xe4#","12.Ne2xe4#"},
-    -- {"2.e2-e4","c3-c4"},
-    -- {"3.e2-e4","c3-c4"},
-    -- {"4.e2-e4","c3-c4"},
-    -- {"5.e2-e4","c3-c4"},
-    -- {"6.e2-e4","c3-c4"},
-    -- {"7.e2-e4","c3-c4"},
-    -- {"8.e2-e4","c3-c4"},
-    -- {"9.e2-e4","c3-c4"},
-    -- {"10.e2-e4","c3-c4"},
-    -- {"11.e2-e4","c3-c4"},
-    -- {"12.e2-e4","c3-c4"},
-    -- {"13.e2-e4","c3-c4"},
-    -- {"14.e2-e4","c3-c4"},
-    -- {"15.e2-e4","c3-c4"},
-    -- {"16.e2-e4","c3-c4"},
-}
 
 class('MoveGrid').extends()
 
@@ -42,9 +18,50 @@ function MoveGrid:init(x, y)
 
     self.x = x
     self.y = y
-
+    self.height = 73
+    self.width = 147
+    self.emptyMove = "   ..."
+    self.moveFont = gfx.font.new("fonts/Roobert-10-Bold")
     self.highlightedMove = {}
+    self.moveList = {
+        {self.emptyMove,self.emptyMove},
+    }
+    self.moveListOffset = 0
 
+    self:loadGridView()
+
+    local selfself = self
+    function self.gridview:drawCell(section, row, column, selected, x, y, width, height)
+        if row + selfself.moveListOffset > #selfself.moveList or row + selfself.moveListOffset < 1 then
+            return
+        end
+        
+        gfx.pushContext()
+            if selected then
+                gfx.fillRoundRect(x, y, width, height, 4)
+                gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
+                selfself.highlightedMove = {row, column}
+            else
+                gfx.setImageDrawMode(gfx.kDrawModeCopy)
+            end
+
+            -- local moveText = selfself.emptyMove
+            -- if column <= #selfself.moveList[row+selfself.moveListOffset] then
+            --     moveText = selfself.moveList[row+selfself.moveListOffset][column]
+            -- end
+            local moveText = iif(
+                column <= #selfself.moveList[row+selfself.moveListOffset],
+                selfself.moveList[row+selfself.moveListOffset][column],
+                selfself.emptyMove
+            )
+            gfx.drawTextInRect(moveText, x+2, y+1, width, height, nil, "...", nil, selfself.moveFont)
+        gfx.popContext()
+    end
+
+    self:draw()
+end
+
+function MoveGrid:loadGridView()
     self.gridview = playdate.ui.gridview.new(65, 17)
 	self.gridview.backgroundImage = gfx.nineSlice.new("images/gridBackground", 7, 7, 18, 18)
     self.gridview:setNumberOfRows(3)
@@ -59,53 +76,28 @@ function MoveGrid:init(x, y)
 	self.gridviewSprite = gfx.sprite.new()
 	self.gridviewSprite:setCenter(0, 0)
     self.gridviewSprite:setZIndex(MOVE_GRID_Z)
-	self.gridviewSprite:moveTo(x, y)
+	self.gridviewSprite:moveTo(self.x,self.y)
 	self.gridviewSprite:add()
-
-    local selfself = self
-    function self.gridview:drawCell(section, row, column, selected, x, y, width, height)
-        gfx.pushContext()
-            if row + moveGridOffset > #moveGrid or row + moveGridOffset < 1 then
-                return
-            end
-
-            if selected then
-                gfx.fillRoundRect(x, y, width, height, 4)
-                gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
-                selfself.highlightedMove = {row, column}
-            else
-                gfx.setImageDrawMode(gfx.kDrawModeCopy)
-            end
-
-            local moveText = EMPTY_MOVE
-            if column <= #moveGrid[row+moveGridOffset] then
-                moveText = moveGrid[row+moveGridOffset][column]
-            end
-
-            gfx.drawTextInRect(moveText, x+2, y+1, width, height, nil, "...", nil, MOVE_FONT)
-        gfx.popContext()
-    end
-
-    self:draw()
 end
 
 function MoveGrid:draw()
-	local listviewImage = gfx.image.new(WIDTH, HEIGHT)
+	local listviewImage = gfx.image.new(self.width, self.height)
 	gfx.pushContext(listviewImage)
         gfx.setFont(MOVE_FONT)
-        self.gridview:drawInRect(0, 0, WIDTH, HEIGHT)
+        self.gridview:drawInRect(0, 0, self.width, self.height)
 		self.gridviewSprite:setImage(listviewImage)
 	gfx.popContext()
 end
 
 function MoveGrid:setMoveToActiveMove()
+    -- todo this can probably be simplified
     printDebug("MoveGrid: setMoveToActiveMove()", DEBUG)
-    if #moveGrid < 1 then
+    if #self.moveList < 1 then
         return
     end
 
-    moveGridOffset = 0
-    if moveGrid[1][1] == EMPTY_MOVE then
+    self.moveListOffset = 0
+    if self.moveList[1][1] == self.emptyMove then
         if self.highlightedMove[1] == 1 and self.highlightedMove[2] == 1 then
             return
         end
@@ -122,18 +114,17 @@ end
 
 function MoveGrid:clear()
     printDebug("MoveGrid: clear()", DEBUG)
-    moveGrid = {
-        {EMPTY_MOVE,EMPTY_MOVE}
+    self.moveList = {
+        {self.emptyMove,self.emptyMove}
     }
-    moveGridOffset = 0
-    printDebug("MoveGrid: clear() drawing", DEBUG)
+    self.moveListOffset = 0
     self.gridview:setSelection(1,1,1)
     self:draw()
 end
 
 function MoveGrid:updateMoveGrid(moves, highlightLeft)
     printDebug("MoveGrid: updateMoveGrid()", DEBUG)
-    moveGrid = moves
+    self.moveList = moves
     if highlightLeft then
         self.gridview:setSelection(1,1,1)
     else
@@ -144,15 +135,14 @@ function MoveGrid:updateMoveGrid(moves, highlightLeft)
 end
 
 function MoveGrid:shiftMoveGrid(amount)
-    printDebug("MoveGrid: shiftMoveGrid()", DEBUG)
-    moveGridOffset += amount
+    self.moveListOffset += amount
 end
 
 function MoveGrid:removeLastTwoMoves()
     printDebug("MoveGrid: removeLastTwoMoves()", DEBUG)
-    if #moveGrid < 1 then return end
-    table.remove(moveGrid,1)
-    if #moveGrid == 0 then
+    if #self.moveList < 1 then return end
+    table.remove(self.moveList,1)
+    if #self.moveList == 0 then
         -- reset movegrid, reset move idx, redraw view
         self:clear()
         return
@@ -164,7 +154,7 @@ end
 function MoveGrid:prevMove()
     printDebug("MoveGrid: prevMove()", DEBUG)
     local _, row, col = self.gridview:getSelection()
-    if moveGridOffset + row >= #moveGrid and col == 1 then
+    if self.moveListOffset + row >= #self.moveList and col == 1 then
         -- reached the end of the list, no prev moves
         return
     end
@@ -190,7 +180,7 @@ function MoveGrid:nextMove()
     local _, row, col = self.gridview:getSelection()
 
     if row == 1 and col == 2 then
-        if moveGridOffset + row <= 1 then
+        if self.moveListOffset + row <= 1 then
             return
         end
         self:shiftMoveGrid(-1)
@@ -205,4 +195,16 @@ function MoveGrid:nextMove()
     end
     printDebug("MoveGrid: nextMove() drawing", DEBUG)
     self:draw()
+end
+
+-- todo might need to add higlighted move
+function MoveGrid:toSavedTable()
+    return {
+        moveList = self.moveList,
+    }
+end
+
+function MoveGrid:initFromSavedTable(data)
+    self.moveListOffset = 0
+    self:updateMoveGrid(data["moveList"], false)
 end

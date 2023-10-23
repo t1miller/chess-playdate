@@ -3,14 +3,14 @@
 import "CoreLibs/sprites"
 import "CoreLibs/graphics"
 
-import 'ui/AnimatedSprite'
+import 'library/AnimatedSprite'
 import 'helper/Utils'
 import 'helper/ResourceCache'
 
 local gfx <const> = playdate.graphics
 local DEBUG <const> = false
-local PROGRESS_FONT<const> = gfx.font.new("fonts/Roobert-10-Bold")
 local PROGRESS_BAR_Z <const> = 100
+local TEXT_Z <const> = 105
 local PROGRESS_BAR_STATE <const> = {
     SHOWING = "SHOWING",
     NOT_SHOWING = "NOT_SHOWING"
@@ -25,35 +25,47 @@ function ProgressBar:init(x, y)
     self.y = y
     self.state = PROGRESS_BAR_STATE.NOT_SHOWING
     self.percent = 0
-
     self.cache = ResourceCache()
+    self.font = gfx.font.new("fonts/Roobert-10-Bold")
+    -- self.font = gfx.font.new("fonts/Outfoxies 2X")
 
     self:initTextSprite()
     self:initBackgroundSprite()
     self:initAnimationSprite()
 
-    self:updateProgress(0.0)
+    -- todo might need this here
+    -- self:updateProgress(0)
 end
 
 function ProgressBar:initTextSprite()
-    local textImage = gfx.imageWithText("Thinking...(0%)", 150, 20, nil, nil, nil, kTextAlignment.left, PROGRESS_FONT)
+    local textImage = gfx.imageWithText("Thinking...(0%)", 150, 20, nil, nil, nil, kTextAlignment.left, self.font)
     self.textSprite = gfx.sprite.new(textImage)
-    self.textSprite:setImageDrawMode(gfx.kDrawModeFillWhite)
-    self.textSprite:setZIndex(PROGRESS_BAR_Z)
+    -- self.textSprite:setImageDrawMode(gfx.kDrawModeFillWhite)
+    self.textSprite:setImageDrawMode(gfx.kDrawModeNXOR)
+    self.textSprite:setZIndex(TEXT_Z)
     self.textSprite:setCenter(0, 0)
     self.textSprite:moveTo(self.x + 32,self.y + 8)
 end
 
 function ProgressBar:initBackgroundSprite()
+    -- todo change 70 back to 140
     local backgroundImage = gfx.image.new(140, 32)
     gfx.pushContext(backgroundImage)
-        -- gfx.setImageDrawMode(gfx.kDrawModeNXOR)
-        gfx.fillRoundRect(0, 0, 140, 32, 10)
+        gfx.fillRoundRect(2, 3, 140, 26, 10)
     gfx.popContext()
 
     self.backgroundSprite = gfx.sprite.new(backgroundImage)
     self.backgroundSprite:setCenter(0, 0)
     self.backgroundSprite:moveTo(self.x+1, self.y-2)
+
+    local borderImage = gfx.image.new(140,32)
+    gfx.pushContext(borderImage)
+        gfx.setLineWidth(2)
+        gfx.drawRoundRect(2, 2, 136, 28, 10)
+    gfx.popContext()
+    self.borderSprite = gfx.sprite.new(borderImage)
+    self.borderSprite:setCenter(0, 0)
+    self.borderSprite:moveTo(self.x+1, self.y-2)
 end
 
 function ProgressBar:initAnimationSprite()
@@ -68,10 +80,12 @@ end
 
 function ProgressBar:hide()
     self.state = PROGRESS_BAR_STATE.NOT_SHOWING
+    self.percent = 0
     self.animatedSprite:stopAnimation()
     self.animatedSprite:remove()
     self.textSprite:remove()
     self.backgroundSprite:remove()
+    self.borderSprite:remove()
     printDebug("ProgressBar: hide()", DEBUG)
 end
 
@@ -81,6 +95,7 @@ function ProgressBar:show()
     self.animatedSprite:playAnimation()
     self.textSprite:add()
     self.backgroundSprite:add()
+    self.borderSprite:add()
     self:updateProgress(0.0)
     printDebug("ProgressBar: show()", DEBUG)
 end
@@ -90,13 +105,19 @@ function ProgressBar:isShowing()
 end
 
 function ProgressBar:updateProgress(percent)
-    self.percent = percent
-    
+    self.percent = iif(percent <= 100, percent, 100)
+
     local percentString = string.format("%.0f", percent)
-    local textImage = gfx.imageWithText("Thinking...("..percentString.."%)", 130, 150, nil, nil, nil, kTextAlignment.left, PROGRESS_FONT)
+    local textImage = gfx.imageWithText("Thinking...("..percentString.."%)", 130, 150, nil, nil, nil, kTextAlignment.left, self.font)
     self.textSprite:setImage(textImage)
     self.textSprite:markDirty()
+
+    self.backgroundSprite:setClipRect(
+        self.backgroundSprite.x,
+        self.backgroundSprite.y,
+        self.percent * 1.4,
+        self.backgroundSprite.height)
+    self.backgroundSprite:markDirty()
+
     printDebug("ProgressBar: updateProgress() progress "..percentString, DEBUG)
-    -- self.progressSprite:setClipRect(self.progressSprite.x - self.progressSprite.width / 2,
-    --     self.progressSprite.y - self.progressSprite.height / 2, self.percent * 1.3, self.progressSprite.height)
 end

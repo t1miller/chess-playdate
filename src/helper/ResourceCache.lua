@@ -1,6 +1,6 @@
 
 import "CoreLibs/graphics"
-import 'ui/AnimatedSprite'
+import 'library/AnimatedSprite'
 
 local gfx <const> = playdate.graphics
 local DEBUG <const> = false
@@ -20,7 +20,25 @@ local PIECE_IMG_PATHS <const> = {
 	["q"] = "images/queen1",
 	["Q"] = "images/queen"
 }
-local ANIMATION_PATHS = {
+
+local PIECE_IMG_NO_BORDER_PATHS <const> = {
+	[" "] = "",
+	["."] = "",
+	["p"] = "images/pawn1",
+	["P"] = "images/pawn",
+	["b"] = "images/bishop1",
+	["B"] = "images/bishop",
+	["n"] = "images/knight1",
+	["N"] = "images/knight",
+	["r"] = "images/rook1",
+	["R"] = "images/rook",
+	["k"] = "images/king1",
+	["K"] = "images/king",
+	["q"] = "images/queen1",
+	["Q"] = "images/queen"
+}
+
+local ANIMATION_IMG_PATHS = {
 	["robot-kick"] = "animation/robot-kick",
 	["robot-shakehands"] = "animation/robot-shakehands",
 	["stickman-kick"] = "animation/stickman-kick",
@@ -28,7 +46,7 @@ local ANIMATION_PATHS = {
 	["robot-progress"] = "animation/robot-progress-inverted"
 }
 
-local ANIMATION_CONFIG = {
+local ANIMATION_CONFIG_PATHS = {
 	["robot-progress-config"] = "animation/progress.json",
 	["kick-config"] = "animation/kick.json",
 	["shakehands-config"] = "animation/shakehands.json",
@@ -52,7 +70,7 @@ function ResourceCache:getPieceImage(piece)
 end
 
 function ResourceCache:getAnimationImage(animation)
-    local animationPath = ANIMATION_PATHS[animation]
+    local animationPath = ANIMATION_IMG_PATHS[animation]
     if animationPath ~= nil then
         return cachedResources[animationPath]
     end
@@ -61,7 +79,7 @@ function ResourceCache:getAnimationImage(animation)
 end
 
 function ResourceCache:getAnimationConfig(config)
-    local configPath = ANIMATION_CONFIG[config]
+    local configPath = ANIMATION_CONFIG_PATHS[config]
     if configPath ~= nil then
         return cachedResources[configPath]
     end
@@ -78,13 +96,13 @@ local function cacheResources()
 	end
 
 	-- cache animation imagetables
-	for _, animationPath in pairs(ANIMATION_PATHS) do
+	for _, animationPath in pairs(ANIMATION_IMG_PATHS) do
 		local animationImages = gfx.imagetable.new(animationPath)
 		cachedResources[animationPath] = animationImages
 	end
 
 	-- cache animation config files
-	for _, configPath in pairs(ANIMATION_CONFIG) do
+	for _, configPath in pairs(ANIMATION_CONFIG_PATHS) do
 		local configFile = AnimatedSprite.loadStates(configPath)
 		cachedResources[configPath] = configFile
 	end

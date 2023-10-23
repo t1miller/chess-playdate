@@ -4,7 +4,7 @@ import "CoreLibs/graphics"
 import 'CoreLibs/animator'
 import "CoreLibs/easing"
 
-import 'ui/AnimatedSprite'
+import 'library/AnimatedSprite'
 import 'helper/Utils'
 import 'helper/ResourceCache'
 
@@ -12,21 +12,14 @@ local geo = playdate.geometry
 local Animator = playdate.graphics.animator
 local gfx<const> = playdate.graphics
 
-local DEBUG <const> = false
-local WIDTH <const> = 260
-local HEIGHT <const> = 170
+local DEBUG <const> = true
 local DIALOG_Z <const> = 1000
 local STICKMAN_Z <const> = 1001
 local KING_Z <const> = 1001
-local FONT_TITLE <const> = gfx.font.new("fonts/Roobert-24-Medium")
-local FONT_BUTTONS <const> = gfx.font.new("fonts/Roobert-11-Bold")
-local FONT_DESCRIPTION <const> = gfx.font.new("fonts/Roobert-11-Medium")
-
 local DIALOG_STATE <const> = {
     SHOWING = "0",
     NOT_SHOWING = "1"
 }
-
 
 class('DialogBox').extends(gfx.sprite)
 
@@ -36,24 +29,32 @@ function DialogBox:init(x, y, text)
     self.x = x
     self.y = y
 
+    self.cache = ResourceCache()
+
     self.state = DIALOG_STATE.NOT_SHOWING
-    self:setSize(WIDTH, HEIGHT)
-    self:moveTo(x, y)
-    self:setZIndex(DIALOG_Z)
-    self.text = ""
     self.title = ""
     self.description = ""
-    self.currentChar = 1 -- we'll use these for the animation
-    self.currentText = ""
-    self.typing = true
-    
+    self.fontTitle = gfx.font.new("fonts/Roobert-24-Medium")
+    self.fontButtons = gfx.font.new("fonts/Roobert-11-Bold")
+    self.fontDescription = gfx.font.new("fonts/Roobert-11-Medium")
+    self.width = 260
+    self.height = 170
     self.flyingAnimator = nil
-    self.flyingSprite = nil
+    self.pieceSprite = nil
     self.walkingSprite = nil
     self.walkingSprite2 = nil
 
-    self.cache = ResourceCache()
 
+    self.dialogBoxInputHandler = {
+
+		BButtonDown = function ()
+            self:dismiss()
+		end,
+	}
+
+    self:setSize(self.width, self.height)
+    self:moveTo(x, y)
+    self:setZIndex(DIALOG_Z)
 end
 
 -- this function will calculate the string to be used. 
@@ -62,7 +63,7 @@ function DialogBox:update()
 
     -- animation
     if self.flyingAnimator and self.flyingAnimator:ended() then
-        self.walkingSprite:moveTo(self.x-WIDTH/2, self.walkingSprite.y)
+        self.walkingSprite:moveTo(self.x-self.width/2, self.walkingSprite.y)
         self.walkingSprite:stopAnimation()
         self.walkingSprite:playAnimation()
 
@@ -81,30 +82,31 @@ function DialogBox:draw()
 
         -- draw the box
         gfx.setColor(gfx.kColorBlack)
-        gfx.fillRect(0, 0, WIDTH, HEIGHT)
+        gfx.fillRect(0, 0, self.width, self.height)
 
         -- border
         gfx.setLineWidth(4)
         gfx.setColor(gfx.kColorWhite)
-        gfx.drawRect(0, 0, WIDTH, HEIGHT)
+        gfx.drawRect(0, 0, self.width, self.height)
 
         -- buttons
         gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
-        gfx.setFont(FONT_BUTTONS)
+        gfx.setFont(self.fontButtons)
         gfx.drawTextAligned("Ⓐ New Game\nⒷ Dismiss", 70, 115, kTextAlignment.left)
 
         -- title
-        gfx.setFont(FONT_TITLE)
-        gfx.drawTextAligned(self.title, WIDTH/2, 10, kTextAlignment.center)
+        gfx.setFont(self.fontTitle)
+        gfx.drawTextAligned(self.title, self.width/2, 10, kTextAlignment.center)
 
         -- description
-        gfx.setFont(FONT_DESCRIPTION)
-        gfx.drawTextAligned(self.description,  WIDTH/2, 50, kTextAlignment.center)
+        gfx.setFont(self.fontDescription)
+        gfx.drawTextAligned(self.description,  self.width/2, 50, kTextAlignment.center)
 
     gfx.popContext()
 end
 
 function DialogBox:setupShakeHandsAnimation()
+    printDebug("DialogBox: setupShakeHandsAnimation()", DEBUG)
     local selfself = self
     self.walkingSprite = AnimatedSprite.new(
         self.cache:getAnimationImage("stickman-shakehands"),
@@ -112,7 +114,7 @@ function DialogBox:setupShakeHandsAnimation()
     )
     self.walkingSprite:setZIndex(STICKMAN_Z)
     self.walkingSprite:setCenter(0, 0)
-    self.walkingSprite:moveTo(self.x-WIDTH/2, self.y-35)
+    self.walkingSprite:moveTo(self.x-self.width/2, self.y-35)
     self.walkingSprite:setDefaultState("stickman_shakehands")
 
     self.walkingSprite.states.stickman_shakehands.onLoopFinishedEvent = function (self)
@@ -122,7 +124,7 @@ function DialogBox:setupShakeHandsAnimation()
 
     self.walkingSprite.states.stickman_shakehands_reverse.onLoopFinishedEvent = function (self)
         selfself.walkingSprite:changeState("stickman_shakehands", true)
-        selfself.walkingSprite:moveTo(selfself.x-WIDTH/2, self.y)
+        selfself.walkingSprite:moveTo(selfself.x-self.width/2, self.y)
     end
     
 
@@ -163,6 +165,7 @@ function DialogBox:setupShakeHandsAnimation()
 end
 
 function DialogBox:setUpRobotAnimation()
+    printDebug("DialogBox: setUpRobotAnimation()", DEBUG)
     local selfself = self
     -- local robotImg = gfx.imagetable.new("animation/robot-run-kick")
     -- local robotImg = self.cache:getAnimationImage("robot-kick")
@@ -172,7 +175,7 @@ function DialogBox:setUpRobotAnimation()
     )
     self.walkingSprite:setZIndex(STICKMAN_Z)
     self.walkingSprite:setCenter(0, 0)
-    self.walkingSprite:moveTo(self.x-WIDTH/2, self.y-30)
+    self.walkingSprite:moveTo(self.x-self.width/2, self.y-30)
     self.walkingSprite:setDefaultState("robot_kick_run")
 
     function self.walkingSprite:update()
@@ -186,6 +189,7 @@ function DialogBox:setUpRobotAnimation()
 end
 
 function DialogBox:setupStickManAnimation()
+    printDebug("DialogBox: setupStickManAnimation()", DEBUG)
     -- local stickmanImg = gfx.imagetable.new("animation/stickman-walking-kick")
     self.walkingSprite = AnimatedSprite.new(
         self.cache:getAnimationImage("stickman-kick"),
@@ -194,10 +198,11 @@ function DialogBox:setupStickManAnimation()
     self.walkingSprite:setDefaultState("stickman_kick_run")
     self.walkingSprite:setZIndex(STICKMAN_Z)
     self.walkingSprite:setCenter(0, 0)
-    self.walkingSprite:moveTo(self.x-WIDTH/2+5, self.y-35)
+    self.walkingSprite:moveTo(self.x-self.width/2+5, self.y-35)
 end
 
 function DialogBox:setUpFlyingPieceAnimation(imgPath, delay)
+    printDebug("DialogBox: setUpFlyingPieceAnimation()", DEBUG)
     local points = self:calculateObjectInMotionPath(self.x + 20, self.y, 5)
     local polygon = geo.polygon.new(table.unpack(points))
     local image = gfx.image.new(imgPath)
@@ -234,8 +239,9 @@ end
 
 function DialogBox:show(state)
     if self:isShowing() then
-        return
+        self:dismiss()
     end
+
     self.state = DIALOG_STATE.SHOWING
 
     if state == GAME_STATE.COMPUTER_WON then
@@ -271,6 +277,8 @@ function DialogBox:show(state)
         self:setupStickManAnimation()
     end
 
+    printDebug("DialogBox: show()\nstate="..state.."\ndescription="..self.description.."\ntitle="..self.title, DEBUG)
+
     self:add()
 
     if self.walkingSprite then
@@ -288,6 +296,7 @@ function DialogBox:show(state)
         self.pieceSprite:add()
     end
 
+    playdate.inputHandlers.push(self.dialogBoxInputHandler)
     printDebug("Dialog Box: showing", DEBUG)
 end
 
@@ -299,18 +308,30 @@ function DialogBox:dismiss()
     if self:isShowing() == false then
         return
     end
+    
+    self.state = DIALOG_STATE.NOT_SHOWING
+    self:remove()
 
     -- stop animation
     if self.walkingSprite then
         self.walkingSprite:remove()
+        self.walkingSprite = nil
     end
 
     if self.walkingSprite2 then
         self.walkingSprite2:remove()
+        self.walkingSprite2 = nil
     end
 
     if self.pieceSprite then
         self.pieceSprite:remove()
+        self.pieceSprite = nil
     end
+
+    if self.flyingAnimator then
+        self.flyingAnimator = nil
+    end
+
+    playdate.inputHandlers.pop()
     printDebug("Dialog Box: dismissing", DEBUG)
 end

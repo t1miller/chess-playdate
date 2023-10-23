@@ -75,8 +75,6 @@ function CapturedPieces:clearPieceSprites()
 			sprites[j]:remove()
 		end
 	end
-	-- self.score = 0.0
-	-- self:drawScore({})
 end
 
 function CapturedPieces:clear()
@@ -125,7 +123,6 @@ function CapturedPieces:createMissingSprites()
 	for missingPiece, missingPieceCount in pairs(self.missingPieces) do
 		-- keep creating sprite for piece until it matches missing count
 		local spriteCount = #self.pieceSprites[missingPiece]
-
 		while spriteCount < missingPieceCount do
 			self:createPieceSprite(missingPiece)
 			spriteCount += 1
@@ -154,11 +151,7 @@ function CapturedPieces:drawPieces()
 
 			-- draw on the next row
 			if drawCount == 10 then
-				if self.isWhite then
-					yOffset -= 24 
-				else
-					yOffset += 24
-				end
+				yOffset = iif(self.isWhite, yOffset - 24, yOffset + 24)
 				xOffset = 0
 			end
 		end
@@ -216,21 +209,8 @@ function CapturedPieces:calculateScore()
 		blacksScore += PIECE_VALUE["q"] * math.abs(self.missingPieces["q"])
 	end
 
-	local score = 0.0
-	if self.isWhite then
-		score = whitesScore - blacksScore
-		if score < 0 then
-			return 0.0
-		else
-			return score
-		end
-	else
-		score = blacksScore - whitesScore
-		if score < 0 then
-			return 0.0
-		else
-			return score
-		end
-	end
+	local score = iif(self.isWhite, whitesScore - blacksScore, blacksScore - whitesScore)
+	score = iif(score < 0.0, 0.0, score)
+	return score
 end
 

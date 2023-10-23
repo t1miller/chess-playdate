@@ -13,7 +13,7 @@ import 'helper/Utils'
 
 local DEBUG <const> = true
 
-local iff, BoardCpy, WatchPosit, CalcKBNK, ChangeForce, Undo, ISqAgrs, Iwxy, XRayBR, ComputerMvt, InitMoves,
+local BoardCpy, WatchPosit, CalcKBNK, ChangeForce, Undo, ISqAgrs, Iwxy, XRayBR, ComputerMvt, InitMoves,
 CheckMov, UnValidateMov, FJunk, ShowThink, ResetData, InChecking, ShowScore, MixBoard, InitGame, IColmn, IRaw, 
 ShowStat, CalcKPK, CalcKg, IArrow, MoveTree, PrisePassant, GetAlgMvt, copyValueOf, Agression, InitArrow, IfCheck, 
 Anyagress, KnightPts, QueenPts, PositPts, PlayMov, IRepeat, ChoiceMov, MultiMov, XRayKg, DoCastle, DoCalc, Lalgb, 
@@ -343,12 +343,12 @@ Js_pgn = ""   -- save too
 -- (if ? then : else) substitute
 -- other syntax for binary operators a,b:  cond and a or b
 
-function iif(ask, ontrue, onfalse)
-    if (ask) then
-        return ontrue
-    end
-    return onfalse
-end
+-- function iif(ask, ontrue, onfalse)
+--     if (ask) then
+--         return ontrue
+--     end
+--     return onfalse
+-- end
 
 function BoardCpy(a, b)
     local sq = 0
@@ -1412,13 +1412,13 @@ function ResetData()
 
     -- this takes longer, maybe it is possible to optimize via (undefined?0:value)
 
-    for i = 0, 10000, 1 do
+    for i = 1, 10000, 1 do
         Js_storage[1 + i] = 0
     end
 
-    for i = 0, 40000, 1 do
-        Js_nextCross[1 + i] = 0
-        Js_nextArrow[1 + i] = 0
+    for i = 1, 40000, 1 do
+        Js_nextCross[i] = 0
+        Js_nextArrow[i] = 0
     end
 end
 
@@ -1465,6 +1465,8 @@ end
 function InitGame()
     local i = 0
 
+    playdate.resetElapsedTime()
+    printDebug("ChessGame: InitGame() start", DEBUG)
     ResetData()
 
     Js_flip = false
@@ -1531,6 +1533,8 @@ function InitGame()
     InitStatus()
 
     Js_pgn = ""
+
+    printDebug("ChessGame: InitGame() done, time = "..playdate.getElapsedTime(), DEBUG)
 end
 
 function IColmn(a)
@@ -2435,8 +2439,7 @@ function DoCalc(side, ply, alpha, beta, gainScore, slk, InChk)
     if (evflag) then
         Js_cCompNodes = Js_cCompNodes + 1
         -- if (Js_cCompNodes % 200 == 0) then
-        if (Js_cCompNodes % 40 == 0) then
-            printDebug("yield", DEBUG)
+        if (Js_cCompNodes % 20 == 0) then
             coroutine.yield()
         end
         Agression(side, Js_agress[1 + side])
@@ -3790,6 +3793,7 @@ function EnterMove(from_sq, to_sq, promo)
 
     SwitchSides(true)
 
+    -- convert string move to a 0-63 square number
     for i = 0, 63, 1 do
         if (Js_szAlgMvt[1 + i] == from_sq) then
             fsq_mvt = i
@@ -3799,12 +3803,12 @@ function EnterMove(from_sq, to_sq, promo)
         end
     end
 
+    -- get promotion piece, just in case this move promotes a piece
     Js_proPiece = 0
     for i = 2, 5, 1 do
         if (Js_upperNot[1 + i] == promo) then
             Js_proPiece = i
             -- promote might work here idk
-            printDebug("promote piece2 = "..Js_proPiece, DEBUG)
         end
     end
 
@@ -3813,6 +3817,7 @@ function EnterMove(from_sq, to_sq, promo)
     Js_root.flags = 0
 
     Js_myPiece = Js_rgszPiece[1 + Js_board[1 + fsq_mvt]]
+    print("EnterMove: piece="..Js_myPiece)
 
     if (Js_board[1 + fsq_mvt] == Js_pawn) then
         if ((tsq_mvt < 8) or (tsq_mvt > 55)) then
@@ -3820,6 +3825,7 @@ function EnterMove(from_sq, to_sq, promo)
             -- promote might work her idk
             printDebug("user promotes3 "..Js_promote)
         end
+        print("EnterMove: iFlag="..iflag)
         Lalgb(fsq_mvt, tsq_mvt, iflag)
     end
 
@@ -3841,7 +3847,10 @@ function EnterMove(from_sq, to_sq, promo)
 
     Js_flag.timeout = true
 
+    print("EnterMove: rgch=")
+    printTable(rgch)
     iMvt = CheckMov(rgch, 0)
+    print("EnterMove: iMvt="..iMvt)
 
     if (iMvt ~= 0) then
         WatchPosit()
@@ -4022,8 +4031,10 @@ function ResetFlags()
 end
 
 function Jst_Play()
+
     SwitchSides(false)
 
+    -- added by me
     Js_userInvalidMove = false
     Js_userMoved = false
     Js_computerMoved = true
@@ -4048,6 +4059,12 @@ function UndoMov()
 
         Undo()
 
+        -- added by me
+        Js_userInvalidMove = false
+        Js_userMoved = false
+        Js_computerMoved = true
+        Js_captured = false
+        Js_castled = false
         -- UpdateDisplay()
 
         ResetFlags()
@@ -4064,8 +4081,30 @@ function UndoMov()
     end
 end
 
+function nonZeroTableSize(t)
+    if #t < 1 then return 0 end
+    for i = #t, 1, -1 do
+        if t[i] ~= 0 then
+            return i
+        end
+    end
+    return #t
+end
+
+function nonZeroNestedTableSize(t)
+    if #t < 1 then return 0 end
+    for i = #t, 1, -1 do
+        for k, v in pairs(t[i]) do
+            if v ~= 0 then
+                return i
+            end
+        end
+    end
+    return #t
+end
+
 local function removeLastTwoMovesPgn()
-    printDebug("removeLast2MovesPgn() before pgn: "..Js_pgn, DEBUG)
+    printDebug("ChessGame: removeLast2MovesPgn() before pgn: "..Js_pgn, DEBUG)
     local movesFlattened = splitString(Js_pgn, " ")
     table.remove(movesFlattened)
     table.remove(movesFlattened)
@@ -4073,7 +4112,7 @@ local function removeLastTwoMovesPgn()
     for i = 1, #movesFlattened do
         Js_pgn = Js_pgn..movesFlattened[i].." "
     end
-    printDebug("removeLast2MovesPgn() after pgn: "..Js_pgn, DEBUG)
+    printDebug("ChessGame: removeLast2MovesPgn() after pgn: "..Js_pgn, DEBUG)
 end
 
 -------------------------------------------
@@ -4161,23 +4200,32 @@ class('ChessGame').extends()
 
 function ChessGame:init()
     ChessGame.super.init(self)
-    printDebug("initialized jester engine", DEBUG)
-    printDebug("search depth = " .. Js_maxDepth .. " search timeout = " .. (Js_searchTimeout) .. " seconds", DEBUG)
+    printDebug("ChessGame: initialized jester engine", DEBUG)
+    printDebug("ChessGame: search depth = " .. Js_maxDepth .. " search timeout = " .. (Js_searchTimeout) .. " seconds", DEBUG)
     self:newGame()
-    self.rowColLookup = self:squareToRowCol()
 end
 
 function ChessGame:newGame()
+    playdate.resetElapsedTime()
     self.state = GAME_STATE.NEW_GAME
     self.computerThinking = false
-    self.timer = nil
+    if self.timer then
+        -- user might click end game while computer is thinking
+        self.timer:remove()
+        self.timer = nil
+    end
     self.computersMove = {}
     self.usersMove = {}
     InitGame()
     UpdateDisplay()
+    printDebug("ChessGame: newGame() took "..playdate.getElapsedTime().." seconds", DEBUG)
 end
 
 function ChessGame:moveUser(from, to)
+    -- todo remove
+    -- local moves = self:calculateAvailableMoves(from)
+    -- todo remove nop state
+    -- and add INVALID_MOVE state back
     self.state = GAME_STATE.NOP
     if from == "" or to == "" then
         -- self.state = GAME_STATE.INVALID_MOVE
@@ -4191,10 +4239,13 @@ function ChessGame:moveUser(from, to)
         self:updateState()
         return false
     end
-    self.usersMove = {self.rowColLookup[Js_origSquare][1],
-                      self.rowColLookup[Js_origSquare][2],
-                      self.rowColLookup[Js_destSquare][1],
-                      self.rowColLookup[Js_destSquare][2]}
+
+    local oldRow, oldCol = self:squareToRowCol(Js_origSquare)
+    local newRow, newCol = self:squareToRowCol(Js_destSquare)
+    self.usersMove = {oldRow,
+                      oldCol,
+                      newRow,
+                      newCol}
 
     -- self.state = GAME_STATE.VALID_MOVE
     self.state = GAME_STATE.USER_MOVED
@@ -4202,22 +4253,31 @@ function ChessGame:moveUser(from, to)
     return true
 end
 
-function ChessGame:moveComputer(moveDoneCallback, onProgressCallback, onStartCallback)
+function ChessGame:moveComputer(moveDoneCallback, onProgressCallback)
     self.state = GAME_STATE.NOP
     local computersMoveCoroutine = coroutine.create(function()
         self.computerThinking = true
+        printDebug("ChessGame: Jst_Play start", DEBUG)
         Jst_Play()
-        self.computersMove = {self.rowColLookup[Js_origSquare][1],
-                              self.rowColLookup[Js_origSquare][2],
-                              self.rowColLookup[Js_destSquare][1],
-                              self.rowColLookup[Js_destSquare][2]}
+        printDebug("ChessGame: Jst_Play done", DEBUG)
 
-        printDebug("nodes searched: " .. Js_cCompNodes .. " time: " .. playdate.getElapsedTime(), DEBUG)     -- to see performance
-        self.computerThinking = false
+        local oldRow, oldCol = self:squareToRowCol(Js_origSquare)
+        local newRow, newCol = self:squareToRowCol(Js_destSquare)
+        self.computersMove = {oldRow,
+                              oldCol,
+                              newRow,
+                              newCol}
+        -- self.computersMove = {self.rowColLookup[Js_origSquare][1],
+        --                       self.rowColLookup[Js_origSquare][2],
+        --                       self.rowColLookup[Js_destSquare][1],
+        --                       self.rowColLookup[Js_destSquare][2]}
+
+        printDebug("ChessGame: nodes searched= " .. Js_cCompNodes .. " time=" .. playdate.getElapsedTime().." depth="..Js_maxDepth, DEBUG)     -- to see performance
         -- -- self.state = GAME_STATE.VALID_MOVE
         -- self.state = GAME_STATE.COMPUTER_MOVED
         self:updateState()
         moveDoneCallback()
+        self.computerThinking = false
     end)
 
     playdate.resetElapsedTime()
@@ -4227,7 +4287,10 @@ function ChessGame:moveComputer(moveDoneCallback, onProgressCallback, onStartCal
         if coroutine.status(computersMoveCoroutine) == "suspended" then
             coroutine.resume(computersMoveCoroutine)
         elseif coroutine.status(computersMoveCoroutine) == "dead" then
-            self.timer:remove()
+            -- user might click end game while computer is thinking
+            if self.timer then
+                self.timer:remove()
+            end
         end
     end)
 end
@@ -4241,7 +4304,7 @@ end
 
 function ChessGame:updateState()
     -- ShowStat()
-    printDebug("Js_castled = "..tostring(Js_castled).."\nJs_captured = "..tostring(Js_captured).."\nJs_userInCheck = "..tostring(Js_userInCheck).."\nJs_userMoved = "..tostring(Js_userMoved).."\nJs_computerMoved = "..tostring(Js_computerMoved).."\nJs_userInvalidMove = "..tostring(Js_userInvalidMove), DEBUG)
+    printDebug("ChessGame: Js_castled = "..tostring(Js_castled).."\nJs_captured = "..tostring(Js_captured).."\nJs_userInCheck = "..tostring(Js_userInCheck).."\nJs_userMoved = "..tostring(Js_userMoved).."\nJs_computerMoved = "..tostring(Js_computerMoved).."\nJs_userInvalidMove = "..tostring(Js_userInvalidMove), DEBUG)
 
     if Js_userMoved then
         self.state = GAME_STATE.USER_MOVED
@@ -4302,18 +4365,20 @@ function ChessGame:updateState()
             self.state = GAME_STATE.INSUFFICIENT_MATERIAL
         end
     end
-    printDebug("state = " .. self.state, DEBUG)
+    printDebug("ChessGame: state = " .. self.state, DEBUG)
 end
 
 function ChessGame:undoLastTwoMoves()
     if Js_nGameMoves < 2 then
         return false
     end
-    -- todo update state here
     UndoMov()
     UndoMov()
     removeLastTwoMovesPgn()
-    -- self.state = GAME_STATE.VALID_MOVE
+    self:updateState()
+    if Js_nGameMoves == 0 then
+        self.state = GAME_STATE.NEW_GAME
+    end
     return true
 end
 
@@ -4324,7 +4389,7 @@ end
 function ChessGame:setDifficulty(params)
     Js_searchTimeout = params[1]
     Js_maxDepth = params[2]
-    printDebug("difficulty set: timeout = " .. Js_searchTimeout .. " seconds, depth = " .. Js_maxDepth, DEBUG)
+    printDebug("ChessGame: difficulty set: timeout = " .. Js_searchTimeout .. " seconds, depth = " .. Js_maxDepth, DEBUG)
 end
 
 -- start will all the pieces then remove pieces you see
@@ -4373,7 +4438,7 @@ function ChessGame:getBoard()
 end
 
 function ChessGame:getPGNMoves()
-    printDebug("getMoves() pgn: "..Js_pgn, DEBUG)
+    printDebug("ChessGame: getMoves() pgn: "..Js_pgn, DEBUG)
     local movesFlattened = splitString(Js_pgn, " ")
     local moves = {}
     local j = 1
@@ -4396,19 +4461,44 @@ function ChessGame:getUsersMove()
     return self.usersMove
 end
 
-function ChessGame:squareToRowCol()
-    local result = {}
-    local row = 1
-    local col = 8
-    for i = 63, 0, -1 do
-        result[i] = {row, col}
-        col -= 1
-        if col == 0 then
-            col = 8
-            row += 1
+function ChessGame:calculateAvailableMoves(fromSquare)
+    local results = {}
+    local move = {}
+    move[1] = string.byte(fromSquare, 1)
+    move[2] = string.byte(fromSquare, 2)
+    -- rgch[1 + 0] = string.byte(from_sq, 1) --(char)
+    -- rgch[1 + 1] = string.byte(from_sq, 2)
+    -- rgch[1 + 2] = string.byte(to_sq, 1)  --(char)
+    -- rgch[1 + 3] = string.byte(to_sq, 2)
+    -- i = 4
+    for i=1,64 do
+        local moveStr = Js_szAlgMvt[i]
+        print("trying "..moveStr)
+        move[3] = string.byte(moveStr, 1)
+        move[4] = string.byte(moveStr, 2)
+        move[5] = 0
+        local result = CheckMov(move, 0)
+        print(result)
+        if result ~= 0 then
+            table.insert(results, moveStr)
         end
     end
-    return result
+    print("calculateAvailableMoves()")
+    printTable(results)
+    return results
+    -- horribly inneficient
+    -- loop through all 64 possible moves
+    -- Js_szAlgMvt = { "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1", "a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2", "a3",
+    -- "b3", "c3", "d3", "e3", "f3", "g3", "h3", "a4", "b4", "c4", "d4", "e4", "f4", "g4", "h4", "a5", "b5", "c5", "d5",
+    -- "e5", "f5", "g5", "h5", "a6", "b6", "c6", "d6", "e6", "f6", "g6", "h6", "a7", "b7", "c7", "d7", "e7", "f7", "g7",
+    -- "h7", "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8" }
+
+end
+
+function ChessGame:squareToRowCol(square)
+    local row = math.floor(8 - (square+1)/8 + 1)
+    local col = square % 8 + 1
+    return row, col
 end
 
 function ChessGame:setUserHasFiveQueens()
@@ -4439,8 +4529,233 @@ function ChessGame:setCapturedPieceScoreChanges()
     SetFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - - 0 40")
 end
 
-function ChessGame:setUserInCheck()
-    -- todo  this doesnt work
-    -- SetFen("7k/K7/8/8/8/8/8/6Q1 w - - 0 40")
+function ChessGame:toSavedTable()
+    if self:isComputerThinking() then
+        -- user quit in the middle of computers move
+        -- undo users move before saving
+        self:undoLastTwoMoves()
+    end
+
+    local Js_movesListSize = nonZeroNestedTableSize(Js_movesList)
+    print("Js_movesListSize="..Js_movesListSize)
+    local Js_movesListCopy = {}
+    for i=1, Js_movesListSize, 1 do
+        Js_movesListCopy[i] = Js_movesList[i]
+    end
+
+    local Js_TreeSize = nonZeroNestedTableSize(Js_Tree)
+    print("Js_TreeSize="..Js_TreeSize)
+    local Js_TreeCopy = {}
+    for i=1, Js_TreeSize, 1 do
+        Js_TreeCopy[i] = Js_Tree[i]
+    end
+
+    return {
+        -- start of ResetData() variables
+        -- ["Js_movesList"] = Js_movesList, compress this w/ Js_movesListCopy
+        -- ["Js_Tree"] = Js_Tree, compress this w/ Js_TreeCopy
+        ["Js_movesListCopy"] = Js_movesListCopy,
+        ["Js_TreeCopy"] = Js_TreeCopy,
+
+        ["Js_treePoint"] = Js_treePoint,
+        ["Js_variants"] = Js_variants,
+        ["Js_flagCheck"] = Js_flagCheck,
+        ["Js_flagEat"] = Js_flagEat,
+        ["Js_menacePawn"] = Js_menacePawn,
+        ["Js_scorePP"] = Js_scorePP,
+        ["Js_scoreTP"] = Js_scoreTP,
+        ["Js_eliminate0"] = Js_eliminate0,
+        ["Js_eliminate1"] = Js_eliminate1,
+        ["Js_eliminate3"] = Js_eliminate3,
+        ["Js_pieceMap"] = Js_pieceMap,
+        ["Js_pawnMap"] = Js_pawnMap,
+        ["Js_nMvtOnBoard"] = Js_nMvtOnBoard,
+        ["Js_scoreOnBoard"] = Js_scoreOnBoard,
+        ["Js_pieceIndex"] = Js_pieceIndex,
+        -- ["Js_arrowData"] = Js_arrowData, not going to save, let ResetData initialize
+        -- ["Js_crossData"] = Js_crossData, not going to save, let ResetData initialize
+        ["Js_agress"] = Js_agress,
+        ["Js_wPawnMvt"] = Js_wPawnMvt,
+        ["Js_bPawnMvt"] = Js_bPawnMvt,
+        ["Js_knightMvt"] = Js_knightMvt,
+        ["Js_bishopMvt"] = Js_bishopMvt,
+        ["Js_kingMvt"] = Js_kingMvt,
+        ["Js_killArea"] = Js_killArea,
+        -- ["Js_storage"] = Js_storage, not going to save, let ResetData initialize
+        -- ["Js_nextCross"] = Js_nextCross, not going to save, let ResetData initialize
+        -- ["Js_nextArrow"] = Js_nextArrow, not going to save, let ResetData initialize
+        -- done w/ ResetData() variables
+        -- start of InitGame
+        ["Js_flip"] = Js_flip,
+        ["Js_fInGame"] = Js_fInGame,
+        ["Js_fGameOver"] = Js_fGameOver,
+        ["Js_fCheck_kc"] = Js_fCheck_kc,
+        ["Js_fMate_kc"] = Js_fMate_kc,
+        ["Js_fSoonMate_kc"] = Js_fSoonMate_kc,
+        ["Js_bDraw"] = Js_bDraw,
+        ["Js_fStalemate"] = Js_fStalemate,
+        ["Js_fAbandon"] = Js_fAbandon,
+        ["Js_fUserWin_kc"] = Js_fUserWin_kc,
+        -- start of InitArrow()
+        -- done w/ InitArrow()
+        -- start of InitMoves()
+        -- ["Js_virtualBoard"] = Js_virtualBoard, not neccessary
+        -- ["Js_direction"] = Js_direction, not neccessary
+        -- ["Js_maxJobs"] = Js_maxJobs, not neccessary
+        -- ["Js_pawn"] = Js_pawn, not neccessary
+        -- ["Js_bkPawn"] = Js_bkPawn, not neccessary
+        -- ["Js_reguBoard"] = Js_reguBoard, not neccessary
+        -- done w/ InitMoves()
+        ["Js_working"] = Js_working,
+        ["Js_working2"] = Js_working2,
+        ["Js_flag"] = Js_flag,
+        ["Js_cNodes"] = Js_cNodes,
+        ["Js_indenSqr"] = Js_indenSqr,
+        ["Js_scoreDither"] = Js_scoreDither,
+        ["Js__alpha"] = Js__alpha,
+        ["Js__beta"] = Js__beta,
+        ["Js_dxAlphaBeta"] = Js_dxAlphaBeta,
+        ["Js_maxDepthSeek"] = Js_maxDepthSeek,
+        ["Js_nMovesMade"] = Js_nMovesMade,
+        ["Js_specialScore"] = Js_specialScore,
+        ["Js_nGameMoves"] = Js_nGameMoves,
+        ["Js_fiftyMoves"] = Js_fiftyMoves,
+        ["Js_hint"] = Js_hint,
+        ["Js_fDevl"] = Js_fDevl,
+        ["Js_roquer"] = Js_roquer,
+        ["Js_board"] = Js_board,
+        ["Js_color"] = Js_color,
+        ["Js_computer"] = Js_computer,
+        ["Js_player"] = Js_player,
+        ["Js_enemy"] = Js_enemy,
+        -- start of InitStatus()
+        -- ["Js_black"] = Js_black, not neccessary
+        -- ["Js_white"] = Js_white, not neccessary
+        ["Js_pmatrl"] = Js_pmatrl,
+        ["Js_matrl"] = Js_matrl,
+        ["Js_piecesCount"] = Js_piecesCount,
+        -- ["Js_hollow"] = Js_hollow, not neccessary
+        -- end of InitStatus()
+        ["Js_pgn"] = Js_pgn,
+        -- end of InitGame()
+        -- start of ChessGame
+        ["state"] = self.state,
+        ["computersMove"] = self.computersMove,
+        ["usersMove"] = self.usersMove,
+        -- ["computerThinking"] = self.computerThinking
+        -- end of ChessGame
+    }
 end
 
+function ChessGame:initFromSavedTable(data)
+            -- start of ResetData() variables
+        -- Js_movesList = data["Js_movesList"], compress this w/ Js_movesListCopy
+        -- Js_Tree = data["Js_Tree"], compress this w/ Js_TreeCopy
+        local Js_movesListCopy = data["Js_movesListCopy"]
+        local Js_TreeCopy = data["Js_TreeCopy"]
+
+        Js_treePoint = data["Js_treePoint"]
+        Js_variants = data["Js_variants"]
+        Js_flagCheck = data["Js_flagCheck"]
+        Js_flagEat = data["Js_flagEat"]
+        Js_menacePawn = data["Js_menacePawn"]
+        Js_scorePP = data["Js_scorePP"]
+        Js_scoreTP = data["Js_scoreTP"]
+        Js_eliminate0 = data["Js_eliminate0"]
+        Js_eliminate1 = data["Js_eliminate1"]
+        Js_eliminate3 = data["Js_eliminate3"]
+        Js_pieceMap = data["Js_pieceMap"]
+        Js_pawnMap = data["Js_pawnMap"]
+        Js_nMvtOnBoard = data["Js_nMvtOnBoard"]
+        Js_scoreOnBoard = data["Js_scoreOnBoard"]
+        Js_pieceIndex = data["Js_pieceIndex"]
+        -- Js_arrowData = data["Js_arrowData"] not going to save, let ResetData initialize
+        -- Js_crossData = data["Js_crossData"] not going to save, let ResetData initialize
+        Js_agress = data["Js_agress"]
+        Js_wPawnMvt = data["Js_wPawnMvt"]
+        Js_bPawnMvt = data["Js_bPawnMvt"]
+        Js_knightMvt = data["Js_knightMvt"]
+        Js_bishopMvt = data["Js_bishopMvt"]
+        Js_kingMvt = data["Js_kingMvt"]
+        Js_killArea = data["Js_killArea"]
+        -- Js_storage = data["Js_storage"] not going to save, let ResetData initialize
+        -- Js_nextCross = data["Js_nextCross"] not going to save, let ResetData initialize
+        -- Js_nextArrow = data["Js_nextArrow"] not going to save, let ResetData initialize
+        -- done w/ ResetData() variables
+        -- start of InitGame
+        Js_flip = data["Js_flip"]
+        Js_fInGame = data["Js_fInGame"]
+        Js_fGameOver = data["Js_fGameOver"]
+        Js_fCheck_kc = data["Js_fCheck_kc"]
+        Js_fMate_kc = data["Js_fMate_kc"]
+        Js_fSoonMate_kc = data["Js_fSoonMate_kc"]
+        Js_bDraw = data["Js_bDraw"]
+        Js_fStalemate = data["Js_fStalemate"]
+        Js_fAbandon = data["Js_fAbandon"]
+        Js_fUserWin_kc = data["Js_fUserWin_kc"]
+        -- start of InitArrow()
+        -- done w/ InitArrow()
+        -- start of InitMoves()
+        -- Js_virtualBoard = data["Js_virtualBoard"] not neccessary
+        -- Js_direction = data["Js_direction"] not neccessary
+        -- Js_maxJobs = data["Js_maxJobs"] not neccessary
+        -- Js_pawn = data["Js_pawn"]
+        -- Js_bkPawn = data["Js_bkPawn"] not neccessary
+        -- Js_reguBoard = data["Js_reguBoard"] not neccessary
+        -- done w/ InitMoves()
+        Js_working = data["Js_working"]
+        Js_working2 = data["Js_working2"]
+        Js_flag = data["Js_flag"]
+        Js_cNodes = data["Js_cNodes"]
+        Js_indenSqr = data["Js_indenSqr"]
+        Js_scoreDither = data["Js_scoreDither"]
+        Js__alpha = data["Js__alpha"]
+        Js__beta = data["Js__beta"]
+        Js_dxAlphaBeta = data["Js_dxAlphaBeta"]
+        Js_maxDepthSeek = data["Js_maxDepthSeek"]
+        Js_nMovesMade = data["Js_nMovesMade"]
+        Js_specialScore = data["Js_specialScore"]
+        Js_nGameMoves = data["Js_nGameMoves"]
+        Js_fiftyMoves = data["Js_fiftyMoves"]
+        Js_hint = data["Js_hint"]
+        Js_fDevl = data["Js_fDevl"]
+        Js_roquer = data["Js_roquer"]
+        Js_board = data["Js_board"]
+        Js_color = data["Js_color"]
+        Js_computer = data["Js_computer"]
+        Js_player = data["Js_player"]
+        Js_enemy = data["Js_enemy"]
+        -- start of InitStatus() here
+        -- Js_black = data["Js_black"], not neccessary
+        -- Js_white = data["Js_white"], not neccessary
+        Js_pmatrl = data["Js_pmatrl"]
+        Js_matrl = data["Js_matrl"]
+        Js_piecesCount = data["Js_piecesCount"]
+        -- Js_hollow = data["Js_hollow"], not neccessary
+        -- end of InitStatus()
+        Js_pgn = data["Js_pgn"]
+        -- end of InitGame()
+        -- start of ChessGame
+        self.state = data["state"]
+        self.computersMove = data["computersMove"]
+        self.usersMove = data["usersMove"]
+        -- self.computerThinking = data["computerThinking"]
+        -- end of ChessGame
+
+        for i = 1, 512, 1 do
+            if i <= #Js_movesListCopy then
+                Js_movesList[i] = Js_movesListCopy[i]
+            else
+                Js_movesList[i] = _MOVES()
+            end
+        end
+
+        for i = 1, 2000, 1 do
+            if i <= #Js_TreeCopy then
+                Js_Tree[i] = Js_TreeCopy[i]
+            else
+                Js_Tree[i] = _BTREE()
+            end
+        end
+
+end
