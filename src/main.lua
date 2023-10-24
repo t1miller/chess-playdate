@@ -7,8 +7,8 @@ import 'ChessViewModel'
 
 -- playdate.setMinimumGCTime(.0001)
 -- playdate.setCollectsGarbage(false)
--- playdate.setGCScaling(0, 0.9)
-playdate.setMinimumGCTime(4)
+playdate.setMinimumGCTime(8)
+-- playdate.setGCScaling(0.4, 0.7)
 local gfx <const> = playdate.graphics
 local chessViewModel = ChessViewModel()
 
