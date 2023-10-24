@@ -1,6 +1,5 @@
 import "CoreLibs/frameTimer"
 
-local gfx <const> = playdate.graphics
 local DEBUG <const> = true
 
 function reverseTable(x)
@@ -55,27 +54,25 @@ function printDebug(msg, debug)
     end
 end
 
-local TOAST_FONT <const> = gfx.font.new("fonts/Roobert-10-Bold")
-function showToast(text, duration)
-    printDebug("Utils: showing toast message: "..text.." for "..duration.." frames", DEBUG)
-    -- local width <const> = TOAST_FONT:getTextWidth(text)
-    -- local height <const> = TOAST_FONT:getHeight()
-    local PADDING <const> = 20
-    local X <const> = 200
-    local Y <const> = 200
-    local t = playdate.frameTimer.new(duration)
-    t.updateCallback = function()
-        gfx.pushContext()
-            gfx.setFont(TOAST_FONT)
-            local width, height = gfx.getTextSize(text)
-            gfx.fillRoundRect(X-width/2-PADDING/2, Y-PADDING/2, width+PADDING, height+PADDING, 9)
-            gfx.setColor(gfx.kColorWhite)
-            gfx.drawRoundRect(X-width/2-PADDING/2, Y-PADDING/2, width+PADDING, height+PADDING, 9)
-            gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
-            gfx.drawTextAligned(text, X, Y, kTextAlignment.center)
-        gfx.popContext()
-    end
-end
+-- local TOAST_FONT <const> = gfx.font.new("fonts/Roobert-10-Bold")
+-- function showToast(text, duration)
+--     printDebug("Utils: showing toast message: "..text.." for "..duration.." frames", DEBUG)
+--     local PADDING <const> = 20
+--     local X <const> = 200
+--     local Y <const> = 200
+--     local t = playdate.frameTimer.new(duration)
+--     t.updateCallback = function()
+--         gfx.pushContext()
+--             gfx.setFont(TOAST_FONT)
+--             local width, height = gfx.getTextSize(text)
+--             gfx.fillRoundRect(X-width/2-PADDING/2, Y-PADDING/2, width+PADDING, height+PADDING, 9)
+--             gfx.setColor(gfx.kColorWhite)
+--             gfx.drawRoundRect(X-width/2-PADDING/2, Y-PADDING/2, width+PADDING, height+PADDING, 9)
+--             gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
+--             gfx.drawTextAligned(text, X, Y, kTextAlignment.center)
+--         gfx.popContext()
+--     end
+-- end
 
 function iif(statement, arg1, arg2)
     if statement then
@@ -90,42 +87,30 @@ function sleep(delayMs)
     while playdate.getElapsedTime()*100 < delayMs do end
 end
 
-function longRunningTask(delayMs, totalTime, coroutineToRun, onProgressCallback)
+function longRunningTask(co, estimatedTotalTime, interval, onProgressCallback, onDoneCallback)
+    -- todo might need to nill and remove existing timer
+
     playdate.resetElapsedTime()
     local timer = nil
-    local t = playdate.timer.keyRepeatTimerWithDelay(delayMs, delayMs, function ()
-        onProgressCallback(playdate.getElapsedTime()*100/totalTime)
-        if coroutine.status(coroutineToRun) == "suspended" then
-            coroutine.resume(coroutineToRun)
-        elseif coroutine.status(coroutineToRun) == "dead" then
+    timer = playdate.timer.keyRepeatTimerWithDelay(0, interval, function()
+        if onProgressCallback then
+            onProgressCallback((playdate.getElapsedTime() / estimatedTotalTime) * 100)
+        end
+
+        if coroutine.status(co) == "suspended" then
+            coroutine.resume(co)
+        elseif coroutine.status(co) == "dead" then
+            -- user might click new game while computer is thinking
             if timer then
+                printDebug("Utils: longRunningTask() timer removed", DEBUG)
                 timer:remove()
+            end
+
+            if onDoneCallback then
+                printDebug("Utils: longRunningTask() onDoneCallback called", DEBUG)
+                onDoneCallback()
             end
         end
     end)
-    timer = t
-    if timer then
-        timer:start()
-    end
+    return timer
 end
-
--- function runAfterDelay(delay, functionToRun)
---     local firstRun = true
---     local delayedTimer = playdate.timer.keyRepeatTimerWithDelay(delay, 0, function ()
---         print("running")
---         if firstRun then
---             firstRun = false
---         else
---             functionToRun()
---             if delayedTimer then
---                 delayedTimer:remove()
---             end
---             print("done running")
---         end
---     end)
-
---     if delayedTimer then
---         delayedTimer:start()
---     end
-
--- end

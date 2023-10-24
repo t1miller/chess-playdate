@@ -5,11 +5,10 @@ import "CoreLibs/graphics"
 
 import 'library/AnimatedSprite'
 import 'helper/Utils'
-import 'helper/ResourceCache'
 
 local gfx <const> = playdate.graphics
-local DEBUG <const> = false
-local PROGRESS_BAR_Z <const> = 100
+local DEBUG <const> = true
+-- local PROGRESS_BAR_Z <const> = 100
 local TEXT_Z <const> = 105
 local PROGRESS_BAR_STATE <const> = {
     SHOWING = "SHOWING",
@@ -25,16 +24,11 @@ function ProgressBar:init(x, y)
     self.y = y
     self.state = PROGRESS_BAR_STATE.NOT_SHOWING
     self.percent = 0
-    self.cache = ResourceCache()
     self.font = gfx.font.new("fonts/Roobert-10-Bold")
-    -- self.font = gfx.font.new("fonts/Outfoxies 2X")
 
     self:initTextSprite()
     self:initBackgroundSprite()
-    self:initAnimationSprite()
-
-    -- todo might need this here
-    -- self:updateProgress(0)
+    -- self:initAnimationSprite()
 end
 
 function ProgressBar:initTextSprite()
@@ -48,7 +42,6 @@ function ProgressBar:initTextSprite()
 end
 
 function ProgressBar:initBackgroundSprite()
-    -- todo change 70 back to 140
     local backgroundImage = gfx.image.new(140, 32)
     gfx.pushContext(backgroundImage)
         gfx.fillRoundRect(2, 3, 140, 26, 10)
@@ -68,21 +61,26 @@ function ProgressBar:initBackgroundSprite()
     self.borderSprite:moveTo(self.x+1, self.y-2)
 end
 
-function ProgressBar:initAnimationSprite()
-    self.animatedSprite = AnimatedSprite.new(
-        self.cache:getAnimationImage("robot-progress"),
-        self.cache:getAnimationConfig("robot-progress")
-    )
-    self.animatedSprite:setZIndex(PROGRESS_BAR_Z)
-    self.animatedSprite:setCenter(0, 0)
-    self.animatedSprite:moveTo(self.x+3, self.y)
-end
+-- function ProgressBar:initAnimationSprite()
+--     self.animatedSprite = AnimatedSprite.new(
+--         gfx.imagetable.new("animation/robot-progress-inverted"),
+--         AnimatedSprite.loadStates("animation/progress.json")
+--     )
+--     self.animatedSprite:setZIndex(PROGRESS_BAR_Z)
+--     self.animatedSprite:setCenter(0, 0)
+--     self.animatedSprite:moveTo(self.x+3, self.y)
+
+--     -- this animation shouldnt be started because the sprite isnt added
+--     -- idk why it starts immediately
+--     self.animatedSprite:stopAnimation()
+--     self.animatedSprite:remove()
+-- end
 
 function ProgressBar:hide()
     self.state = PROGRESS_BAR_STATE.NOT_SHOWING
     self.percent = 0
-    self.animatedSprite:stopAnimation()
-    self.animatedSprite:remove()
+    -- self.animatedSprite:stopAnimation()
+    -- self.animatedSprite:remove()
     self.textSprite:remove()
     self.backgroundSprite:remove()
     self.borderSprite:remove()
@@ -91,8 +89,8 @@ end
 
 function ProgressBar:show()
     self.state = PROGRESS_BAR_STATE.SHOWING
-    self.animatedSprite:add()
-    self.animatedSprite:playAnimation()
+    -- self.animatedSprite:add()
+    -- self.animatedSprite:playAnimation()
     self.textSprite:add()
     self.backgroundSprite:add()
     self.borderSprite:add()
@@ -118,6 +116,4 @@ function ProgressBar:updateProgress(percent)
         self.percent * 1.4,
         self.backgroundSprite.height)
     self.backgroundSprite:markDirty()
-
-    printDebug("ProgressBar: updateProgress() progress "..percentString, DEBUG)
 end

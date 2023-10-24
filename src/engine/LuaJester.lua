@@ -19,7 +19,7 @@ ShowStat, CalcKPK, CalcKg, IArrow, MoveTree, PrisePassant, GetAlgMvt, copyValueO
 Anyagress, KnightPts, QueenPts, PositPts, PlayMov, IRepeat, ChoiceMov, MultiMov, XRayKg, DoCastle, DoCalc, Lalgb, 
 UpdatePiecMap, getBoard, UpdateDisplay, AvailCaptur, InitStatus, MessageOut, Pagress, CheckMatrl, AttachMov, PawnPts, 
 RookPts, KingPts, AvailMov, BishopPts, ValidateMov, Peek, Seek, SwitchSides, GetFen, EnterMove, SetFen, ResetFlags, 
-Jst_Play, UndoMov, _BTREE, _GAMESTATS, _INT, _MOVES
+Jst_Play, UndoMov, ShowMov, _BTREE, _GAMESTATS, _INT, _MOVES
 
 function _BTREE()
     local b = {}
@@ -58,6 +58,7 @@ Js_maxDepth = 6         -- Search Depth setting for lua (no timeout option)
 
 Js_searchTimeout = 12   -- 9 seconds for search allowed
 
+Js_prevYieldTime = 0
 -- Js_startTime = 0
 -- used for ChessGame GAME_STATE
 Js_castled = false
@@ -351,7 +352,7 @@ Js_pgn = ""   -- save too
 -- end
 
 function BoardCpy(a, b)
-    local sq = 0
+    -- local sq = 0
     for sq = 0, 63, 1 do
         b[1 + sq] = a[1 + sq]
     end
@@ -360,9 +361,9 @@ end
 function WatchPosit()
     local PawnStorm = false
     local i = 0
-    local side = 0
+    -- local side = 0
     local b = 0
-    local sq = 0
+    -- local sq = 0
 
     local fyle = 0
     local rank = 0
@@ -380,8 +381,8 @@ function WatchPosit()
     local Pd = 0
     local pp = 0
     local z = 0
-    local j = 0
-    local k = 0
+    -- local j = 0
+    -- local k = 0
     local val = 0
 
     Agression(Js_white, Js_agress[1 + Js_white])
@@ -646,7 +647,7 @@ end
 function CalcKBNK(winner, king1, king2)
     local end_KBNKsq = 0
     local s = 0
-    local sq = 0
+    -- local sq = 0
     for sq = 0, 63, 1 do
         if (Js_board[1 + sq] == Js_bishop) then
             if (IRaw(sq) % 2 == IColmn(sq) % 2) then
@@ -729,7 +730,7 @@ function Undo()
     local f = Js_movesList[1 + Js_nGameMoves].gamMv >> 8
     local t = Js_movesList[1 + Js_nGameMoves].gamMv & 0xFF
     local from = 0
-    local g = 0
+    -- local g = 0
 
     if ((Js_board[1 + t] == Js_king) and (IArrow(t, f) > 1)) then
         DoCastle(Js_movesList[1 + Js_nGameMoves].color, f, t, 2)
@@ -897,7 +898,7 @@ function ComputerMvt()
     end
     Js_computerMoved =  true
     -- Js_startTime = os.clock()
-    playdate.resetElapsedTime()
+    -- playdate.resetElapsedTime()
     
     ChoiceMov(Js_computer, 1)
     IfCheck()
@@ -945,6 +946,7 @@ function InitMoves()
         ptyp = ptyp + 1
     end
 
+    coroutine.yield()
     ptyp = 1
     while (ptyp < 8) do
         po = 21
@@ -1144,8 +1146,8 @@ function CheckMov(s, iop)
 
     local cnt = 0
     local pnt = 0
-    local s0 = ""
-    local s1 = ""
+    -- local s0 = ""
+    -- local s1 = ""
 
     if (iop == 2) then
         UnValidateMov(Js_enemy, xnode, tempb, tempc, tempsf, tempst)
@@ -1155,14 +1157,14 @@ function CheckMov(s, iop)
     cnt = 0
     AvailMov(Js_enemy, 2)
     pnt = Js_treePoint[1 + 2]
-    s0 = copyValueOf(s)
+    -- s0 = copyValueOf(s)
 
     while (pnt < Js_treePoint[1 + 3]) do
         node = Js_Tree[1 + pnt] -- _BTREE
         pnt = pnt + 1
 
         Lalgb(node.f, node.t, node.flags)
-        s1 = copyValueOf(Js_asciiMove[1 + 0])
+        -- s1 = copyValueOf(Js_asciiMove[1 + 0])
         if (not ((((s[1 + 0] ~= Js_asciiMove[1 + 0][1 + 0]) or (s[1 + 1] ~= Js_asciiMove[1 + 0][1 + 1]) or (s[1 + 2] ~= Js_asciiMove[1 + 0][1 + 2]) or (s[1 + 3] ~= Js_asciiMove[1 + 0][1 + 3]))) and
                 (((s[1 + 0] ~= Js_asciiMove[1 + 1][1 + 0]) or (s[1 + 1] ~= Js_asciiMove[1 + 1][1 + 1]) or (s[1 + 2] ~= Js_asciiMove[1 + 1][1 + 2]) or (s[1 + 3] ~= Js_asciiMove[1 + 1][1 + 3]))) and
                 (((s[1 + 0] ~= Js_asciiMove[1 + 2][1 + 0]) or (s[1 + 1] ~= Js_asciiMove[1 + 2][1 + 1]) or (s[1 + 2] ~= Js_asciiMove[1 + 2][1 + 2]) or (s[1 + 3] ~= Js_asciiMove[1 + 2][1 + 3]))) and ((
@@ -1324,26 +1326,27 @@ function ShowThink(score4, best)
         s = s .. copyValueOf(Js_tmpCh) .. " "
         i = i + 1
     end
-    -- MessageOut("Thinking: "..s , true)
-
-    --ShowScore(score4)
+    MessageOut("Thinking: "..s , true)
+    ShowScore(score4)
 end
 
 function ResetData()
-    local i = 0
-    local j = 0
+    -- local i = 0
+    -- local j = 0
 
+    coroutine.yield()
     Js_movesList = {}
-
     for i = 0, 512, 1 do
         Js_movesList[1 + i] = _MOVES()
     end
 
+    coroutine.yield()
     Js_Tree = {}
     for i = 0, 2000, 1 do
         Js_Tree[1 + i] = _BTREE()
     end
 
+    coroutine.yield()
     for i = 0, Js_maxDepth - 1, 1 do
         Js_treePoint[1 + i] = 0
         Js_variants[1 + i] = 0
@@ -1377,11 +1380,13 @@ function ResetData()
         Js_pieceIndex[1 + i] = 0
     end
 
+    coroutine.yield()
     for i = 0, 4200, 1 do
         Js_arrowData[1 + i] = 0
         Js_crossData[1 + i] = 0
     end
 
+    coroutine.yield()
     for i = 0, 1, 1 do
         for j = 0, 63, 1 do
             Js_agress[1 + i] = {} -- creates object
@@ -1412,18 +1417,21 @@ function ResetData()
 
     -- this takes longer, maybe it is possible to optimize via (undefined?0:value)
 
+    coroutine.yield()
     for i = 1, 10000, 1 do
         Js_storage[1 + i] = 0
     end
 
+    coroutine.yield()
     for i = 1, 40000, 1 do
-        Js_nextCross[i] = 0
-        Js_nextArrow[i] = 0
+        Js_nextCross[1 + i] = 0
+        Js_nextArrow[1 + i] = 0
     end
+    coroutine.yield()
 end
 
 function InChecking(side)
-    local i = 0
+    -- local i = 0
     for i = 0, 63, 1 do
         if ((Js_board[1 + i] == Js_king) and
                 (Js_color[1 + i] == side) and
@@ -1456,17 +1464,15 @@ function ShowScore(score5)
 end
 
 function MixBoard(a, b, c)
-    local sq = 0
+    -- local sq = 0
     for sq = 0, 63, 1 do
         c[1 + sq] = ((a[1 + sq] * (10 - Js_working) + b[1 + sq] * Js_working) / 10)
     end
 end
 
 function InitGame()
-    local i = 0
+    -- local i = 0
 
-    playdate.resetElapsedTime()
-    printDebug("ChessGame: InitGame() start", DEBUG)
     ResetData()
 
     Js_flip = false
@@ -1483,8 +1489,9 @@ function InitGame()
     Js_fAbandon = false
     Js_fUserWin_kc = false
 
-
+    coroutine.yield()
     InitArrow()
+    coroutine.yield()
     InitMoves()
 
     Js_working = -1
@@ -1533,8 +1540,6 @@ function InitGame()
     InitStatus()
 
     Js_pgn = ""
-
-    printDebug("ChessGame: InitGame() done, time = "..playdate.getElapsedTime(), DEBUG)
 end
 
 function IColmn(a)
@@ -1654,7 +1659,7 @@ function CalcKg(side, score)
     local king1 = 0
     local king2 = 0
     local s = 0
-    local i = 0
+    -- local i = 0
 
     ChangeForce()
 
@@ -1707,7 +1712,7 @@ function PrisePassant(xside, f, t, iop)
 end
 
 function GetAlgMvt(ch)
-    local i = 0
+    -- local i = 0
     for i = 0, 63, 1 do
         if (ch == string.sub(Js_szIdMvt, i + 1, i + 1)) then
             return Js_szAlgMvt[1 + i]
@@ -1719,7 +1724,7 @@ end
 
 function copyValueOf(a)
     local str = ""
-    local i = 0
+    -- local i = 0
     for i = 0, #a - 1, 1 do
         if (type(a[1 + i]) == "string") then
             str = str .. a[1 + i]
@@ -1733,7 +1738,7 @@ function copyValueOf(a)
 end
 
 function Agression(side, a)
-    local i = 0
+    -- local i = 0
     local sq = 0
     local piece = 0
     local c = 0
@@ -1807,7 +1812,7 @@ function InitArrow()
 end
 
 function IfCheck()
-    local i = 0
+    -- local i = 0
     for i = 0, 63, 1 do
         if (Js_board[1 + i] == Js_king) then
             if (Js_color[1 + i] == Js_white) then
@@ -1883,7 +1888,7 @@ end
 function PositPts(side, score)
     local pscore = { 0, 0 }
     local xside = 0
-    local i = 0
+    -- local i = 0
     local sq = 0
     local s = 0
 
@@ -2004,7 +2009,7 @@ end
 
 function IRepeat(cnt)
     local c = 0
-    local i = 0
+    -- local i = 0
 
     local m = 0
     local f = 0
@@ -2048,7 +2053,7 @@ function ChoiceMov(side, iop)
 
     local alpha = 0
     local beta = 0
-    local i = 0
+    -- local i = 0
     local xside = Js_otherTroop[1 + side]
     local m_f = 0
     local m_t = 0
@@ -2100,6 +2105,11 @@ function ChoiceMov(side, iop)
         Js_scoreDither = 0
         Js_dxDither = 20
     end
+    -- printDebug(tostring(Js_flag.timeout),DEBUG)
+    -- printDebug(tostring(Js_depth_Seek),DEBUG)
+    -- printDebug(tostring(Js_maxDepthSeek),DEBUG)
+    -- printDebug("ChessGame: ChoiceMov() flag.timeout="..Js_flag.timeout.." Js_depth_Seek="..Js_depth_Seek.." Js_maxDepthSeek:"..Js_maxDepthSeek, DEBUG)
+
     while ((not Js_flag.timeout) and (Js_depth_Seek < Js_maxDepthSeek)) do
         coroutine.yield()
         Js_depth_Seek = Js_depth_Seek + 1
@@ -2108,9 +2118,11 @@ function ChoiceMov(side, iop)
         for i = 1, Js_depth_Seek, 1 do
             Js_eliminate0[1 + i] = Js_variants[1 + i]
         end
+
         if (score.i < alpha) then
             score.i = Seek(side, 1, Js_depth_Seek, -9000, score.i, Js_variants, rpt)
         end
+
         if ((score.i > beta) and ((Js_root.flags & Js__idem) == 0)) then
             score.i = Seek(side, 1, Js_depth_Seek, score.i, 9000, Js_variants, rpt)
         end
@@ -2120,7 +2132,6 @@ function ChoiceMov(side, iop)
         for i = Js_treePoint[1 + 1] + 1, Js_treePoint[1 + 2] - 1, 1 do
             Peek(i, Js_treePoint[1 + 2] - 1)
         end
-
 
         for i = 1, Js_depth_Seek, 1 do
             Js_eliminate0[1 + i] = Js_variants[1 + i]
@@ -2145,11 +2156,14 @@ function ChoiceMov(side, iop)
         else
             alpha = score.i - Js__alpha - Js_dxDither
         end
+
+        -- printDebug("ChessGame: ChoiceMov() flag.timeout="..tostring(Js_flag.timeout).." Js_depth_Seek="..Js_depth_Seek.." Js_maxDepthSeek:"..Js_maxDepthSeek, DEBUG)
     end
 
     score.i = Js_root.score
 
     if (iop == 2) then
+        -- printDebug("ChessGame: ChoiceMov() iop="..iop, DEBUG)
         return
     end
 
@@ -2439,7 +2453,10 @@ function DoCalc(side, ply, alpha, beta, gainScore, slk, InChk)
     if (evflag) then
         Js_cCompNodes = Js_cCompNodes + 1
         -- if (Js_cCompNodes % 200 == 0) then
-        if (Js_cCompNodes % 20 == 0) then
+        local currTime = playdate.getElapsedTime()
+        -- if (Js_cCompNodes % 50 == 0 or currTime - Js_prevYieldTime > .5) then
+        if (currTime - Js_prevYieldTime > .3) then
+            Js_prevYieldTime = currTime
             coroutine.yield()
         end
         Agression(side, Js_agress[1 + side])
@@ -2475,8 +2492,8 @@ function DoCalc(side, ply, alpha, beta, gainScore, slk, InChk)
 end
 
 function Lalgb(f, t, flag)
-    local i = 0
-    local y = 0
+    -- local i = 0
+    -- local y = 0
     local m3p = 0
 
     if (f ~= t) then
@@ -2569,7 +2586,7 @@ function Lalgb(f, t, flag)
 end
 
 function UpdatePiecMap(side, sq, iop)
-    local i = 0
+    -- local i = 0
     if (iop == 1) then
         Js_piecesCount[1 + side] = Js_piecesCount[1 + side] - 1
         for i = Js_pieceIndex[1 + sq], Js_piecesCount[1 + side], 1 do
@@ -2588,7 +2605,7 @@ function getBoard()
     local BB = {} -- 8x8
     local iCol = 0
     local iLine = 0
-    local i = 0
+    -- local i = 0
     local s = ""
     local ch = ""
 
@@ -2621,7 +2638,7 @@ function UpdateDisplay()
     local BB = {} -- 8x8
     local iCol = 0
     local iLine = 0
-    local i = 0
+    -- local i = 0
     local s = ""
     local ch = ""
 
@@ -2659,8 +2676,8 @@ function AvailCaptur(side, ply)
     local node = Js_Tree[1 + Tpt] --_BTREE
     local inext = Tpt + 1
     local r7 = Js_raw7[1 + side]
-    local ipl = side
-    local i = 0
+    -- local ipl = side
+    -- local i = 0
 
     local sq = 0
     local piece = 0
@@ -2763,8 +2780,8 @@ function AvailCaptur(side, ply)
 end
 
 function InitStatus()
-    local i = 0
-    local sq = 0
+    -- local i = 0
+    -- local sq = 0
     local c = 0
     local c2 = 0
 
@@ -2819,7 +2836,7 @@ function Pagress(c, u)
 end
 
 function CheckMatrl()
-    local flag = true
+    -- local flag = true
 
     local nP = 0
     local nK = 0
@@ -2832,7 +2849,7 @@ function CheckMatrl()
     local nB1 = 0
     local nB2 = 0
 
-    local i = 0
+    -- local i = 0
 
     for i = 0, 63, 1 do
         if (Js_board[1 + i] == Js_pawn) then
@@ -2996,7 +3013,7 @@ function PawnPts(sq, side)
     local r = 0
     local in_square = false
     local e = 0
-    local j = 0
+    -- local j = 0
 
     if (Js_c1 == Js_white) then
         s = Js_wPawnMvt[1 + sq]
@@ -3259,7 +3276,7 @@ end
 
 function AvailMov(side, ply)
     local xside = Js_otherTroop[1 + side]
-    local i = 0
+    -- local i = 0
     local square = 0
     local f = 0
 
@@ -3437,7 +3454,7 @@ end
 function Peek(p1, p2)
     local s0 = Js_Tree[1 + p1].score
     local p0 = p1
-    local p = 0
+    -- local p = 0
     local s = 0
 
     for p = p1 + 1, p2, 1 do
@@ -3489,14 +3506,17 @@ function Seek(side, ply, depth, alpha, beta, bstline, rpt)
 
     if ((rpt.i == 1) and (ply > 1)) then
         if (Js_nMovesMade <= 11) then
+            -- printDebug("ChessGame: Seek() Js_nMovesMade <= 11 return", DEBUG)
             return 100
         end
+        -- printDebug("ChessGame: Seek() i==1 and ply > 1 return", DEBUG)
         return 0
     end
 
     score3 = DoCalc(side, ply, alpha, beta, Js_gainScore.i, slk, InChk)
     if (score3 > 9000) then
         bstline[1 + ply] = 0
+        -- printDebug("ChessGame: Seek() score3:"..score3.." > 9000 return score3", DEBUG)
         return score3
     end
 
@@ -3529,6 +3549,8 @@ function Seek(side, ply, depth, alpha, beta, bstline, rpt)
     d = iif((Js_depth_Seek == 1), 7, 11)
 
     if ((ply > Js_depth_Seek + d) or ((depth < 1) and (score3 > beta))) then
+        -- printDebug("ChessGame: Seek() return score3", DEBUG)
+        -- printDebug("ChessGame: Seek() ply:"..ply.." depth: "..depth.." score3: "..score3.." beta: "..beta, DEBUG)
         return score3
     end
 
@@ -3626,6 +3648,7 @@ function Seek(side, ply, depth, alpha, beta, bstline, rpt)
                     pbst = 0
                 end
 
+                -- removed to optimize performance
                 if (Js_depth_Seek > 2) then
                     ShowThink(best, bstline)
                 end
@@ -3633,6 +3656,7 @@ function Seek(side, ply, depth, alpha, beta, bstline, rpt)
         end
 
         if (Js_flag.timeout) then
+            -- printDebug("ChessGame: timeout true", DEBUG)
             return (-Js_scoreTP[1 + (ply - 1)])
         end
 
@@ -3671,6 +3695,7 @@ function Seek(side, ply, depth, alpha, beta, bstline, rpt)
     -- if (os.clock() - Js_startTime > Js_searchTimeout) then
     if (playdate.getElapsedTime() > Js_searchTimeout) then
         Js_flag.timeout = true
+        -- printDebug("ChessGame: Seek() search timedout", DEBUG)
     end
 
     return best
@@ -3775,7 +3800,7 @@ end
 -- ignores checkmate status flag
 
 function EnterMove(from_sq, to_sq, promo)
-    local mvt = 0
+    -- local mvt = 0
     local fsq_mvt = 0
     local tsq_mvt = 0
     local i = 0
@@ -3883,7 +3908,7 @@ function SetFen(fen)
     local pt = 0
     local i2 = 0
     local piece = 0
-    local j = 1
+    -- local j = 1
 
     local side = ""
     local enp = ""
@@ -4115,66 +4140,7 @@ local function removeLastTwoMovesPgn()
     printDebug("ChessGame: removeLast2MovesPgn() after pgn: "..Js_pgn, DEBUG)
 end
 
--------------------------------------------
--- SAMPLES...
--------------------------------------------
 
--- -- moves entering
--- function autosample1()
---     EnterMove("e2", "e4", "")
---     EnterMove("c7", "c5", "")
---     EnterMove("f1", "e2", "")
---     EnterMove("c5", "c4", "")
---     EnterMove("b2", "b4", "")
---     EnterMove("c4", "b3", "")
---     EnterMove("g1", "f3", "")
---     EnterMove("b3", "b2", "")
---     EnterMove("e1", "g1", "")
---     EnterMove("b2", "a1", "R") -- promote rook
---     MessageOut("FEN:" .. GetFen(), true)
--- end
-
--- -- automatic game
--- function autosample2()
---     print("Thinking, autogame...")
---     while ((not Js_fGameOver) and (not Js_fAbandon) and (not Js_fMate_kc) and (not Js_fStalemate)) do
---         Jst_Play()                  -- next move
---         print("nodes " .. Js_cCompNodes) -- to see performance
---     end
---     print(Js_pgn)
--- end
-
--- -- undo cases
--- function autosample3()
---     EnterMove("e2", "e4", "")
---     UndoMov()
---     EnterMove("a2", "a4", "")
---     EnterMove("c7", "c5", "")
---     UndoMov()
---     Jst_Play()
---     UndoMov()
---     MessageOut(GetFen(), true)
--- end
-
--- -- set FEN case
--- function autosample4()
---     SetFen("7k/Q7/2P2K2/8/8/8/8/8 w - - 0 40") -- set given FEN
---     MessageOut(GetFen(), true)
-
---     Jst_Play()
---     MessageOut(GetFen(), true)
--- end
-
--- InitGame()  -- Also to start a new game again
-
-
--- UpdateDisplay()
-
---autosample1()
-
--- autosample2()
---autosample3()
---autosample4()
 
 GAME_STATE = {
     NEW_GAME = "New Game",
@@ -4186,7 +4152,6 @@ GAME_STATE = {
     CHECK = "Check!",
     INSUFFICIENT_MATERIAL = "Insufficient Material. Draw!",
     STALEMATE = "Stalemate!",
-    -- COMPUTER_THINKING = "Computer Thinking",
     USER_IN_CHECK = "User In Check",
     CASTLED = "Castled",
     PROMOTED = "Promoted",
@@ -4201,11 +4166,11 @@ class('ChessGame').extends()
 function ChessGame:init()
     ChessGame.super.init(self)
     printDebug("ChessGame: initialized jester engine", DEBUG)
-    printDebug("ChessGame: search depth = " .. Js_maxDepth .. " search timeout = " .. (Js_searchTimeout) .. " seconds", DEBUG)
-    self:newGame()
+    -- self:newGame()
 end
 
-function ChessGame:newGame()
+function ChessGame:newGame(onProgressCallback, onDoneCallback)
+    printDebug("ChessGame: newGame() search depth = " .. Js_maxDepth .. " search timeout = " .. (Js_searchTimeout) .. " seconds", DEBUG)
     playdate.resetElapsedTime()
     self.state = GAME_STATE.NEW_GAME
     self.computerThinking = false
@@ -4216,12 +4181,23 @@ function ChessGame:newGame()
     end
     self.computersMove = {}
     self.usersMove = {}
-    InitGame()
-    UpdateDisplay()
-    printDebug("ChessGame: newGame() took "..playdate.getElapsedTime().." seconds", DEBUG)
+    self.gameLoading = true
+    local newGameCoroutine = coroutine.create(function()
+        InitGame()
+        UpdateDisplay()
+        -- onDoneCallback()
+        self.gameLoading = false
+        printDebug("ChessGame: newGame() took "..playdate.getElapsedTime().." seconds", DEBUG)
+    end)
+
+    self.timer = longRunningTask(newGameCoroutine, 2.3, 10, onProgressCallback, onDoneCallback)
+    -- InitGame()
+    -- UpdateDisplay()
 end
 
 function ChessGame:moveUser(from, to)
+
+    printDebug("ChessGame: number of timers allocated: "..#playdate.timer.allTimers(), DEBUG)
     -- todo remove
     -- local moves = self:calculateAvailableMoves(from)
     -- todo remove nop state
@@ -4247,13 +4223,12 @@ function ChessGame:moveUser(from, to)
                       newRow,
                       newCol}
 
-    -- self.state = GAME_STATE.VALID_MOVE
     self.state = GAME_STATE.USER_MOVED
     self:updateState()
     return true
 end
 
-function ChessGame:moveComputer(moveDoneCallback, onProgressCallback)
+function ChessGame:moveComputer(onProgressCallback, onDoneCallback)
     self.state = GAME_STATE.NOP
     local computersMoveCoroutine = coroutine.create(function()
         self.computerThinking = true
@@ -4267,32 +4242,29 @@ function ChessGame:moveComputer(moveDoneCallback, onProgressCallback)
                               oldCol,
                               newRow,
                               newCol}
-        -- self.computersMove = {self.rowColLookup[Js_origSquare][1],
-        --                       self.rowColLookup[Js_origSquare][2],
-        --                       self.rowColLookup[Js_destSquare][1],
-        --                       self.rowColLookup[Js_destSquare][2]}
 
         printDebug("ChessGame: nodes searched= " .. Js_cCompNodes .. " time=" .. playdate.getElapsedTime().." depth="..Js_maxDepth, DEBUG)     -- to see performance
         -- -- self.state = GAME_STATE.VALID_MOVE
         -- self.state = GAME_STATE.COMPUTER_MOVED
         self:updateState()
-        moveDoneCallback()
+        -- onDoneCallback()
         self.computerThinking = false
     end)
 
-    playdate.resetElapsedTime()
+    self.timer = longRunningTask(computersMoveCoroutine, Js_searchTimeout, 30, onProgressCallback, onDoneCallback)
+    -- playdate.resetElapsedTime()
     
-    self.timer = playdate.timer.keyRepeatTimerWithDelay(0, 10, function()
-        onProgressCallback((playdate.getElapsedTime() / Js_searchTimeout) * 100)
-        if coroutine.status(computersMoveCoroutine) == "suspended" then
-            coroutine.resume(computersMoveCoroutine)
-        elseif coroutine.status(computersMoveCoroutine) == "dead" then
-            -- user might click end game while computer is thinking
-            if self.timer then
-                self.timer:remove()
-            end
-        end
-    end)
+    -- self.timer = playdate.timer.keyRepeatTimerWithDelay(0, 10, function()
+    --     onProgressCallback((playdate.getElapsedTime() / Js_searchTimeout) * 100)
+    --     if coroutine.status(computersMoveCoroutine) == "suspended" then
+    --         coroutine.resume(computersMoveCoroutine)
+    --     elseif coroutine.status(computersMoveCoroutine) == "dead" then
+    --         -- user might click end game while computer is thinking
+    --         if self.timer then
+    --             self.timer:remove()
+    --         end
+    --     end
+    -- end)
 end
 
 function ChessGame:isGameOver()
@@ -4382,6 +4354,10 @@ function ChessGame:undoLastTwoMoves()
     return true
 end
 
+function ChessGame:isGameLoading()
+    return self.gameLoading
+end
+
 function ChessGame:isComputerThinking()
     return self.computerThinking
 end
@@ -4389,6 +4365,9 @@ end
 function ChessGame:setDifficulty(params)
     Js_searchTimeout = params[1]
     Js_maxDepth = params[2]
+    Js_maxDepthSeek = (Js_maxDepth - 1)
+    -- todo variables need to be reinitialized because they
+    -- deoend on maxDepth
     printDebug("ChessGame: difficulty set: timeout = " .. Js_searchTimeout .. " seconds, depth = " .. Js_maxDepth, DEBUG)
 end
 
@@ -4528,6 +4507,22 @@ end
 function ChessGame:setCapturedPieceScoreChanges()
     SetFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - - 0 40")
 end
+
+-- function ChessGame:longRunningTask(co, estimatedTotalTime, onProgressCallback)
+--     -- todo might need to nill and remove existing timer
+--     playdate.resetElapsedTime()
+--     self.timer = playdate.timer.keyRepeatTimerWithDelay(0, 10, function()
+--         onProgressCallback((playdate.getElapsedTime() / estimatedTotalTime) * 100)
+--         if coroutine.status(co) == "suspended" then
+--             coroutine.resume(co)
+--         elseif coroutine.status(co) == "dead" then
+--             -- user might click new game while computer is thinking
+--             if self.timer then
+--                 self.timer:remove()
+--             end
+--         end
+--     end)
+-- end
 
 function ChessGame:toSavedTable()
     if self:isComputerThinking() then
@@ -4759,3 +4754,64 @@ function ChessGame:initFromSavedTable(data)
         end
 
 end
+
+-------------------------------------------
+-- SAMPLES...
+-------------------------------------------
+
+-- -- moves entering
+-- function autosample1()
+--     EnterMove("e2", "e4", "")
+--     EnterMove("c7", "c5", "")
+--     EnterMove("f1", "e2", "")
+--     EnterMove("c5", "c4", "")
+--     EnterMove("b2", "b4", "")
+--     EnterMove("c4", "b3", "")
+--     EnterMove("g1", "f3", "")
+--     EnterMove("b3", "b2", "")
+--     EnterMove("e1", "g1", "")
+--     EnterMove("b2", "a1", "R") -- promote rook
+--     MessageOut("FEN:" .. GetFen(), true)
+-- end
+
+-- -- automatic game
+-- function autosample2()
+--     print("Thinking, autogame...")
+--     while ((not Js_fGameOver) and (not Js_fAbandon) and (not Js_fMate_kc) and (not Js_fStalemate)) do
+--         Jst_Play()                  -- next move
+--         print("nodes " .. Js_cCompNodes) -- to see performance
+--     end
+--     print(Js_pgn)
+-- end
+
+-- -- undo cases
+-- function autosample3()
+--     EnterMove("e2", "e4", "")
+--     UndoMov()
+--     EnterMove("a2", "a4", "")
+--     EnterMove("c7", "c5", "")
+--     UndoMov()
+--     Jst_Play()
+--     UndoMov()
+--     MessageOut(GetFen(), true)
+-- end
+
+-- -- set FEN case
+-- function autosample4()
+--     SetFen("7k/Q7/2P2K2/8/8/8/8/8 w - - 0 40") -- set given FEN
+--     MessageOut(GetFen(), true)
+
+--     Jst_Play()
+--     MessageOut(GetFen(), true)
+-- end
+
+-- InitGame()  -- Also to start a new game again
+
+
+-- UpdateDisplay()
+
+--autosample1()
+
+-- autosample2()
+--autosample3()
+--autosample4()

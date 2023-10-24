@@ -7,6 +7,7 @@ import 'ui/ProgressBarView'
 import 'ui/CapturedPiecesView'
 import 'ui/MoveGridView'
 import 'ui/SettingsScreenView'
+import 'ui/Toast'
 import 'helper/Utils'
 import 'helper/SoundHelper'
 import 'helper/Settings'
@@ -21,40 +22,57 @@ class('ChessViewModel').extends()
 function ChessViewModel:init()
     ChessViewModel.super.init(self)
 
-    self.chessGame = ChessGame()
-    self.boardGrid = BoardGridView(self.chessGame:getBoard())
+    -- {time, depth}
+    self.GAME_DIFFICULTY = {
+        ["easy"] = { 2, 5 },
+        ["med"] = { 10, 5 },
+        ["hard"] = { 100, 6 },
+        ["harder"] = { 200, 8 },
+        ["expert"] = { 300, 8 },
+        ["master"] = {500, 8 },
+    }
+    -- set default settings
+    self.settings = Settings({
+        [SettingKeys.difficulty] = "easy"
+    })
+
+    self.boardGrid = BoardGridView()
     self.dialogBox = DialogBox(200, 120)
     self.progressBar = ProgressBar(255, 145)
     self.bCapturedPieces = CapturedPieces(270, 13, false)
     self.wCapturedPieces = CapturedPieces(270, 233, true)
     self.moveGrid = MoveGrid(254, 70)
-    -- {time, depth}
-    self.GAME_DIFFICULTY = {
-        ["easy"] = { 2, 3 },
-        ["med"] = { 5, 6 },
-        ["hard"] = { 10, 9 },
-        ["harder"] = { 30, 10 },
-        ["expert"] = { 60, 14 },
-        ["master"] = {180, 16 },
-    }
+    self.toast = Toast()
+    self.chessGame = ChessGame()
 
-    -- set default settings
-    self.settings = Settings({
-        [SettingKeys.difficulty] = "easy"
-    })
-    
     self.chessGame:setDifficulty(
         self.GAME_DIFFICULTY[self.settings:get(SettingKeys.difficulty)]
+        -- self.GAME_DIFFICULTY["med"]
+    )
+    
+    self.toast:show("loading chess engine", 300, true)
+    self.chessGame:newGame(
+
+        -- onProgressCallback
+        function(progress)
+            self.toast:updateProgress(progress)
+        end,
+
+        -- onDoneCallback
+        function ()
+            self.toast:dismiss()
+            self.boardGrid:addBoard(self.chessGame:getBoard())
+
+            self.gameSave = GameSave()
+            if self.gameSave:isEmpty() == false then
+                self:loadGame()
+                self.toast:show("loaded previous game", 60)
+            end
+        end
     )
 
-    self.gameSave = GameSave()
-    if self.gameSave:isEmpty() == false then
-        self:loadGame()
-        showToast("loaded previous game", 30)
-    end
 
     -- local settingsScreen = SettingsScreen()
-
     -- todo remove
     -- playdate.drawFPS()
     -- self.progressBar:show()
@@ -95,14 +113,27 @@ end
 
 
 function ChessViewModel:newGame()
-    self.chessGame:newGame()
-    self.boardGrid:clear()
-    self.boardGrid:addBoard(self.chessGame:getBoard())
-    self.wCapturedPieces:clear()
-    self.bCapturedPieces:clear()
-    self.moveGrid:clear()
-    self.progressBar:hide()
-    playSoundGameState(self.chessGame:getState())
+    self.toast:show("restarting chess engine", 60, true)
+
+    self.chessGame:newGame(
+
+        -- onProgressCallback
+        function (progress)
+            self.toast:updateProgress(progress)
+        end,
+
+        -- onDoneCallback
+        function ()
+            self.toast:dismiss()
+            self.boardGrid:clear()
+            self.boardGrid:addBoard(self.chessGame:getBoard())
+            self.wCapturedPieces:clear()
+            self.bCapturedPieces:clear()
+            self.moveGrid:clear()
+            self.progressBar:hide()
+            playSoundGameState(self.chessGame:getState())
+        end
+    )
 end
 
 function ChessViewModel:updateMissingPieces(board)
@@ -114,7 +145,15 @@ end
 function ChessViewModel:getComputersMove()
     self.progressBar:show()
     self.chessGame:moveComputer(
+        -- onProgressCallback
+        function(progress)
+            printDebug("ChessViewModel: progress = " .. progress .. "%".." time="..playdate.getElapsedTime(), DEBUG)
+            self.progressBar:updateProgress(progress)
+        end,
+
+        -- onDoneCallback
         function()
+            self.boardGrid:setBoardToActivePos()
             self.boardGrid:addMove(self.chessGame:getComputersMove())
             self.boardGrid:addBoard(self.chessGame:getBoard())
             self:updateMissingPieces()
@@ -125,10 +164,6 @@ function ChessViewModel:getComputersMove()
                 self.dialogBox:show(self.chessGame:getState())
                 return
             end
-        end,
-        function(progress)
-            printDebug("ChessViewModel: progress = " .. progress .. "%", DEBUG)
-            self.progressBar:updateProgress(progress)
         end
     )
 end
@@ -171,14 +206,14 @@ end
 function ChessViewModel:undoMove()
     local success = self.chessGame:undoLastTwoMoves()
     if success then
-        showToast("undid 2 moves", 30)
+        self.toast:show("undid 2 moves", 50)
         self.boardGrid:setBoardToActivePos()
         self.boardGrid:removeBoard()
         self.boardGrid:removeBoard()
         self:updateMissingPieces(self.boardGrid:getVisibleBoard())
         self.moveGrid:removeLastTwoMoves()
     else
-        showToast("nothing to undo",30)
+        self.toast:show("nothing to undo",50)
     end
 end
 
@@ -196,9 +231,7 @@ function ChessViewModel:saveGame()
     if self.chessGame:getState() ~= GAME_STATE.NEW_GAME and
         -- self.chessGame:isGameOver() == false and
         self.chessGame:isComputerThinking() == false then
-        showToast("saving game",60)
-        playdate.display.flush()
-        playdate.update()
+        self.toast:show("saving game",60)
         -- if computer is mid move the entire game wont be saved
         -- its difficult to handle the case were computer is mid move
         self.gameSave:put(GAME_SAVE_KEYS.BoardGridView,self.boardGrid:toSavedTable())
@@ -208,48 +241,29 @@ function ChessViewModel:saveGame()
     end
 end
 
-function ChessViewModel:APressed()
-    if self.chessGame:isComputerThinking() then
-        printDebug("ChessViewModel: computer still thinking. you cant move yet.", DEBUG)
-        showToast("wait for computers move...",30)
-        return
-    end
+-- function ChessViewModel:APressed()
+--     if self.chessGame:isComputerThinking() then
+--         self.toast:show("wait for computers move",30)
+--         return
+--     end
 
-    if self.dialogBox:isShowing() then
-        self.dialogBox:dismiss()
-        self:newGame()
-        return
-    end
+--     if self.chessGame:isGameLoading() then
+--         self.toast:show("wait for game to load",30)
+--         return
+--     end
 
-    if self.chessGame:isGameOver() then
-        self.dialogBox:show(self.chessGame:getState())
-        return
-    end
-
-    self:gameStateMachine()
-end
-
--- function ChessViewModel:BPressed()
---     -- user wants to dismiss end game dialog
 --     if self.dialogBox:isShowing() then
 --         self.dialogBox:dismiss()
+--         self:newGame()
+--         return
 --     end
--- end
 
--- function ChessViewModel:UpPressed()
---    self.boardGrid:selectPreviousRow(true)
--- end
+--     if self.chessGame:isGameOver() then
+--         self.dialogBox:show(self.chessGame:getState())
+--         return
+--     end
 
--- function ChessViewModel:DownPressed()
---    self. boardGrid:selectNextRow(true)
--- end
-
--- function ChessViewModel:LeftPressed()
---     self.boardGrid:selectPreviousColumn(true)
--- end
-
--- function ChessViewModel:RightPressed()
---     self.boardGrid:selectNextColumn(true)
+--     self:gameStateMachine()
 -- end
 
 function ChessViewModel:cranked()
@@ -269,10 +283,36 @@ function ChessViewModel:setupInputHandler()
     local chessViewModelInputHandler = {
 
 		AButtonDown = function ()
-            self:APressed()
+            if self.chessGame:isComputerThinking() then
+                self.toast:show("wait for computers move",30)
+                return
+            end
+        
+            if self.chessGame:isGameLoading() then
+                self.toast:show("wait for game to load",30)
+                return
+            end
+        
+            if self.dialogBox:isShowing() then
+                self.dialogBox:dismiss()
+                self:newGame()
+                return
+            end
+        
+            if self.chessGame:isGameOver() then
+                self.dialogBox:show(self.chessGame:getState())
+                return
+            end
+        
+            self:gameStateMachine()
+
 		end,
 
         cranked = function (change, acceleratedChange)
+            if self.chessGame:isGameLoading() then
+                self.toast:show("wait for game to load",30)
+                return
+            end
             self:cranked()
         end
 	}
@@ -283,7 +323,7 @@ function ChessViewModel:setupMenu()
     local menu = playdate.getSystemMenu()
     
     menu:addOptionsMenuItem("Difficulty", { "easy", "med", "hard", "harder", "expert", "master" }, self.settings:get(SettingKeys.difficulty), function(value)
-        showToast("computer thinks "..self.GAME_DIFFICULTY[value][2].. " moves ahead and\nspends up to "..self.GAME_DIFFICULTY[value][1].." seconds thinking", 120)
+        self.toast:show("computer thinks "..self.GAME_DIFFICULTY[value][2].. " moves ahead and\nspends up to "..self.GAME_DIFFICULTY[value][1].." seconds thinking", 120)
         self.chessGame:setDifficulty(self.GAME_DIFFICULTY[value])
         self.settings:set(SettingKeys.difficulty, value)
         self.settings:save()
@@ -295,7 +335,7 @@ function ChessViewModel:setupMenu()
 
     menu:addMenuItem("undo move", function()
         if self.chessGame:isComputerThinking() then
-            showToast("wait for computers move...",30)
+            self.toast:show("wait for computers move...",30)
             return
         end
         -- todo this has a bug

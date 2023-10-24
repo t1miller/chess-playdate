@@ -6,7 +6,7 @@ import "CoreLibs/nineslice"
 import 'CoreLibs/animator'
 
 import 'helper/Utils'
-import 'helper/ResourceCache'
+import 'helper/ImageCache'
 import 'ui/RectangleView'
 
 local FILES <const> = {
@@ -49,7 +49,7 @@ function BoardGridView:init(newBoard)
 
 	selfself = self
 
-	self.resourceCache = ResourceCache()
+	self.imageCache = ImageCache()
 	self.isWhite = true
 	-- r, c, position, piece
 	self.clicked = {
@@ -96,7 +96,7 @@ function BoardGridView:init(newBoard)
 
 	self:setupInputHandler()
 
-	self:addBoard(newBoard)
+	-- self:addBoard(newBoard)
 end
 
 function BoardGridView:addMove(move, callback)
@@ -244,29 +244,17 @@ function BoardGridView:drawCell(section, row, column, selected, x, y, width, hei
 	end
 
 	-- draw piece image
-	selfself:drawPieceSprite(row, column)
+	if selfself.boardListIdx ~= 0 then
+		-- print("boardListIdx == "..)
+		-- if boardListIdx == 0, theres no board to draw yet
+		-- this happens when the game is loading and the user
+		-- starts clicking buttons
+		selfself:drawPieceSprite(row, column)
+		return
+	end
 
 	gfx.popContext()
 end
--- function BoardGridView:selectNextRow(select)
--- 	self.gridview:selectNextRow(select)
--- 	self:draw()
--- end
-
--- function BoardGridView:selectPreviousRow(select)
--- 	self.gridview:selectPreviousRow(select)
--- 	self:draw()
--- end
-
--- function BoardGridView:selectNextColumn(select)
--- 	self.gridview:selectNextColumn(select)
--- 	self:draw()
--- end
-
--- function BoardGridView:selectPreviousColumn(select)
--- 	self.gridview:selectPreviousColumn(select)
--- 	self:draw()
--- end
 
 -- clear saved boards and tiles clicked
 function BoardGridView:clear()
@@ -306,7 +294,7 @@ function BoardGridView:drawRanks()
 	printDebug("BoardGridView: drawRanks()", DEBUG)
 	local j = 8
 	for i = 1, 8, 1 do
-		self:drawText(tostring(i), 10, j * 27 - 6)
+		self:drawText(tostring(i), 11, j * 27 - 6)
 		j -= 1
 	end
 end
@@ -367,7 +355,7 @@ end
 -- if sprite at r, c is the same piece then do nothing
 -- if sprite at r, c is different remove sprite and draw new sprite
 function BoardGridView:drawPieceSprite(r, c)
-
+	
 	local piece = self:getPieceAt(r, c)
 
 	if self.piecesSprites[r][c][2] == piece then
@@ -379,7 +367,7 @@ function BoardGridView:drawPieceSprite(r, c)
 		printDebug("BoardGridView: removing piece "..self.piecesSprites[r][c][2].." at r="..r.." c="..c, DEBUG)
 		self.piecesSprites[r][c][2] = self.emptySquare
 	end
-	local pieceImage = self.resourceCache:getPieceImage(piece)
+	local pieceImage = self.imageCache:getPieceImage(piece)
 	if pieceImage then
 		self.piecesSprites[r][c] = {gfx.sprite.new(), piece}
 		self.piecesSprites[r][c][1]:setImage(pieceImage)

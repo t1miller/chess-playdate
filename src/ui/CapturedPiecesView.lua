@@ -2,7 +2,7 @@ import "CoreLibs/object"
 import "CoreLibs/sprites"
 import "CoreLibs/graphics"
 
-import 'helper/ResourceCache'
+import 'helper/ImageCache'
 import 'helper/Utils'
 
 local gfx <const> = playdate.graphics
@@ -15,7 +15,7 @@ local BLACK_PIECES = {
 	["r"] = 0,
 	["q"] = 0,
 }
-local ResourceCache = ResourceCache()
+local ImageCache = ImageCache()
 local PIECE_VALUE <const> = {
 	["p"] = 1,
 	["P"] = 1,
@@ -100,7 +100,7 @@ end
 function CapturedPieces:createPieceSprite(piece)
 	printDebug("CapturedPieces: createPieceSprite()", DEBUG)
 	-- create sprite
-	local pieceImage = ResourceCache:getPieceImage(piece)
+	local pieceImage = ImageCache:getPieceImage(piece)
 	local pieceSprite = gfx.sprite.new(pieceImage)
 
 	-- add to sprite table

@@ -6,7 +6,6 @@ import "CoreLibs/easing"
 
 import 'library/AnimatedSprite'
 import 'helper/Utils'
-import 'helper/ResourceCache'
 
 local geo = playdate.geometry
 local Animator = playdate.graphics.animator
@@ -28,8 +27,6 @@ function DialogBox:init(x, y, text)
 
     self.x = x
     self.y = y
-
-    self.cache = ResourceCache()
 
     self.state = DIALOG_STATE.NOT_SHOWING
     self.title = ""
@@ -108,9 +105,12 @@ end
 function DialogBox:setupShakeHandsAnimation()
     printDebug("DialogBox: setupShakeHandsAnimation()", DEBUG)
     local selfself = self
+
     self.walkingSprite = AnimatedSprite.new(
-        self.cache:getAnimationImage("stickman-shakehands"),
-        self.cache:getAnimationConfig("shakehands-config")
+        -- self.cache:getAnimationImage("stickman-shakehands"),
+        -- self.cache:getAnimationConfig("shakehands-config")
+        gfx.imagetable.new("animation/stickman-shakehands"),
+        AnimatedSprite.loadStates("animation/shakehands.json")
     )
     self.walkingSprite:setZIndex(STICKMAN_Z)
     self.walkingSprite:setCenter(0, 0)
@@ -126,11 +126,12 @@ function DialogBox:setupShakeHandsAnimation()
         selfself.walkingSprite:changeState("stickman_shakehands", true)
         selfself.walkingSprite:moveTo(selfself.x-self.width/2, self.y)
     end
-    
 
     self.walkingSprite2 = AnimatedSprite.new(
-        self.cache:getAnimationImage("robot-shakehands"),
-        self.cache:getAnimationConfig("shakehands-config")
+        -- self.cache:getAnimationImage("robot-shakehands"),
+        -- self.cache:getAnimationConfig("shakehands-config")
+        gfx.imagetable.new("animation/robot-shakehands"),
+        AnimatedSprite.loadStates("animation/shakehands.json")
     )
     self.walkingSprite2:setZIndex(STICKMAN_Z)
     self.walkingSprite2:setCenter(0, 0)
@@ -167,11 +168,12 @@ end
 function DialogBox:setUpRobotAnimation()
     printDebug("DialogBox: setUpRobotAnimation()", DEBUG)
     local selfself = self
-    -- local robotImg = gfx.imagetable.new("animation/robot-run-kick")
-    -- local robotImg = self.cache:getAnimationImage("robot-kick")
+
     self.walkingSprite = AnimatedSprite.new(
-        self.cache:getAnimationImage("robot-kick"),
-        self.cache:getAnimationConfig("kick-config")
+        -- self.cache:getAnimationImage("robot-kick"),
+        -- self.cache:getAnimationConfig("kick-config")
+        gfx.imagetable.new("animation/robot-kick"),
+        AnimatedSprite.loadStates("animation/kick.json")
     )
     self.walkingSprite:setZIndex(STICKMAN_Z)
     self.walkingSprite:setCenter(0, 0)
@@ -190,10 +192,12 @@ end
 
 function DialogBox:setupStickManAnimation()
     printDebug("DialogBox: setupStickManAnimation()", DEBUG)
-    -- local stickmanImg = gfx.imagetable.new("animation/stickman-walking-kick")
+
     self.walkingSprite = AnimatedSprite.new(
-        self.cache:getAnimationImage("stickman-kick"),
-        self.cache:getAnimationConfig("kick-config")
+        -- self.cache:getAnimationImage("stickman-kick"),
+        -- self.cache:getAnimationConfig("kick-config")
+        gfx.imagetable.new("animation/stickman-kick"),
+        AnimatedSprite.loadStates("animation/kick.json")
     )
     self.walkingSprite:setDefaultState("stickman_kick_run")
     self.walkingSprite:setZIndex(STICKMAN_Z)

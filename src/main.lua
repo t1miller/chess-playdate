@@ -8,6 +8,7 @@ import 'ChessViewModel'
 -- playdate.setMinimumGCTime(.0001)
 -- playdate.setCollectsGarbage(false)
 -- playdate.setGCScaling(0, 0.9)
+playdate.setMinimumGCTime(4)
 local gfx <const> = playdate.graphics
 local chessViewModel = ChessViewModel()
 
@@ -23,7 +24,7 @@ end
 
 function playdate.update()
     gfx.sprite.update()
-    playdate.drawFPS(350,20)
+    playdate.drawFPS(0,0)
     playdate.frameTimer.updateTimers()
     playdate.timer:updateTimers()
 end
