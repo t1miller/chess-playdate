@@ -56,7 +56,6 @@ end
 
 -- local TOAST_FONT <const> = gfx.font.new("fonts/Roobert-10-Bold")
 -- function showToast(text, duration)
---     printDebug("Utils: showing toast message: "..text.." for "..duration.." frames", DEBUG)
 --     local PADDING <const> = 20
 --     local X <const> = 200
 --     local Y <const> = 200

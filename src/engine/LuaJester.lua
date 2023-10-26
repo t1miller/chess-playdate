@@ -15,44 +15,49 @@ local DEBUG <const> = true
 
 local BoardCpy, WatchPosit, CalcKBNK, ChangeForce, Undo, ISqAgrs, Iwxy, XRayBR, ComputerMvt, InitMoves,
 CheckMov, UnValidateMov, FJunk, ShowThink, ResetData, InChecking, ShowScore, MixBoard, InitGame, IColmn, IRaw, 
-ShowStat, CalcKPK, CalcKg, IArrow, MoveTree, PrisePassant, GetAlgMvt, copyValueOf, Agression, InitArrow, IfCheck, 
+ShowStat, CalcKPK, CalcKg, IArrow, MoveTree, PrisePassant, copyValueOf, Agression, InitArrow, IfCheck, 
 Anyagress, KnightPts, QueenPts, PositPts, PlayMov, IRepeat, ChoiceMov, MultiMov, XRayKg, DoCastle, DoCalc, Lalgb, 
 UpdatePiecMap, getBoard, UpdateDisplay, AvailCaptur, InitStatus, MessageOut, Pagress, CheckMatrl, AttachMov, PawnPts, 
 RookPts, KingPts, AvailMov, BishopPts, ValidateMov, Peek, Seek, SwitchSides, GetFen, EnterMove, SetFen, ResetFlags, 
-Jst_Play, UndoMov, ShowMov, _BTREE, _GAMESTATS, _INT, _MOVES
+Jst_Play, UndoMov, ShowMov
+-- GetAlgMvt
 
-function _BTREE()
-    local b = {}
-    b.replay = 0
-    b.f = 0
-    b.t = 0
-    b.flags = 0
-    b.score = 0
-    return b
-end
+-- function _BTREE()
+--     local b = {}
+--     b.replay = 0
+--     b.f = 0
+--     b.t = 0
+--     b.flags = 0
+--     b.score = 0
+--     return b
+-- end
+-- {replay = 0, f = 0, t = 0, flags = 0, score = 0}
 
-function _GAMESTATS()
-    local g = {}
-    g.mate = false
-    g.timeout = false
-    g.recapture = false
-    return g
-end
+-- function _GAMESTATS()
+--     local g = {}
+--     g.mate = false
+--     g.timeout = false
+--     g.recapture = false
+--     return g
+-- end
+-- {mate =  false, timeout = false, recapture = false}
 
-function _INT()
-    local x = {}
-    x.i = 0
-    return x
-end
+-- function _INT()
+--     local x = {}
+--     x.i = 0
+--     return x
+-- end
+-- {i = 0}
 
-function _MOVES()
-    local m = {}
-    m.gamMv = 0
-    m.score = 0
-    m.piece = 0
-    m.color = 0
-    return m
-end
+-- function _MOVES()
+--     local m = {}
+--     m.gamMv = 0
+--     m.score = 0
+--     m.piece = 0
+--     m.color = 0
+--     return m
+-- end
+-- {gamMv = 0, score = 0, piece = 0, color = 0}
 
 Js_maxDepth = 6         -- Search Depth setting for lua (no timeout option)
 
@@ -119,30 +124,30 @@ Js_agress_across = -6
 Js_pinned_p = -8
 Js_pinned_other = -12
 
-Js_nGameMoves = {}   --int[]
-Js_depth_Seek = 0
-Js_c1 = 0
-Js_c2 = 0
-Js_agress2 = {}   --int[]
-Js_agress1 = {}   --int[]
-Js_ptValue = 0
-Js_flip = false
-Js_fEat = false
-Js_myPiece = ""
-Js_Message = ""
+local Js_nGameMoves = {}   --int[]
+local Js_depth_Seek = 0
+local Js_c1 = 0
+local Js_c2 = 0
+local Js_agress2 = {}   --int[]
+local Js_agress1 = {}   --int[]
+local Js_ptValue = 0
+local Js_flip = false
+local Js_fEat = false
+local Js_myPiece = ""
+local Js_Message = ""
 
-Js_fiftyMoves = 0
-Js_indenSqr = 0
-Js_realBestDepth = 0
-Js_realBestScore = 0
-Js_realBestMove = 0
-Js_lastDepth = 0
-Js_lastScore = 0
-Js_fKO = false
+local Js_fiftyMoves = 0
+local Js_indenSqr = 0
+local Js_realBestDepth = 0
+local Js_realBestScore = 0
+local Js_realBestMove = 0
+local Js_lastDepth = 0
+local Js_lastScore = 0
+-- local Js_fKO = false
 
 
-Js_fromMySquare = 0
-Js_toMySquare = 0
+-- local Js_fromMySquare = 0
+-- local Js_toMySquare = 0
 Js_cNodes = 0
 Js_scoreDither = 0
 Js__alpha = 0
@@ -152,47 +157,49 @@ Js_maxDepthSeek = 0
 Js_specialScore = 0
 Js_hint = 0
 
-Js_currentScore = 0
+local Js_currentScore = 0
 
-Js_proPiece = 0
-Js_pawc1 = {}
-Js_pawc2 = {}
-Js_origSquare = 0
-Js_destSquare = 0
+local Js_proPiece = 0
+local Js_pawc1 = {}
+local Js_pawc2 = {}
+local Js_origSquare = 0
+local Js_destSquare = 0
 
-Js_cCompNodes = 0
-Js_dxDither = 0
-Js_scoreWin0 = 0
-Js_scoreWin1 = 0
-Js_scoreWin2 = 0
-Js_scoreWin3 = 0
-Js_scoreWin4 = 0
+local Js_cCompNodes = 0
+local Js_dxDither = 0
+local Js_scoreWin0 = 0
+local Js_scoreWin1 = 0
+local Js_scoreWin2 = 0
+local Js_scoreWin3 = 0
+local Js_scoreWin4 = 0
 
-Js_USER_TOPLAY = 0
-Js_JESTER_TOPLAY = 1
+-- local Js_USER_TOPLAY = 0
+-- local Js_JESTER_TOPLAY = 1
 
-Js_hollow = 2
-Js_empty = 0
-Js_pawn = 1
-Js_knight = 2
-Js_bishop = 3
-Js_rook = 4
-Js_queen = 5
-Js_king = 6
+local Js_hollow = 2
+local Js_empty = 0
+local Js_pawn = 1
+local Js_knight = 2
+local Js_bishop = 3
+local Js_rook = 4
+local Js_queen = 5
+local Js_king = 6
 
-Js_white = 0
-Js_black = 1
+-- black == 1
+-- white == 0
+local Js_white = 0
+local Js_black = 1
 
-Js_N9 = 90
+local Js_N9 = 90
 
-Js_szIdMvt = "ABCDEFGH" .. "IJKLMNOP" .. "QRSTUVWX" .. "abcdefgh" .. "ijklmnop" .. "qrstuvwx" .. "01234567" .. "89YZyz*+"
-Js_szAlgMvt = { "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1", "a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2", "a3",
+-- local Js_szIdMvt = "ABCDEFGH" .. "IJKLMNOP" .. "QRSTUVWX" .. "abcdefgh" .. "ijklmnop" .. "qrstuvwx" .. "01234567" .. "89YZyz*+"
+local Js_szAlgMvt = { "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1", "a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2", "a3",
     "b3", "c3", "d3", "e3", "f3", "g3", "h3", "a4", "b4", "c4", "d4", "e4", "f4", "g4", "h4", "a5", "b5", "c5", "d5",
     "e5", "f5", "g5", "h5", "a6", "b6", "c6", "d6", "e6", "f6", "g6", "h6", "a7", "b7", "c7", "d7", "e7", "f7", "g7",
     "h7", "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8" }
 
-Js_color_sq = { 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0,
-    1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0 }
+-- Js_color_sq = { 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0,
+--     1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0 }
 
 Js_bkPawn = 7
 Js_pawn_msk = 7
@@ -201,7 +208,7 @@ Js_castle_msk = 16
 Js_enpassant_msk = 32
 Js__idem = 64
 Js_menace_pawn = 128
-Js_check = 256
+-- local Js_check = 256
 Js_capture = 512
 Js_draw = 1024
 Js_pawnVal = 100
@@ -221,115 +228,115 @@ Js_xltBN = 2048
 Js_xltRQ = 1536
 Js_xltNN = 8192
 
-Js_movesList = {}        --new _MOVES[512]
-Js_flag = _GAMESTATS()   --new _GAMESTATS()
-Js_Tree = {}             --new _BTREE[2000]
-Js_root = _BTREE()
-Js_tmpTree = _BTREE()    --new _BTREE()
-Js_treePoint = {}        --new int[Js_maxDepth]
-Js_board = {}            --new int[64]
-Js_color = {}            --new int[64]
-Js_pieceMap = {}         --new int[2][16]
-Js_pawnMap = {}          --new int[2][8]
-Js_roquer = { 0, 0 }
-Js_nMvtOnBoard = {}      --new int[64]
-Js_scoreOnBoard = {}     --new int[64]
-Js_gainScore = _INT()
+local Js_movesList = {}        --new _MOVES[512]
+local Js_flag = {mate =  false, timeout = false, recapture = false}   --new _GAMESTATS()
+local Js_Tree = {}             --new _BTREE[2000]
+local Js_root = {replay = 0, f = 0, t = 0, flags = 0, score = 0}
+local Js_tmpTree = {replay = 0, f = 0, t = 0, flags = 0, score = 0}    --new _BTREE()
+local Js_treePoint = {}        --new int[Js_maxDepth]
+local Js_board = {}            --new int[64]
+local Js_color = {}            --new int[64]
+local Js_pieceMap = {}         --new int[2][16]
+local Js_pawnMap = {}          --new int[2][8]
+local Js_roquer = { 0, 0 }
+local Js_nMvtOnBoard = {}      --new int[64]
+local Js_scoreOnBoard = {}     --new int[64]
+local Js_gainScore = {i = 0}
 
-Js_otherTroop = { 1, 0, 2 }
-Js_variants = {}     --new int[Js_maxDepth]
-Js_pieceIndex = {}   --new int[64]
-Js_piecesCount = { 0, 0 }
-Js_arrowData = {}    --new int[4200]
-Js_crossData = {}    --new int[4200]
-Js_agress = {}       --new int[2][64]
-Js_matrl = { 0, 0 }
-Js_pmatrl = { 0, 0 }
-Js_ematrl = { 0, 0 }
-Js_pinned = { 0, 0 }
-Js_withPawn = { 0, 0 }
-Js_withKnight = { 0, 0 }
-Js_withBishop = { 0, 0 }
-Js_withRook = { 0, 0 }
-Js_withQueen = { 0, 0 }
-Js_flagCheck = {}    --new int[Js_maxDepth]
-Js_flagEat = {}      --new int[Js_maxDepth]
-Js_menacePawn = {}   --new int[Js_maxDepth]
-Js_scorePP = {}      --new int[Js_maxDepth]
-Js_scoreTP = {}      --new int[Js_maxDepth]
-Js_eliminate0 = {}   --new int[Js_maxDepth]
-Js_eliminate1 = {}   --new int[Js_maxDepth]
-Js_eliminate2 = {}   --new int[Js_maxDepth]
-Js_eliminate3 = {}   --new int[Js_maxDepth]
-Js_storage = {}      --new short[10000]
-Js_wPawnMvt = {}     --new int[64]
-Js_bPawnMvt = {}     --new int[64]
-Js_knightMvt = {}    --new int[2][64]
-Js_bishopMvt = {}    --new int[2][64]
-Js_kingMvt = {}      --new int[2][64]
-Js_killArea = {}     --new int[2][64]
-Js_fDevl = { 0, 0 }
-Js_nextCross = {}    --new char[40000]
-Js_nextArrow = {}    --new char[40000]
-Js_tmpCh = {}        --new char[20]
-Js_movCh = {}        --new char[8]
-Js_b_r = {}          --new int[64]
+local Js_otherTroop = { 1, 0, 2 }
+local Js_variants = {}     --new int[Js_maxDepth]
+local Js_pieceIndex = {}   --new int[64]
+local Js_piecesCount = { 0, 0 }
+local Js_arrowData = {}    --new int[4200]
+local Js_crossData = {}    --new int[4200]
+local Js_agress = {}       --new int[2][64]
+local Js_matrl = { 0, 0 }
+local Js_pmatrl = { 0, 0 }
+local Js_ematrl = { 0, 0 }
+local Js_pinned = { 0, 0 }
+local Js_withPawn = { 0, 0 }
+local Js_withKnight = { 0, 0 }
+local Js_withBishop = { 0, 0 }
+local Js_withRook = { 0, 0 }
+local Js_withQueen = { 0, 0 }
+local Js_flagCheck = {}    --new int[Js_maxDepth]
+local Js_flagEat = {}      --new int[Js_maxDepth]
+local Js_menacePawn = {}   --new int[Js_maxDepth]
+local Js_scorePP = {}      --new int[Js_maxDepth]
+local Js_scoreTP = {}      --new int[Js_maxDepth]
+local Js_eliminate0 = {}   --new int[Js_maxDepth]
+local Js_eliminate1 = {}   --new int[Js_maxDepth]
+local Js_eliminate2 = {}   --new int[Js_maxDepth]
+local Js_eliminate3 = {}   --new int[Js_maxDepth]
+local Js_storage = {}      --new short[10000]
+local Js_wPawnMvt = {}     --new int[64]
+local Js_bPawnMvt = {}     --new int[64]
+local Js_knightMvt = {}    --new int[2][64]
+local Js_bishopMvt = {}    --new int[2][64]
+local Js_kingMvt = {}      --new int[2][64]
+local Js_killArea = {}     --new int[2][64]
+local Js_fDevl = { 0, 0 }
+local Js_nextCross = {}    --new char[40000]
+local Js_nextArrow = {}    --new char[40000]
+local Js_tmpCh = {}        --new char[20]
+local Js_movCh = {}        --new char[8]
+local Js_b_r = {}          --new int[64]
 
-Js_upperNot = { " ", "P", "N", "B", "R", "Q", "K" }
-Js_lowerNot = { " ", "p", "n", "b", "r", "q", "k" }
-Js_rgszPiece = { "", "", "N", "B", "R", "Q", "K" }
-Js_asciiMove = { { " ", " ", " ", " ", " ", " " }, { " ", " ", " ", " ", " ", " " }, { " ", " ", " ", " ", " ", " " },
+local Js_upperNot = { " ", "P", "N", "B", "R", "Q", "K" }
+local Js_lowerNot = { " ", "p", "n", "b", "r", "q", "k" }
+local Js_rgszPiece = { "", "", "N", "B", "R", "Q", "K" }
+local Js_asciiMove = { { " ", " ", " ", " ", " ", " " }, { " ", " ", " ", " ", " ", " " }, { " ", " ", " ", " ", " ", " " },
     { " ", " ", " ", " ", " ", " " } }
-Js_reguBoard = { Js_rook, Js_knight, Js_bishop, Js_queen, Js_king, Js_bishop, Js_knight, Js_rook, Js_pawn, Js_pawn,
+local Js_reguBoard = { Js_rook, Js_knight, Js_bishop, Js_queen, Js_king, Js_bishop, Js_knight, Js_rook, Js_pawn, Js_pawn,
     Js_pawn, Js_pawn, Js_pawn, Js_pawn, Js_pawn, Js_pawn, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, Js_pawn, Js_pawn, Js_pawn, Js_pawn, Js_pawn, Js_pawn, Js_pawn, Js_pawn, Js_rook,
     Js_knight, Js_bishop, Js_queen, Js_king, Js_bishop, Js_knight, Js_rook }
-Js_reguColor = { Js_white, Js_white, Js_white, Js_white, Js_white, Js_white, Js_white, Js_white, Js_white, Js_white,
+local Js_reguColor = { Js_white, Js_white, Js_white, Js_white, Js_white, Js_white, Js_white, Js_white, Js_white, Js_white,
     Js_white, Js_white, Js_white, Js_white, Js_white, Js_white, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
     2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, Js_black, Js_black, Js_black, Js_black, Js_black, Js_black, Js_black,
     Js_black, Js_black, Js_black, Js_black, Js_black, Js_black, Js_black, Js_black, Js_black }
-Js_pieceTyp = { { Js_empty, Js_pawn, Js_knight, Js_bishop, Js_rook, Js_queen, Js_king, Js_empty },
+local Js_pieceTyp = { { Js_empty, Js_pawn, Js_knight, Js_bishop, Js_rook, Js_queen, Js_king, Js_empty },
     { Js_empty, Js_bkPawn, Js_knight, Js_bishop, Js_rook, Js_queen, Js_king, Js_empty } }
-Js_direction = { { 0, 0, 0, 0, 0, 0, 0, 0 }, { 10, 9, 11, 0, 0, 0, 0, 0 }, { 8, -8, 12, -12, 19, -19, 21, -21 },
+local Js_direction = { { 0, 0, 0, 0, 0, 0, 0, 0 }, { 10, 9, 11, 0, 0, 0, 0, 0 }, { 8, -8, 12, -12, 19, -19, 21, -21 },
     { 9, 11, -9, -11, 0, 0, 0, 0 }, { 1, 10, -1, -10, 0, 0, 0, 0 }, { 1, 10, -1, -10, 9, 11, -9, -11 },
     { 1, 10, -1, -10, 9, 11, -9, -11 }, { -10, -9, -11, 0, 0, 0, 0, 0 } }
-Js_maxJobs = { 0, 2, 1, 7, 7, 7, 1, 2 }
-Js_virtualBoard = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 1, 2, 3, 4, 5,
+local Js_maxJobs = { 0, 2, 1, 7, 7, 7, 1, 2 }
+local Js_virtualBoard = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 1, 2, 3, 4, 5,
     6, 7, -1, -1, 8, 9, 10, 11, 12, 13, 14, 15, -1, -1, 16, 17, 18, 19, 20, 21, 22, 23, -1, -1, 24, 25, 26, 27, 28, 29,
     30, 31, -1, -1, 32, 33, 34, 35, 36, 37, 38, 39, -1, -1, 40, 41, 42, 43, 44, 45, 46, 47, -1, -1, 48, 49, 50, 51, 52,
     53, 54, 55, -1, -1, 56, 57, 58, 59, 60, 61, 62, 63, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1 }
-Js_start_K = { 0, 0, -4, -10, -10, -4, 0, 0, -4, -4, -8, -12, -12, -8, -4, -4, -12, -16, -20, -20, -20, -20, -16, -12,
+local Js_start_K = { 0, 0, -4, -10, -10, -4, 0, 0, -4, -4, -8, -12, -12, -8, -4, -4, -12, -16, -20, -20, -20, -20, -16, -12,
     -16, -20, -24, -24, -24, -24, -20, -16, -16, -20, -24, -24, -24, -24, -20, -16, -12, -16, -20, -20, -20, -20, -16,
     -12, -4, -4, -8, -12, -12, -8, -4, -4, 0, 0, -4, -10, -10, -4, 0, 0 }
-Js_end_K = { 0, 6, 12, 18, 18, 12, 6, 0, 6, 12, 18, 24, 24, 18, 12, 6, 12, 18, 24, 30, 30, 24, 18, 12, 18, 24, 30, 36,
+local Js_end_K = { 0, 6, 12, 18, 18, 12, 6, 0, 6, 12, 18, 24, 24, 18, 12, 6, 12, 18, 24, 30, 30, 24, 18, 12, 18, 24, 30, 36,
     36, 30, 24, 18, 18, 24, 30, 36, 36, 30, 24, 18, 12, 18, 24, 30, 30, 24, 18, 12, 6, 12, 18, 24, 24, 18, 12, 6, 0, 6,
     12, 18, 18, 12, 6, 0 }
-Js_vanish_K = { 0, 8, 16, 24, 24, 16, 8, 0, 8, 32, 40, 48, 48, 40, 32, 8, 16, 40, 56, 64, 64, 56, 40, 16, 24, 48, 64, 72,
+local Js_vanish_K = { 0, 8, 16, 24, 24, 16, 8, 0, 8, 32, 40, 48, 48, 40, 32, 8, 16, 40, 56, 64, 64, 56, 40, 16, 24, 48, 64, 72,
     72, 64, 48, 24, 24, 48, 64, 72, 72, 64, 48, 24, 16, 40, 56, 64, 64, 56, 40, 16, 8, 32, 40, 48, 48, 40, 32, 8, 0, 8,
     16, 24, 24, 16, 8, 0 }
-Js_end_KBNK = { 99, 90, 80, 70, 60, 50, 40, 40, 90, 80, 60, 50, 40, 30, 20, 40, 80, 60, 40, 30, 20, 10, 30, 50, 70, 50,
+local Js_end_KBNK = { 99, 90, 80, 70, 60, 50, 40, 40, 90, 80, 60, 50, 40, 30, 20, 40, 80, 60, 40, 30, 20, 10, 30, 50, 70, 50,
     30, 10, 0, 20, 40, 60, 60, 40, 20, 0, 10, 30, 50, 70, 50, 30, 10, 20, 30, 40, 60, 80, 40, 20, 30, 40, 50, 60, 80, 90,
     40, 40, 50, 60, 70, 80, 90, 99 }
-Js_knight_pos = { 0, 4, 8, 10, 10, 8, 4, 0, 4, 8, 16, 20, 20, 16, 8, 4, 8, 16, 24, 28, 28, 24, 16, 8, 10, 20, 28, 32, 32,
+local Js_knight_pos = { 0, 4, 8, 10, 10, 8, 4, 0, 4, 8, 16, 20, 20, 16, 8, 4, 8, 16, 24, 28, 28, 24, 16, 8, 10, 20, 28, 32, 32,
     28, 20, 10, 10, 20, 28, 32, 32, 28, 20, 10, 8, 16, 24, 28, 28, 24, 16, 8, 4, 8, 16, 20, 20, 16, 8, 4, 0, 4, 8, 10,
     10, 8, 4, 0 }
-Js_bishop_pos = { 14, 14, 14, 14, 14, 14, 14, 14, 14, 22, 18, 18, 18, 18, 22, 14, 14, 18, 22, 22, 22, 22, 18, 14, 14, 18,
+local Js_bishop_pos = { 14, 14, 14, 14, 14, 14, 14, 14, 14, 22, 18, 18, 18, 18, 22, 14, 14, 18, 22, 22, 22, 22, 18, 14, 14, 18,
     22, 22, 22, 22, 18, 14, 14, 18, 22, 22, 22, 22, 18, 14, 14, 18, 22, 22, 22, 22, 18, 14, 14, 22, 18, 18, 18, 18, 22,
     14, 14, 14, 14, 14, 14, 14, 14, 14 }
-Js_pawn_pos = { 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 0, 0, 4, 4, 4, 6, 8, 2, 10, 10, 2, 8, 6, 6, 8, 12, 16, 16, 12, 8, 6, 8,
+local Js_pawn_pos = { 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 0, 0, 4, 4, 4, 6, 8, 2, 10, 10, 2, 8, 6, 6, 8, 12, 16, 16, 12, 8, 6, 8,
     12, 16, 24, 24, 16, 12, 8, 12, 16, 24, 32, 32, 24, 16, 12, 12, 16, 24, 32, 32, 24, 16, 12, 0, 0, 0, 0, 0, 0, 0, 0 }
-Js_valueMap = { 0, Js_pawnVal, Js_knightVal, Js_bishopVal, Js_rookVal, Js_queenVal, Js_kingVal }
-Js_xlat = { 0, Js_xltP, Js_xltN, Js_xltB, Js_xltR, Js_xltQ, Js_xltK }
-Js_pss_pawn0 = { 0, 60, 80, 120, 200, 360, 600, 800 }
-Js_pss_pawn1 = { 0, 30, 40, 60, 100, 180, 300, 800 }
-Js_pss_pawn2 = { 0, 15, 25, 35, 50, 90, 140, 800 }
-Js_pss_pawn3 = { 0, 5, 10, 15, 20, 30, 140, 800 }
-Js_isol_pawn = { -12, -16, -20, -24, -24, -20, -16, -12 }
-Js_takeBack = { -6, -10, -15, -21, -28, -28, -28, -28, -28, -28, -28, -28, -28, -28, -28, -28 }
-Js_mobBishop = { -2, 0, 2, 4, 6, 8, 10, 12, 13, 14, 15, 16, 16, 16 }
-Js_mobRook = { 0, 2, 4, 6, 8, 10, 11, 12, 13, 14, 14, 14, 14, 14, 14 }
-Js_menaceKing = { 0, -8, -20, -36, -52, -68, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80,
+local Js_valueMap = { 0, Js_pawnVal, Js_knightVal, Js_bishopVal, Js_rookVal, Js_queenVal, Js_kingVal }
+local Js_xlat = { 0, Js_xltP, Js_xltN, Js_xltB, Js_xltR, Js_xltQ, Js_xltK }
+local Js_pss_pawn0 = { 0, 60, 80, 120, 200, 360, 600, 800 }
+local Js_pss_pawn1 = { 0, 30, 40, 60, 100, 180, 300, 800 }
+local Js_pss_pawn2 = { 0, 15, 25, 35, 50, 90, 140, 800 }
+local Js_pss_pawn3 = { 0, 5, 10, 15, 20, 30, 140, 800 }
+local Js_isol_pawn = { -12, -16, -20, -24, -24, -20, -16, -12 }
+local Js_takeBack = { -6, -10, -15, -21, -28, -28, -28, -28, -28, -28, -28, -28, -28, -28, -28, -28 }
+local Js_mobBishop = { -2, 0, 2, 4, 6, 8, 10, 12, 13, 14, 15, 16, 16, 16 }
+local Js_mobRook = { 0, 2, 4, 6, 8, 10, 11, 12, 13, 14, 14, 14, 14, 14, 14 }
+local Js_menaceKing = { 0, -8, -20, -36, -52, -68, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80,
     -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80 }
 Js_queenRook = { 0, 56, 0 }
 Js_kingRook = { 7, 63, 0 }
@@ -337,7 +344,7 @@ Js_kingPawn = { 4, 60, 0 }
 Js_raw7 = { 6, 1, 0 }
 Js_heavy = { false, false, false, true, true, true, false, false }
 
-Js_pgn = ""   -- save too
+local Js_pgn = ""   -- save too
 
 -- Some helping functions for Lua scripting
 
@@ -432,7 +439,7 @@ function WatchPosit()
 
     if (Js_fDevl[1 + Js_black] == 0) then
         Js_fDevl[1 + Js_black] = iif(
-        ((Js_board[1 + 57] == Js_knight) or (Js_board[1 + 58] == Js_bishop) or (Js_board[1 + 61] == Js_bishop) or (Js_board[1 + 62] == Js_knight)),
+        ((Js_board[58] == Js_knight) or (Js_board[59] == Js_bishop) or (Js_board[62] == Js_bishop) or (Js_board[63] == Js_knight)),
             0, 1)
     end
 
@@ -1083,7 +1090,6 @@ function ShowMov(rgchMove)
         Js_movCh[1 + (i + 1)] = waspromo
         i = i + 2
         -- promotion deostn work here
-        -- printDebug("computer promoted: "..waspromo, DEBUG)
     end
     if (Js_bDraw ~= 0) then
         Js_movCh[1 + i] = "="
@@ -1137,11 +1143,11 @@ function ShowMov(rgchMove)
 end
 
 function CheckMov(s, iop)
-    local tempb = _INT()
-    local tempc = _INT()
-    local tempsf = _INT()
-    local tempst = _INT()
-    local xnode = _BTREE()
+    local tempb = {i = 0}
+    local tempc = {i = 0}
+    local tempsf = {i = 0}
+    local tempst = {i = 0}
+    local xnode = {replay = 0, f = 0, t = 0, flags = 0, score = 0}
     local node = nil
 
     local cnt = 0
@@ -1337,13 +1343,13 @@ function ResetData()
     coroutine.yield()
     Js_movesList = {}
     for i = 0, 512, 1 do
-        Js_movesList[1 + i] = _MOVES()
+        Js_movesList[1 + i] = {gamMv = 0, score = 0, piece = 0, color = 0}
     end
 
     coroutine.yield()
     Js_Tree = {}
     for i = 0, 2000, 1 do
-        Js_Tree[1 + i] = _BTREE()
+        Js_Tree[1 + i] = {replay = 0, f = 0, t = 0, flags = 0, score = 0}
     end
 
     coroutine.yield()
@@ -1711,16 +1717,16 @@ function PrisePassant(xside, f, t, iop)
     InitStatus()
 end
 
-function GetAlgMvt(ch)
-    -- local i = 0
-    for i = 0, 63, 1 do
-        if (ch == string.sub(Js_szIdMvt, i + 1, i + 1)) then
-            return Js_szAlgMvt[1 + i]
-        end
-    end
+-- function GetAlgMvt(ch)
+--     -- local i = 0
+--     for i = 0, 63, 1 do
+--         if (ch == string.sub(Js_szIdMvt, i + 1, i + 1)) then
+--             return Js_szAlgMvt[1 + i]
+--         end
+--     end
 
-    return "a1"
-end
+--     return "a1"
+-- end
 
 function copyValueOf(a)
     local str = ""
@@ -2044,12 +2050,12 @@ function IRepeat(cnt)
 end
 
 function ChoiceMov(side, iop)
-    local tempb = _INT()
-    local tempc = _INT()
-    local tempsf = _INT()
-    local tempst = _INT()
-    local rpt = _INT()
-    local score = _INT()
+    local tempb = {i = 0}
+    local tempc = {i = 0}
+    local tempsf = {i = 0}
+    local tempst = {i = 0}
+    local rpt = {i = 0}
+    local score = {i = 0}
 
     local alpha = 0
     local beta = 0
@@ -2105,11 +2111,7 @@ function ChoiceMov(side, iop)
         Js_scoreDither = 0
         Js_dxDither = 20
     end
-    -- printDebug(tostring(Js_flag.timeout),DEBUG)
-    -- printDebug(tostring(Js_depth_Seek),DEBUG)
-    -- printDebug(tostring(Js_maxDepthSeek),DEBUG)
-    -- printDebug("ChessGame: ChoiceMov() flag.timeout="..Js_flag.timeout.." Js_depth_Seek="..Js_depth_Seek.." Js_maxDepthSeek:"..Js_maxDepthSeek, DEBUG)
-
+   
     while ((not Js_flag.timeout) and (Js_depth_Seek < Js_maxDepthSeek)) do
         coroutine.yield()
         Js_depth_Seek = Js_depth_Seek + 1
@@ -2157,13 +2159,11 @@ function ChoiceMov(side, iop)
             alpha = score.i - Js__alpha - Js_dxDither
         end
 
-        -- printDebug("ChessGame: ChoiceMov() flag.timeout="..tostring(Js_flag.timeout).." Js_depth_Seek="..Js_depth_Seek.." Js_maxDepthSeek:"..Js_maxDepthSeek, DEBUG)
     end
 
     score.i = Js_root.score
 
     if (iop == 2) then
-        -- printDebug("ChessGame: ChoiceMov() iop="..iop, DEBUG)
         return
     end
 
@@ -2426,7 +2426,7 @@ function DoCastle(side, kf, kt, iop)
 end
 
 function DoCalc(side, ply, alpha, beta, gainScore, slk, InChk)
-    local s = _INT()
+    local s = {i = 0}
     local xside = Js_otherTroop[1 + side]
     local evflag = false
 
@@ -2453,9 +2453,9 @@ function DoCalc(side, ply, alpha, beta, gainScore, slk, InChk)
     if (evflag) then
         Js_cCompNodes = Js_cCompNodes + 1
         -- if (Js_cCompNodes % 200 == 0) then
-        local currTime = playdate.getElapsedTime()
-        -- if (Js_cCompNodes % 50 == 0 or currTime - Js_prevYieldTime > .5) then
-        if (currTime - Js_prevYieldTime > .3) then
+        local currTime = playdate.getElapsedTime() --.4
+        if (Js_cCompNodes % 40 == 0 or currTime - Js_prevYieldTime > .5) then
+        -- if (currTime - Js_prevYieldTime > .3) then
             Js_prevYieldTime = currTime
             coroutine.yield()
         end
@@ -3017,8 +3017,8 @@ function PawnPts(sq, side)
 
     if (Js_c1 == Js_white) then
         s = Js_wPawnMvt[1 + sq]
-        if (((sq == 11) and (Js_color[1 + 19] ~= Js_hollow)) or (
-                (sq == 12) and (Js_color[1 + 20] ~= Js_hollow))) then
+        if (((sq == 11) and (Js_color[20] ~= Js_hollow)) or (
+                (sq == 12) and (Js_color[21] ~= Js_hollow))) then
             s = s + Js_junk_pawn
         end
 
@@ -3076,8 +3076,8 @@ function PawnPts(sq, side)
     else
         if (Js_c1 == Js_black) then
             s = Js_bPawnMvt[1 + sq]
-            if (((sq == 51) and (Js_color[1 + 43] ~= Js_hollow)) or (
-                    (sq == 52) and (Js_color[1 + 44] ~= Js_hollow))) then
+            if (((sq == 51) and (Js_color[44] ~= Js_hollow)) or (
+                    (sq == 52) and (Js_color[45] ~= Js_hollow))) then
                 s = s + Js_junk_pawn
             end
 
@@ -3154,8 +3154,8 @@ function PawnPts(sq, side)
 end
 
 function RookPts(sq, side)
-    local s = _INT()
-    local mob = _INT()
+    local s = {i = 0}
+    local mob = {i = 0}
     local fyle = IColmn(sq)
     local a1 = 0
     local a2 = 0
@@ -3197,7 +3197,7 @@ function RookPts(sq, side)
 end
 
 function KingPts(sq, side)
-    local s = _INT()
+    local s = {i = 0}
     local fyle = IColmn(sq)
     local a1 = 0
     local a2 = 0
@@ -3225,10 +3225,10 @@ function KingPts(sq, side)
     end
 
     if (fyle == 5) then
-        if (Js_pawc1[1 + 7] == 0) then
+        if (Js_pawc1[8] == 0) then
             s.i = s.i + Js_semiOpen_king
         end
-        if (Js_pawc2[1 + 7] == 0) then
+        if (Js_pawc2[8] == 0) then
             s.i = s.i + Js_semiOpen_kingOther
         end
     else
@@ -3308,8 +3308,8 @@ function AvailMov(side, ply)
 end
 
 function BishopPts(sq, side)
-    local s = _INT()
-    local mob = _INT()
+    local s = {i = 0}
+    local mob = {i = 0}
     local a1 = 0
     local a2 = 0
 
@@ -3475,17 +3475,17 @@ function Peek(p1, p2)
 end
 
 function Seek(side, ply, depth, alpha, beta, bstline, rpt)
-    local tempb = _INT()
-    local tempc = _INT()
-    local tempsf = _INT()
-    local tempst = _INT()
-    local rcnt = _INT()
+    local tempb = {i = 0}
+    local tempc = {i = 0}
+    local tempsf = {i = 0}
+    local tempst = {i = 0}
+    local rcnt = {i = 0}
 
-    local slk = _INT()
-    local InChk = _INT()
+    local slk = {i = 0}
+    local InChk = {i = 0}
     local nxtline = {} -- new int[1+Js_maxDepth]
 
-    local node = _BTREE()
+    local node = {replay = 0, f = 0, t = 0, flags = 0, score = 0}
     local xside = Js_otherTroop[1 + side]
     local score3 = 0
     local d = 0
@@ -3506,17 +3506,14 @@ function Seek(side, ply, depth, alpha, beta, bstline, rpt)
 
     if ((rpt.i == 1) and (ply > 1)) then
         if (Js_nMovesMade <= 11) then
-            -- printDebug("ChessGame: Seek() Js_nMovesMade <= 11 return", DEBUG)
             return 100
         end
-        -- printDebug("ChessGame: Seek() i==1 and ply > 1 return", DEBUG)
         return 0
     end
 
     score3 = DoCalc(side, ply, alpha, beta, Js_gainScore.i, slk, InChk)
     if (score3 > 9000) then
         bstline[1 + ply] = 0
-        -- printDebug("ChessGame: Seek() score3:"..score3.." > 9000 return score3", DEBUG)
         return score3
     end
 
@@ -3549,8 +3546,6 @@ function Seek(side, ply, depth, alpha, beta, bstline, rpt)
     d = iif((Js_depth_Seek == 1), 7, 11)
 
     if ((ply > Js_depth_Seek + d) or ((depth < 1) and (score3 > beta))) then
-        -- printDebug("ChessGame: Seek() return score3", DEBUG)
-        -- printDebug("ChessGame: Seek() ply:"..ply.." depth: "..depth.." score3: "..score3.." beta: "..beta, DEBUG)
         return score3
     end
 
@@ -3656,7 +3651,6 @@ function Seek(side, ply, depth, alpha, beta, bstline, rpt)
         end
 
         if (Js_flag.timeout) then
-            -- printDebug("ChessGame: timeout true", DEBUG)
             return (-Js_scoreTP[1 + (ply - 1)])
         end
 
@@ -3695,7 +3689,6 @@ function Seek(side, ply, depth, alpha, beta, bstline, rpt)
     -- if (os.clock() - Js_startTime > Js_searchTimeout) then
     if (playdate.getElapsedTime() > Js_searchTimeout) then
         Js_flag.timeout = true
-        -- printDebug("ChessGame: Seek() search timedout", DEBUG)
     end
 
     return best
@@ -3710,7 +3703,7 @@ function SwitchSides(oposit)
         Js_computer = Js_otherTroop[1 + Js_computer]
         Js_enemy = Js_otherTroop[1 + Js_enemy]
 
-        Js_JESTER_TOPLAY = Js_otherTroop[1 + Js_JESTER_TOPLAY]
+        -- Js_JESTER_TOPLAY = Js_otherTroop[1 + Js_JESTER_TOPLAY]
     end
     Js_fUserWin_kc = false
 end
@@ -3842,15 +3835,12 @@ function EnterMove(from_sq, to_sq, promo)
     Js_root.flags = 0
 
     Js_myPiece = Js_rgszPiece[1 + Js_board[1 + fsq_mvt]]
-    print("EnterMove: piece="..Js_myPiece)
 
     if (Js_board[1 + fsq_mvt] == Js_pawn) then
         if ((tsq_mvt < 8) or (tsq_mvt > 55)) then
             iflag = (Js_promote | Js_proPiece)
             -- promote might work her idk
-            printDebug("user promotes3 "..Js_promote)
         end
-        print("EnterMove: iFlag="..iflag)
         Lalgb(fsq_mvt, tsq_mvt, iflag)
     end
 
@@ -3865,17 +3855,13 @@ function EnterMove(from_sq, to_sq, promo)
         rgch[6] = promo
         i = 6
         -- promote might work her idk
-        printDebug("user promotes3 "..Js_promote)
     end
 
     rgch[1 + i] = 0
 
     Js_flag.timeout = true
 
-    print("EnterMove: rgch=")
-    printTable(rgch)
     iMvt = CheckMov(rgch, 0)
-    print("EnterMove: iMvt="..iMvt)
 
     if (iMvt ~= 0) then
         WatchPosit()
@@ -4143,21 +4129,21 @@ end
 
 
 GAME_STATE = {
-    NEW_GAME = "New Game",
-    USER_WON = "Checkmate\nWhite Wins!",
-    COMPUTER_WON = "Checkmate\nBlack Wins!",
-    RESIGN = "Black Resigned\nWhite Wins!",
-    DRAW_BY_REPITITION = "Draw By Threefold\nRepetition!",
-    DRAW = "Draw!",
-    CHECK = "Check!",
-    INSUFFICIENT_MATERIAL = "Insufficient Material. Draw!",
-    STALEMATE = "Stalemate!",
-    USER_IN_CHECK = "User In Check",
-    CASTLED = "Castled",
-    PROMOTED = "Promoted",
-    CAPTURED = "Captured",
-    USER_MOVED = "User Moved",
-    COMPUTER_MOVED = "Computer Moved",
+    NEW_GAME = "NEW_GAME",
+    USER_WON = "USER_WON",
+    COMPUTER_WON = "COMPUTER_WON",
+    RESIGN = "RESIGN",
+    DRAW_BY_REPITITION = "DRAW_BY_REPITITION",
+    DRAW = "DRAW",
+    CHECK = "CHECK",
+    INSUFFICIENT_MATERIAL = "INSUFFICIENT_MATERIAL",
+    STALEMATE = "STALEMATE",
+    USER_IN_CHECK = "USER_IN_CHECK",
+    CASTLED = "CASTLED",
+    PROMOTED = "PROMOTED",
+    CAPTURED = "CAPTURED",
+    USER_MOVED = "USER_MOVED",
+    COMPUTER_MOVED = "COMPUTER_MOVED",
     NOP = "NOP",
 }
 
@@ -4191,8 +4177,6 @@ function ChessGame:newGame(onProgressCallback, onDoneCallback)
     end)
 
     self.timer = longRunningTask(newGameCoroutine, 2.3, 10, onProgressCallback, onDoneCallback)
-    -- InitGame()
-    -- UpdateDisplay()
 end
 
 function ChessGame:moveUser(from, to)
@@ -4202,9 +4186,11 @@ function ChessGame:moveUser(from, to)
     -- local moves = self:calculateAvailableMoves(from)
     -- todo remove nop state
     -- and add INVALID_MOVE state back
+    printDebug("ChessGame: moveUser() move="..from..to, DEBUG)
     self.state = GAME_STATE.NOP
     if from == "" or to == "" then
         -- self.state = GAME_STATE.INVALID_MOVE
+        printDebug("ChessGame: moveUser() move empty", DEBUG)
         return false
     end
 
@@ -4212,6 +4198,7 @@ function ChessGame:moveUser(from, to)
     if isValid == false then
         -- self.state = GAME_STATE.INVALID_MOVE
         -- todo check for invalid move because check
+        printDebug("ChessGame: moveUser() move is invalid", DEBUG)
         self:updateState()
         return false
     end
@@ -4251,20 +4238,7 @@ function ChessGame:moveComputer(onProgressCallback, onDoneCallback)
         self.computerThinking = false
     end)
 
-    self.timer = longRunningTask(computersMoveCoroutine, Js_searchTimeout, 30, onProgressCallback, onDoneCallback)
-    -- playdate.resetElapsedTime()
-    
-    -- self.timer = playdate.timer.keyRepeatTimerWithDelay(0, 10, function()
-    --     onProgressCallback((playdate.getElapsedTime() / Js_searchTimeout) * 100)
-    --     if coroutine.status(computersMoveCoroutine) == "suspended" then
-    --         coroutine.resume(computersMoveCoroutine)
-    --     elseif coroutine.status(computersMoveCoroutine) == "dead" then
-    --         -- user might click end game while computer is thinking
-    --         if self.timer then
-    --             self.timer:remove()
-    --         end
-    --     end
-    -- end)
+    self.timer = longRunningTask(computersMoveCoroutine, Js_searchTimeout, 25, onProgressCallback, onDoneCallback)
 end
 
 function ChessGame:isGameOver()
@@ -4276,7 +4250,7 @@ end
 
 function ChessGame:updateState()
     -- ShowStat()
-    printDebug("ChessGame: Js_castled = "..tostring(Js_castled).."\nJs_captured = "..tostring(Js_captured).."\nJs_userInCheck = "..tostring(Js_userInCheck).."\nJs_userMoved = "..tostring(Js_userMoved).."\nJs_computerMoved = "..tostring(Js_computerMoved).."\nJs_userInvalidMove = "..tostring(Js_userInvalidMove), DEBUG)
+    printDebug("ChessGame: Js_castled = "..tostring(Js_castled).."\nJs_captured = "..tostring(Js_captured).."\nJs_userInCheck = "..tostring(Js_userInCheck).."\nJs_userMoved = "..tostring(Js_userMoved).."\nJs_computerMoved = "..tostring(Js_computerMoved).."\nJs_userInvalidMove = "..tostring(Js_userInvalidMove).."\nJs_promoted"..tostring(Js_promoted), DEBUG)
 
     if Js_userMoved then
         self.state = GAME_STATE.USER_MOVED
@@ -4405,6 +4379,7 @@ function ChessGame:getMissingPieces(board)
         pieceCount[piece] -= 1
     end
 
+    printTable(pieceCount)
     return pieceCount
 end
 
@@ -4452,18 +4427,14 @@ function ChessGame:calculateAvailableMoves(fromSquare)
     -- i = 4
     for i=1,64 do
         local moveStr = Js_szAlgMvt[i]
-        print("trying "..moveStr)
         move[3] = string.byte(moveStr, 1)
         move[4] = string.byte(moveStr, 2)
         move[5] = 0
         local result = CheckMov(move, 0)
-        print(result)
         if result ~= 0 then
             table.insert(results, moveStr)
         end
     end
-    print("calculateAvailableMoves()")
-    printTable(results)
     return results
     -- horribly inneficient
     -- loop through all 64 possible moves
@@ -4508,22 +4479,6 @@ function ChessGame:setCapturedPieceScoreChanges()
     SetFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - - 0 40")
 end
 
--- function ChessGame:longRunningTask(co, estimatedTotalTime, onProgressCallback)
---     -- todo might need to nill and remove existing timer
---     playdate.resetElapsedTime()
---     self.timer = playdate.timer.keyRepeatTimerWithDelay(0, 10, function()
---         onProgressCallback((playdate.getElapsedTime() / estimatedTotalTime) * 100)
---         if coroutine.status(co) == "suspended" then
---             coroutine.resume(co)
---         elseif coroutine.status(co) == "dead" then
---             -- user might click new game while computer is thinking
---             if self.timer then
---                 self.timer:remove()
---             end
---         end
---     end)
--- end
-
 function ChessGame:toSavedTable()
     if self:isComputerThinking() then
         -- user quit in the middle of computers move
@@ -4532,14 +4487,12 @@ function ChessGame:toSavedTable()
     end
 
     local Js_movesListSize = nonZeroNestedTableSize(Js_movesList)
-    print("Js_movesListSize="..Js_movesListSize)
     local Js_movesListCopy = {}
     for i=1, Js_movesListSize, 1 do
         Js_movesListCopy[i] = Js_movesList[i]
     end
 
     local Js_TreeSize = nonZeroNestedTableSize(Js_Tree)
-    print("Js_TreeSize="..Js_TreeSize)
     local Js_TreeCopy = {}
     for i=1, Js_TreeSize, 1 do
         Js_TreeCopy[i] = Js_Tree[i]
@@ -4741,7 +4694,7 @@ function ChessGame:initFromSavedTable(data)
             if i <= #Js_movesListCopy then
                 Js_movesList[i] = Js_movesListCopy[i]
             else
-                Js_movesList[i] = _MOVES()
+                Js_movesList[i] = {gamMv = 0, score = 0, piece = 0, color = 0}
             end
         end
 
@@ -4749,7 +4702,7 @@ function ChessGame:initFromSavedTable(data)
             if i <= #Js_TreeCopy then
                 Js_Tree[i] = Js_TreeCopy[i]
             else
-                Js_Tree[i] = _BTREE()
+                Js_Tree[i] = {replay = 0, f = 0, t = 0, flags = 0, score = 0}
             end
         end
 

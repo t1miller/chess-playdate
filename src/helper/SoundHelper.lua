@@ -34,7 +34,7 @@ local function loadSounds()
         local player = sampler.new(path)
         assert(player)
         samplePlayers[name] = player
-        samplePlayers[name]:setVolume(1.0)
+        -- samplePlayers[name]:setVolume(1.0)
     end
     printDebug(samplePlayers, DEBUG)
 end

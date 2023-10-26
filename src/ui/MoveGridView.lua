@@ -18,8 +18,9 @@ function MoveGrid:init(x, y)
 
     self.x = x
     self.y = y
-    self.height = 73
-    self.width = 147
+    -- self.height = 73
+    self.height = 94
+    self.width = 145
     self.emptyMove = "   ..."
     self.moveFont = gfx.font.new("fonts/Roobert-10-Bold")
     self.highlightedMove = {}
@@ -62,9 +63,9 @@ function MoveGrid:init(x, y)
 end
 
 function MoveGrid:loadGridView()
-    self.gridview = playdate.ui.gridview.new(65, 17)
+    self.gridview = playdate.ui.gridview.new(64, 17)
 	self.gridview.backgroundImage = gfx.nineSlice.new("images/gridBackground", 7, 7, 18, 18)
-    self.gridview:setNumberOfRows(3)
+    self.gridview:setNumberOfRows(4)
     self.gridview:setNumberOfColumns(2)
     self.gridview:setSectionHeaderHeight(1)
     self.gridview:setCellPadding(2, 2, 2, 2)
@@ -159,7 +160,7 @@ function MoveGrid:prevMove()
         return
     end
 
-    if row == 3 and col == 1 then
+    if row == 4 and col == 1 then
         self:shiftMoveGrid(1)
         self.gridview:selectNextColumn(false)
     else

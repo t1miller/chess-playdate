@@ -9,16 +9,6 @@ import 'helper/Utils'
 import 'helper/ImageCache'
 import 'ui/RectangleView'
 
-local FILES <const> = {
-	[1] = "a",
-	[2] = "b",
-	[3] = "c",
-	[4] = "d",
-	[5] = "e",
-	[6] = "f",
-	[7] = "g",
-	[8] = "h",
-}
 local geo = playdate.geometry
 local gfx <const> = playdate.graphics
 local Animator <const> = gfx.animator
@@ -67,14 +57,23 @@ function BoardGridView:init(newBoard)
 		{{},{},{},{},{},{},{},{}},
 		{{},{},{},{},{},{},{},{}},
 	}
-	-- controls the direction of piece animation
+	self.files = {
+		[1] = "a",
+		[2] = "b",
+		[3] = "c",
+		[4] = "d",
+		[5] = "e",
+		[6] = "f",
+		[7] = "g",
+		[8] = "h",
+	}
+	self.buttonTimer = nil
 	self.isReverseDirection = false
 	self.boardList = {}
-	-- the index of the board thats currently visible
 	self.boardListIdx = 0
 	self.moveList  = {}
 	self.animationDoneCallback = false
-	self.selectedSquareSprite = Rectangle(0, 0, SELECT_SQUARE_Z, 25, 25, RECT_TYPE.FILLED, nil, .5, img.kDitherTypeBayer8x8)
+	self.selectedSquareSprite = Rectangle(-50, -50, SELECT_SQUARE_Z, 25, 25, RECT_TYPE.FILLED, nil, .5, img.kDitherTypeBayer8x8)
 	self.clickedSquareSprite =  Rectangle(0, 0, CLICKED_SQUARE_Z, 27, 27, RECT_TYPE.FILLED)
 	self.rankAndFileFont =  gfx.font.new("fonts/Roobert-10-Bold")
 	self.borderOffset = 2
@@ -87,6 +86,7 @@ function BoardGridView:init(newBoard)
 	self.gridview:setNumberOfRows(8)
 	self.gridview:setContentInset(6, 6, 6, 6)
 	self.gridview.drawCell = self.drawCell
+	self.gridview.changeRowOnColumnWrap = false
 
 	self:drawWoodBackground()
 	self:drawBoardBorders()
@@ -178,11 +178,10 @@ end
 function BoardGridView:clickCell()
 	printDebug("BoardGridView: clickCell()", DEBUG)
 	local _, r, c = self.gridview:getSelection()
-	local position = FILES[c] .. tostring(9 - r)
+	local position = self.files[c] .. tostring(9 - r)
 	local piece = self:getPieceAt(r, c)
 	self.clicked[1] = self.clicked[2]
 	self.clicked[2] =  { r, c, position, piece }
-	local move = self.clicked[1][3] .. self.clicked[2][3]
 	if self.clicked[1][3] ~= self.clicked[2][3] then
 		printDebug("BoardGridView: clickCell() drawing", DEBUG)
 		self:draw()
@@ -192,28 +191,67 @@ function BoardGridView:clickCell()
 	return self.clicked[1][3], self.clicked[2][3]
 end
 
+function BoardGridView:startButtonTimer(callbackToRepeat)
+	if self.buttonTimer then
+		self.buttonTimer:remove()
+		self.buttonTimer = nil
+	end
+	self.buttonTimer = playdate.timer.keyRepeatTimerWithDelay(200, 80, callbackToRepeat)
+end
+
+function BoardGridView:stopButtonTimer()
+	if self.buttonTimer then
+		self.buttonTimer:remove()
+		self.buttonTimer = nil
+	end
+end
+
 function BoardGridView:setupInputHandler()
 	self.boardGridInputHandler = {
 
 		leftButtonDown = function ()
-			self.gridview:selectPreviousColumn(true)
-			self:draw()
+			self:startButtonTimer(function ()
+				self.gridview:selectPreviousColumn(true)
+				self:draw()
+			end)
+		end,
+
+		leftButtonUp = function ()
+			self:stopButtonTimer()
 		end,
 
 		rightButtonDown = function ()
-			self.gridview:selectNextColumn(true)
-			self:draw()
+			self:startButtonTimer(function ()
+				self.gridview:selectNextColumn(true)
+				self:draw()
+			end)
+		end,
+
+		rightButtonUp = function ()
+			self:stopButtonTimer()
 		end,
 
 		downButtonDown = function ()
-			self.gridview:selectNextRow(true)
-			self:draw()
+			self:startButtonTimer(function ()
+				self.gridview:selectNextRow(true)
+				self:draw()
+			end)
+		end,
+
+		downButtonUp = function ()
+			self:stopButtonTimer()
 		end,
 
 		upButtonDown = function ()
-			self.gridview:selectPreviousRow(true)
-			self:draw()
-		end
+			self:startButtonTimer(function ()
+				self.gridview:selectPreviousRow(true)
+				self:draw()
+			end)
+		end,
+
+		upButtonUp = function ()
+			self:stopButtonTimer()
+		end,
 	}
 	playdate.inputHandlers.push(self.boardGridInputHandler)
 end
@@ -221,37 +259,36 @@ end
 function BoardGridView:drawCell(section, row, column, selected, x, y, width, height)
 	gfx.pushContext()
 
-	-- add background to selected cell
-	if selected then
-		if selfself:isLightSquare(row, column) then
-			selfself.selectedSquareSprite:setColor(gfx.kColorBlack)
-		else
-			selfself.selectedSquareSprite:setColor(gfx.kColorWhite)
+		-- add background to selected cell
+		if selected then
+			if selfself:isLightSquare(row, column) then
+				selfself.selectedSquareSprite:setColor(gfx.kColorBlack)
+			else
+				selfself.selectedSquareSprite:setColor(gfx.kColorWhite)
+			end
+			selfself.selectedSquareSprite:moveTo(x+1, y+1)
 		end
-		selfself.selectedSquareSprite:moveTo(x+1, y+1)
-	end
 
-	-- add background to clicked cell
-	if selfself.clicked[#selfself.clicked][1] == row and selfself.clicked[#selfself.clicked][2] == column then
-		if selfself:isLightSquare(row, column) then
-			selfself.clickedSquareSprite:setColor(gfx.kColorBlack)
-			selfself.clickedSquareSprite:setDither(.2, img.kDitherTypeBayer8x8)
-		else
-			selfself.clickedSquareSprite:setColor(gfx.kColorWhite)
-			selfself.clickedSquareSprite:setDither(.6, img.kDitherTypeBayer8x8)
+		-- add background to clicked cell
+		if selfself.clicked[#selfself.clicked][1] == row and selfself.clicked[#selfself.clicked][2] == column then
+			if selfself:isLightSquare(row, column) then
+				selfself.clickedSquareSprite:setColor(gfx.kColorBlack)
+				selfself.clickedSquareSprite:setDither(.2, img.kDitherTypeBayer8x8)
+			else
+				selfself.clickedSquareSprite:setColor(gfx.kColorWhite)
+				selfself.clickedSquareSprite:setDither(.6, img.kDitherTypeBayer8x8)
+			end
+			selfself.clickedSquareSprite:moveTo(x,y)
 		end
-		selfself.clickedSquareSprite:moveTo(x,y)
-	end
 
-	-- draw piece image
-	if selfself.boardListIdx ~= 0 then
-		-- print("boardListIdx == "..)
-		-- if boardListIdx == 0, theres no board to draw yet
-		-- this happens when the game is loading and the user
-		-- starts clicking buttons
-		selfself:drawPieceSprite(row, column)
-		return
-	end
+		-- draw piece image
+		if selfself.boardListIdx ~= 0 then
+			-- if boardListIdx == 0, theres no board to draw yet
+			-- this happens when the game is loading and the user
+			-- starts clicking buttons
+			selfself:drawPieceSprite(row, column)
+			return
+		end
 
 	gfx.popContext()
 end
@@ -269,7 +306,6 @@ function BoardGridView:clear()
 end
 
 function BoardGridView:draw()
-	-- printDebug("BoardGridView: draw()", DEBUG)
 	self.gridview:drawInRect(self.borderOffset+self.borderXThickness, 0, self.boardWidth, self.boardWidth)
 end
 
@@ -414,7 +450,6 @@ function BoardGridView:drawPieceSprite(r, c)
 					selfself:animationDoneCallback()
 					selfself.animationDoneCallback = nil
 				end
-				-- printDebug("BoardGridView: update" ,DEBUG)
 				pieceSprite:setUpdatesEnabled(false)
 				animationDoneCount += 1
 			end

@@ -40,7 +40,6 @@ function Settings:load()
 		printDebug("Settings: setting "..k.."="..tostring(v), DEBUG)
 		self.settings[k] = v
 	end
-	printTable(self.settings)
 	printDebug("Settings: loaded settings", DEBUG)
 end
 

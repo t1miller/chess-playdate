@@ -7,15 +7,13 @@ import 'ChessViewModel'
 
 -- playdate.setMinimumGCTime(.0001)
 -- playdate.setCollectsGarbage(false)
-playdate.setMinimumGCTime(8)
+playdate.setMinimumGCTime(10)
 -- playdate.setGCScaling(0.4, 0.7)
 local gfx <const> = playdate.graphics
 local chessViewModel = ChessViewModel()
 
 function playdate.gameWillTerminate()
-    print("main saving game")
     chessViewModel:saveGame()
-    print("main saving done")
 end
 
 function playdate.deviceWillSleep()
@@ -31,11 +29,8 @@ end
 
 -- TODO
 -- let user choose promotion piece
--- only update squares that changed in the grid view, not the whole gridview
 -- add menu option
 --      - change color
--- clear selected square on a new game
--- save progress when game ends
 -- play as black
 -- Settings Screen
 -- change difficulty

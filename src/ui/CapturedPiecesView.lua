@@ -6,101 +6,48 @@ import 'helper/ImageCache'
 import 'helper/Utils'
 
 local gfx <const> = playdate.graphics
-local DEBUG <const> = false
-local SCORE_FONT <const> = gfx.font.new("fonts/Roobert-11-Bold")
-local BLACK_PIECES = {
-	["p"] = 0,
-	["n"] = 0,
-	["b"] = 0,
-	["r"] = 0,
-	["q"] = 0,
-}
-local ImageCache = ImageCache()
-local PIECE_VALUE <const> = {
-	["p"] = 1,
-	["P"] = 1,
-	["n"] = 3,
-	["N"] = 3,
-	["b"] = 3,
-	["B"] = 3,
-	["r"] = 5,
-	["R"] = 5,
-	["q"] = 9,
-	["Q"] = 9,
-}
+local DEBUG <const> = true
 
 class('CapturedPieces').extends()
 
-function CapturedPieces:init(x, y, isWhite)
+function CapturedPieces:init(x, y)
 	CapturedPieces.super.init(self)
 	self.x = x
 	self.y = y
-	self.isWhite = isWhite
-	self.pieceSprites = {
-		["p"] = {},
-		["P"] = {},
-		["n"] = {},
-		["N"] = {},
-		["b"] = {},
-		["B"] = {},
-		["r"] = {},
-		["R"] = {},
-		["q"] = {},
-		["Q"] = {},
-		["k"] = {},
-		["K"] = {},
-	}
-	self.score = -1.0 --force drawing of initial score
-	self.missingPieces = {
-        ["p"] = 0,
-        ["P"] = 0,
-        ["n"] = 0,
-        ["N"] = 0,
-        ["b"] = 0,
-        ["B"] = 0,
-        ["r"] = 0,
-        ["R"] = 0,
-        ["q"] = 0,
-        ["Q"] = 0,
-        ["k"] = 0,
-        ["K"] = 0,
-	}
-	self.textSprite = nil
-	self:drawScore({})
+	self.imageCache = ImageCache()
+	self.font = gfx.font.new("fonts/Roobert-11-Bold")
+	self.pieceSprites =  {["p"] = {},["P"] = {},["n"] = {},["N"] = {},["b"] = {},["B"] = {},["r"] = {},["R"] = {},["q"] = {},["Q"] = {},["k"] = {},["K"] = {},}
+	self.missingPieces = {["p"] = 0,["P"] = 0,["n"] = 0,["N"] = 0,["b"] = 0,["B"] = 0,["r"] = 0,["R"] = 0,["q"] = 0,["Q"] = 0,["k"] = 0,["K"] = 0,}
+	self.blackPieces =   {["p"] = 0,["n"] = 0,["b"] = 0,["r"] = 0,["q"] = 0,}
+	self.pieceValues =   {["p"] = 1,["P"] = 1,["n"] = 3,["N"] = 3,["b"] = 3,["B"] = 3,["r"] = 5,["R"] = 5,["q"] = 9,["Q"] = 9,}
+	self.textSpriteBlack = nil
+	self.textSpriteWhite = nil
+
+	self:drawScores()
 end
 
 function CapturedPieces:clearPieceSprites()
 	for piece, sprites in pairs(self.pieceSprites) do
 		for j = 1, #sprites do
 			sprites[j]:remove()
+			sprites[j]:update()
+			print("clearPieceSprites() removing: "..piece)
 		end
 	end
+
+	printTable(self.pieceSprites)
 end
 
 function CapturedPieces:clear()
 	self:clearPieceSprites()
-	self.score = -1.0
-	self.missingPieces = {
-        ["p"] = 0,
-        ["P"] = 0,
-        ["n"] = 0,
-        ["N"] = 0,
-        ["b"] = 0,
-        ["B"] = 0,
-        ["r"] = 0,
-        ["R"] = 0,
-        ["q"] = 0,
-        ["Q"] = 0,
-        ["k"] = 0,
-        ["K"] = 0,
-	}
-	self:drawScore()
+	self.missingPieces = {["p"] = 0,["P"] = 0,["n"] = 0,["N"] = 0,["b"] = 0,["B"] = 0,["r"] = 0,["R"] = 0,["q"] = 0,["Q"] = 0,["k"] = 0,["K"] = 0,}
+	self:drawScores()
 end
 
 function CapturedPieces:createPieceSprite(piece)
 	printDebug("CapturedPieces: createPieceSprite()", DEBUG)
 	-- create sprite
-	local pieceImage = ImageCache:getPieceImage(piece)
+	local pieceImage = self.imageCache:getPieceImage(piece)
 	local pieceSprite = gfx.sprite.new(pieceImage)
 
 	-- add to sprite table
@@ -109,12 +56,16 @@ end
 
 function CapturedPieces:addPieces(missingPieces)
 	printDebug("CapturedPieces: addPieces()", DEBUG)
+	-- print("addPieces() comparing")
+	-- printTable(self.missingPieces)
+	-- print()
+	-- printTable(missingPieces)
 	if deepcompare(self.missingPieces, missingPieces, false) == false then
 		self.missingPieces = missingPieces
 		self:clearPieceSprites()
 		self:createMissingSprites()
 		self:drawPieces()
-		self:drawScore()
+		self:drawScores()
 	end
 end
 
@@ -125,6 +76,7 @@ function CapturedPieces:createMissingSprites()
 		local spriteCount = #self.pieceSprites[missingPiece]
 		while spriteCount < missingPieceCount do
 			self:createPieceSprite(missingPiece)
+			print("createMissingSprites() creating sprite:"..missingPiece)
 			spriteCount += 1
 		end
 	end
@@ -132,54 +84,82 @@ end
 
 function CapturedPieces:drawPieces()
 	printDebug("CapturedPieces: drawPieces()", DEBUG)
-	local xOffset = 0
-	local yOffset = 20
-	local drawCount = 0
-	local pieceOrder = {"P","N","B","R","Q"}
-	if self.isWhite then
-		pieceOrder = {"p","n","b","r","q"}
-		yOffset = -24
-	end
 
+	-- draw blacks capture pieces, the white pieces
+	local xOffset = 45
+	local yOffset = 12
+	local numberOfPiecesDrawn = 0
+	local pieceOrder = {"P","N","B","R","Q"}
 	for i = 1, #pieceOrder do
 		local sprites = self.pieceSprites[pieceOrder[i]]
 		for j = 1, self.missingPieces[pieceOrder[i]] do
 			sprites[j]:add()
 			sprites[j]:moveTo(self.x + xOffset, self.y + yOffset)
 			xOffset += 12
-			drawCount += 1
+			numberOfPiecesDrawn += 1
 
-			-- draw on the next row
-			if drawCount == 10 then
-				yOffset = iif(self.isWhite, yOffset - 24, yOffset + 24)
-				xOffset = 0
+			-- first row filled, draw second row
+			if numberOfPiecesDrawn == 8 then
+				yOffset += 26
+				xOffset = 10
 			end
 		end
 	end
+
+	-- draw whites captured pieces, the black pieces
+	yOffset = 226
+	xOffset = 45
+	numberOfPiecesDrawn = 0
+	pieceOrder = {"p","n","b","r","q"}
+	for i = 1, #pieceOrder do
+		local sprites = self.pieceSprites[pieceOrder[i]]
+		for j = 1, self.missingPieces[pieceOrder[i]] do
+			sprites[j]:add()
+			sprites[j]:moveTo(self.x + xOffset, self.y + yOffset)
+			xOffset += 12
+			numberOfPiecesDrawn += 1
+
+			-- first row filled, draw second row
+			if numberOfPiecesDrawn == 8 then
+				yOffset -= 22
+				xOffset = 10
+			end
+		end
+	end
+
 	printDebug("CapturedPieces: drawPieces() drawing", DEBUG)
 end
 
-function CapturedPieces:drawScore()
-	printDebug("CapturedPieces: drawScore()", DEBUG)
-	local score = self:calculateScore()
-	if self.score == score then
-		printDebug("CapturedPieces: drawScore() not drawing", DEBUG)
-		return
-	end
-	self.score = score
+function CapturedPieces:drawScores()
+	printDebug("CapturedPieces: drawScores()", DEBUG)
+	local whitesScore, blacksScore = self:calculateScores()
+	local whitesScoreString = "+"..whitesScore
+	local blacksScoreString = "+"..blacksScore
 
-	local scoreString = string.format("+%.0f",score)
-	if self.textSprite ~= nil then
-		self.textSprite:remove()
-		self.textSprite = nil
+	if self.textSpriteBlack ~= nil then
+		self.textSpriteBlack:remove()
+		self.textSpriteBlack:update()
+		-- self.textSpriteBlack = nil
+	end
+	
+	if self.textSpriteWhite ~= nil then
+		self.textSpriteWhite:remove()
+		self.textSpriteWhite:update()
+		-- self.textSpriteWhite = nil
 	end
 
-	gfx.pushContext()
-		self.textSprite = gfx.sprite.spriteWithText(scoreString, 150, 25, nil, nil, nil, kTextAlignment.left, SCORE_FONT)
-		self.textSprite:setCenter(0,0)
-		self.textSprite:moveTo(self.x-10, self.y-12)
-		self.textSprite:add()
-	gfx.popContext()
+	-- draw blacks score
+	self.textSpriteBlack = gfx.sprite.spriteWithText(blacksScoreString, 75, 25, nil, nil, nil, kTextAlignment.left, self.font)
+	self.textSpriteBlack:setCenter(0,0)
+	self.textSpriteBlack:moveTo(self.x + 2, self.y + 2)
+	self.textSpriteBlack:add()
+
+	-- draw whites score
+	self.textSpriteWhite = gfx.sprite.spriteWithText(whitesScoreString, 75, 25, nil, nil, nil, kTextAlignment.left, self.font)
+	self.textSpriteWhite:setCenter(0,0)
+	self.textSpriteWhite:moveTo(self.x + 2, self.y + 220)
+	self.textSpriteWhite:add()
+		
 	printDebug("CapturedPieces: drawScore() drawing", DEBUG)
 end
 
@@ -187,30 +167,36 @@ end
 -- add up the the score of the pieces you took
 -- and subtract the score of what your opponent took
 -- return abs(score, 0)
-function CapturedPieces:calculateScore()
-	printDebug("CapturedPieces: calculateScore()", DEBUG)
-	local whitesScore = 0.0
-	local blacksScore = 0.0
+function CapturedPieces:calculateScores()
+	printDebug("CapturedPieces: calculateScores()", DEBUG)
+	local whitesScore = 0
+	local blacksScore = 0
 	for piece,count in pairs(self.missingPieces) do
 		if count > 0 then
-			if BLACK_PIECES[piece] then
-				whitesScore += PIECE_VALUE[piece] * count
+			if self.blackPieces[piece] then
+				whitesScore += self.pieceValues[piece] * count
 			else
-				blacksScore += PIECE_VALUE[piece] * count
+				blacksScore += self.pieceValues[piece] * count
 			end
 		end
 	end
 
 	-- add extra queens
 	if self.missingPieces["Q"] ~= nil and self.missingPieces["Q"] < 0 then
-		whitesScore += PIECE_VALUE["Q"] * math.abs(self.missingPieces["Q"])
+		whitesScore += self.pieceValues["Q"] * math.abs(self.missingPieces["Q"])
 	end
 	if self.missingPieces["q"] ~= nil and self.missingPieces["q"] < 0 then
-		blacksScore += PIECE_VALUE["q"] * math.abs(self.missingPieces["q"])
+		blacksScore += self.pieceValues["q"] * math.abs(self.missingPieces["q"])
 	end
 
-	local score = iif(self.isWhite, whitesScore - blacksScore, blacksScore - whitesScore)
-	score = iif(score < 0.0, 0.0, score)
-	return score
+	local tmp = whitesScore
+	whitesScore = whitesScore - blacksScore
+	blacksScore = blacksScore - tmp
+
+	whitesScore = iif(whitesScore > 0, whitesScore, 0)
+	blacksScore = iif(blacksScore > 0, blacksScore, 0)
+
+	printDebug("CapturedPieces: calculateScores() blacksScore = "..blacksScore.." whitesScore = "..whitesScore, DEBUG)
+	return whitesScore, blacksScore
 end
 

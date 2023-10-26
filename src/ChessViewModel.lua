@@ -24,12 +24,12 @@ function ChessViewModel:init()
 
     -- {time, depth}
     self.GAME_DIFFICULTY = {
-        ["easy"] = { 2, 5 },
-        ["med"] = { 10, 5 },
-        ["hard"] = { 100, 6 },
-        ["harder"] = { 200, 8 },
-        ["expert"] = { 300, 8 },
-        ["master"] = {500, 8 },
+        ["easy"] = { 2, 4 },
+        ["med"] = { 10, 4 },
+        ["hard"] = { 50, 4 },
+        ["harder"] = { 100, 5 },
+        ["expert"] = { 200, 5 },
+        ["master"] = {500, 6 },
     }
     -- set default settings
     self.settings = Settings({
@@ -38,16 +38,16 @@ function ChessViewModel:init()
 
     self.boardGrid = BoardGridView()
     self.dialogBox = DialogBox(200, 120)
-    self.progressBar = ProgressBar(255, 145)
-    self.bCapturedPieces = CapturedPieces(270, 13, false)
-    self.wCapturedPieces = CapturedPieces(270, 233, true)
-    self.moveGrid = MoveGrid(254, 70)
+    self.progressBar = ProgressBar(260, 155)
+    -- self.bCapturedPieces = CapturedPieces(270, 13, false)
+    -- self.wCapturedPieces = CapturedPieces(270, 233, true)
+    self.capturedPieces = CapturedPieces(255, 0)
+    self.moveGrid = MoveGrid(255, 55)
     self.toast = Toast()
     self.chessGame = ChessGame()
 
     self.chessGame:setDifficulty(
         self.GAME_DIFFICULTY[self.settings:get(SettingKeys.difficulty)]
-        -- self.GAME_DIFFICULTY["med"]
     )
     
     self.toast:show("loading chess engine", 300, true)
@@ -74,7 +74,6 @@ function ChessViewModel:init()
 
     -- local settingsScreen = SettingsScreen()
     -- todo remove
-    -- playdate.drawFPS()
     -- self.progressBar:show()
     -- self.dialogBox:show(GAME_STATE.COMPUTER_WON)
     -- self.chessGame:setUserHasMateInOne()
@@ -82,30 +81,19 @@ function ChessViewModel:init()
     -- self.moveGrid:updateMoveGrid(self.chessGame:getPGNMoves(), true)
     -- self.wCapturedPieces:addPieces(self.chessGame:getMissingPieces())
     -- self.bCapturedPieces:addPieces(self.chessGame:getMissingPieces())
-    -- wCapturedPieces:addPieces({
-    --     ["p"] = 1,
-    -- 	["P"] = 1,
-    -- 	["n"] = 3,
-    -- 	["N"] = 3,
-    -- 	["b"] = 3,
-    -- 	["B"] = 3,
-    -- 	["r"] = 5,
-    -- 	["R"] = 5,
-    -- 	["q"] = 9,
-    -- 	["Q"] = 9,
+    -- self.capturedPieces:addPieces({
+    --     ["p"] = 7,
+    -- 	["P"] = 7,
+    -- 	["n"] = 2,
+    -- 	["N"] = 2,
+    -- 	["b"] = 2,
+    -- 	["B"] = 2,
+    -- 	["r"] = 2,
+    -- 	["R"] = 2,
+    -- 	["q"] = 3,
+    -- 	["Q"] = 6,
     -- })
-    -- bCapturedPieces:addPieces({
-    --     ["p"] = 1,
-    -- 	["P"] = 1,
-    -- 	["n"] = 3,
-    -- 	["N"] = 3,
-    -- 	["b"] = 3,
-    -- 	["B"] = 3,
-    -- 	["r"] = 5,
-    -- 	["R"] = 5,
-    -- 	["q"] = 9,
-    -- 	["Q"] = 9,
-    -- })
+
     self:setupInputHandler()
     self:setupMenu()
     playSoundGameState(self.chessGame:getState())
@@ -127,8 +115,9 @@ function ChessViewModel:newGame()
             self.toast:dismiss()
             self.boardGrid:clear()
             self.boardGrid:addBoard(self.chessGame:getBoard())
-            self.wCapturedPieces:clear()
-            self.bCapturedPieces:clear()
+            -- self.wCapturedPieces:clear()
+            -- self.bCapturedPieces:clear()
+            self.capturedPieces:clear()
             self.moveGrid:clear()
             self.progressBar:hide()
             playSoundGameState(self.chessGame:getState())
@@ -136,11 +125,11 @@ function ChessViewModel:newGame()
     )
 end
 
-function ChessViewModel:updateMissingPieces(board)
-    local missingPieces = self.chessGame:getMissingPieces(board)
-    self.wCapturedPieces:addPieces(missingPieces)
-    self.bCapturedPieces:addPieces(missingPieces)
-end
+-- function ChessViewModel:updateMissingPieces(board)
+--     local missingPieces = self.chessGame:getMissingPieces(board)
+--     self.wCapturedPieces:addPieces(missingPieces)
+--     self.bCapturedPieces:addPieces(missingPieces)
+-- end
 
 function ChessViewModel:getComputersMove()
     self.progressBar:show()
@@ -153,10 +142,12 @@ function ChessViewModel:getComputersMove()
 
         -- onDoneCallback
         function()
+            -- local board = self.chessGame:getBoard()
             self.boardGrid:setBoardToActivePos()
             self.boardGrid:addMove(self.chessGame:getComputersMove())
             self.boardGrid:addBoard(self.chessGame:getBoard())
-            self:updateMissingPieces()
+            -- self:updateMissingPieces()
+            self.capturedPieces:addPieces(self.chessGame:getMissingPieces())
             self.moveGrid:updateMoveGrid(self.chessGame:getPGNMoves(), false)
             self.progressBar:hide()
             playSoundGameState(self.chessGame:getState())
@@ -180,7 +171,8 @@ function ChessViewModel:getUsersMove()
         end
     )
     self.boardGrid:addBoard(self.chessGame:getBoard())
-    self:updateMissingPieces()
+    self.capturedPieces:addPieces(self.chessGame:getMissingPieces())
+    -- self:updateMissingPieces()
     self.moveGrid:updateMoveGrid(self.chessGame:getPGNMoves(), true)
     return true
 end
@@ -188,7 +180,8 @@ end
 function ChessViewModel:gameStateMachine()
     self.boardGrid:setBoardToActivePos()
     self.moveGrid:setMoveToActiveMove()
-    self:updateMissingPieces(self.boardGrid:getVisibleBoard())
+    -- self:updateMissingPieces(self.boardGrid:getVisibleBoard())
+    self.capturedPieces:addPieces(self.chessGame:getMissingPieces(self.boardGrid:getVisibleBoard()))
     
     local didMove = self:getUsersMove()
     playSoundGameState(self.chessGame:getState())
@@ -210,7 +203,8 @@ function ChessViewModel:undoMove()
         self.boardGrid:setBoardToActivePos()
         self.boardGrid:removeBoard()
         self.boardGrid:removeBoard()
-        self:updateMissingPieces(self.boardGrid:getVisibleBoard())
+        self.capturedPieces:addPieces(self.chessGame:getMissingPieces(self.boardGrid:getVisibleBoard()))
+        -- self:updateMissingPieces(self.boardGrid:getVisibleBoard())
         self.moveGrid:removeLastTwoMoves()
     else
         self.toast:show("nothing to undo",50)
@@ -223,8 +217,9 @@ function ChessViewModel:loadGame()
     self.chessGame:initFromSavedTable(self.gameSave:get(GAME_SAVE_KEYS.ChessGame))
     self.gameSave:delete()
 
-    self.wCapturedPieces:addPieces(self.chessGame:getMissingPieces())
-    self.bCapturedPieces:addPieces(self.chessGame:getMissingPieces())
+    -- self.wCapturedPieces:addPieces(self.chessGame:getMissingPieces())
+    -- self.bCapturedPieces:addPieces(self.chessGame:getMissingPieces())
+    self.capturedPieces:addPieces(self.chessGame:getMissingPieces())
 end
 
 function ChessViewModel:saveGame()
@@ -270,11 +265,13 @@ function ChessViewModel:cranked()
     local crankTicks = playdate.getCrankTicks(4)
     if crankTicks == 1 then
         self.boardGrid:nextPosition()
-        self:updateMissingPieces(self.boardGrid:getVisibleBoard())
+        -- self:updateMissingPieces(self.boardGrid:getVisibleBoard())
+        self.capturedPieces:addPieces(self.chessGame:getMissingPieces(self.boardGrid:getVisibleBoard()))
         self.moveGrid:nextMove()
     elseif crankTicks == -1 then
         self.boardGrid:previousPosition()
-        self:updateMissingPieces(self.boardGrid:getVisibleBoard())
+        -- self:updateMissingPieces(self.boardGrid:getVisibleBoard())
+        self.capturedPieces:addPieces(self.chessGame:getMissingPieces(self.boardGrid:getVisibleBoard()))
         self.moveGrid:prevMove()
     end
 end
@@ -305,7 +302,6 @@ function ChessViewModel:setupInputHandler()
             end
         
             self:gameStateMachine()
-
 		end,
 
         cranked = function (change, acceleratedChange)
@@ -335,7 +331,7 @@ function ChessViewModel:setupMenu()
 
     menu:addMenuItem("undo move", function()
         if self.chessGame:isComputerThinking() then
-            self.toast:show("wait for computers move...",30)
+            self.toast:show("wait for computers move",30)
             return
         end
         -- todo this has a bug
