@@ -1,6 +1,6 @@
 import "CoreLibs/frameTimer"
 
-local DEBUG <const> = true
+local DEBUG <const> = false
 
 function reverseTable(x)
     local rev = {}
@@ -86,19 +86,23 @@ function sleep(delayMs)
     while playdate.getElapsedTime()*100 < delayMs do end
 end
 
+local resetElapsedTime<const> = playdate.resetElapsedTime
+local getElapsedTime<const> = playdate.getElapsedTime
+local coroutineStatus<const> = coroutine.status
+local coroutineResume<const> = coroutine.resume
 function longRunningTask(co, estimatedTotalTime, interval, onProgressCallback, onDoneCallback)
     -- todo might need to nill and remove existing timer
 
-    playdate.resetElapsedTime()
+    resetElapsedTime()
     local timer = nil
     timer = playdate.timer.keyRepeatTimerWithDelay(0, interval, function()
         if onProgressCallback then
-            onProgressCallback((playdate.getElapsedTime() / estimatedTotalTime) * 100)
+            onProgressCallback((getElapsedTime() / estimatedTotalTime) * 100)
         end
 
-        if coroutine.status(co) == "suspended" then
-            coroutine.resume(co)
-        elseif coroutine.status(co) == "dead" then
+        if coroutineStatus(co) == "suspended" then
+            coroutineResume(co)
+        elseif coroutineStatus(co) == "dead" then
             -- user might click new game while computer is thinking
             if timer then
                 printDebug("Utils: longRunningTask() timer removed", DEBUG)

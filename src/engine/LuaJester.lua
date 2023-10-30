@@ -12,13 +12,19 @@
 import 'helper/Utils'
 
 local DEBUG <const> = true
+local abs <const> = math.abs
+local floor <const> = math.floor
+
+local iif<const> = iif
+local getTime = playdate.getElapsedTime
+local yield = coroutine.yield
 
 local BoardCpy, WatchPosit, CalcKBNK, ChangeForce, Undo, ISqAgrs, Iwxy, XRayBR, ComputerMvt, InitMoves,
 CheckMov, UnValidateMov, FJunk, ShowThink, ResetData, InChecking, ShowScore, MixBoard, InitGame, IColmn, IRaw, 
 ShowStat, CalcKPK, CalcKg, IArrow, MoveTree, PrisePassant, copyValueOf, Agression, InitArrow, IfCheck, 
 Anyagress, KnightPts, QueenPts, PositPts, PlayMov, IRepeat, ChoiceMov, MultiMov, XRayKg, DoCastle, DoCalc, Lalgb, 
 UpdatePiecMap, getBoard, UpdateDisplay, AvailCaptur, InitStatus, MessageOut, Pagress, CheckMatrl, AttachMov, PawnPts, 
-RookPts, KingPts, AvailMov, BishopPts, ValidateMov, Peek, Seek, SwitchSides, GetFen, EnterMove, SetFen, ResetFlags, 
+RookPts, KingPts, AvailMov, BishopPts, ValidateMov, Peek, Seek, SwitchSides, EnterMove, SetFen, ResetFlags, 
 Jst_Play, UndoMov, ShowMov
 -- GetAlgMvt
 
@@ -148,8 +154,8 @@ local Js_lastScore = 0
 
 -- local Js_fromMySquare = 0
 -- local Js_toMySquare = 0
-Js_cNodes = 0
-Js_scoreDither = 0
+local Js_cNodes = 0
+local Js_scoreDither = 0
 Js__alpha = 0
 Js__beta = 0
 Js_dxAlphaBeta = 0
@@ -342,7 +348,7 @@ Js_queenRook = { 0, 56, 0 }
 Js_kingRook = { 7, 63, 0 }
 Js_kingPawn = { 4, 60, 0 }
 Js_raw7 = { 6, 1, 0 }
-Js_heavy = { false, false, false, true, true, true, false, false }
+local Js_heavy = { false, false, false, true, true, true, false, false }
 
 local Js_pgn = ""   -- save too
 
@@ -953,7 +959,7 @@ function InitMoves()
         ptyp = ptyp + 1
     end
 
-    coroutine.yield()
+    yield()
     ptyp = 1
     while (ptyp < 8) do
         po = 21
@@ -1340,19 +1346,19 @@ function ResetData()
     -- local i = 0
     -- local j = 0
 
-    coroutine.yield()
+    yield()
     Js_movesList = {}
     for i = 0, 512, 1 do
         Js_movesList[1 + i] = {gamMv = 0, score = 0, piece = 0, color = 0}
     end
 
-    coroutine.yield()
+    yield()
     Js_Tree = {}
     for i = 0, 2000, 1 do
         Js_Tree[1 + i] = {replay = 0, f = 0, t = 0, flags = 0, score = 0}
     end
 
-    coroutine.yield()
+    yield()
     for i = 0, Js_maxDepth - 1, 1 do
         Js_treePoint[1 + i] = 0
         Js_variants[1 + i] = 0
@@ -1386,13 +1392,13 @@ function ResetData()
         Js_pieceIndex[1 + i] = 0
     end
 
-    coroutine.yield()
+    yield()
     for i = 0, 4200, 1 do
         Js_arrowData[1 + i] = 0
         Js_crossData[1 + i] = 0
     end
 
-    coroutine.yield()
+    yield()
     for i = 0, 1, 1 do
         for j = 0, 63, 1 do
             Js_agress[1 + i] = {} -- creates object
@@ -1423,17 +1429,17 @@ function ResetData()
 
     -- this takes longer, maybe it is possible to optimize via (undefined?0:value)
 
-    coroutine.yield()
+    yield()
     for i = 1, 10000, 1 do
         Js_storage[1 + i] = 0
     end
 
-    coroutine.yield()
+    yield()
     for i = 1, 40000, 1 do
         Js_nextCross[1 + i] = 0
         Js_nextArrow[1 + i] = 0
     end
-    coroutine.yield()
+    yield()
 end
 
 function InChecking(side)
@@ -1495,9 +1501,9 @@ function InitGame()
     Js_fAbandon = false
     Js_fUserWin_kc = false
 
-    coroutine.yield()
+    yield()
     InitArrow()
-    coroutine.yield()
+    yield()
     InitMoves()
 
     Js_working = -1
@@ -1806,8 +1812,8 @@ function InitArrow()
     while (a < 64) do
         b = 0
         while (b < 64) do
-            d = math.abs(IColmn(a) - IColmn(b))
-            di = math.abs(IRaw(a) - IRaw(b))
+            d = abs(IColmn(a) - IColmn(b))
+            di = abs(IRaw(a) - IRaw(b))
 
             Js_crossData[1 + ((a * 64) + b)] = (d + di)
             Js_arrowData[1 + ((a * 64) + b)] = iif((d > di), d, di)
@@ -2113,7 +2119,7 @@ function ChoiceMov(side, iop)
     end
    
     while ((not Js_flag.timeout) and (Js_depth_Seek < Js_maxDepthSeek)) do
-        coroutine.yield()
+        yield()
         Js_depth_Seek = Js_depth_Seek + 1
 
         score.i = Seek(side, 1, Js_depth_Seek, alpha, beta, Js_variants, rpt)
@@ -2151,7 +2157,7 @@ function ChoiceMov(side, iop)
             Js_scoreTP[1] = score.i
             Js_scoreDither = iif((Js_scoreDither == 0), score.i, ((Js_scoreDither + score.i) / 2))
         end
-        Js_dxDither = (20 + math.abs(Js_scoreDither / 12))
+        Js_dxDither = (20 + abs(Js_scoreDither / 12))
         beta = score.i + Js__beta
         if (Js_scoreDither < score.i) then
             alpha = Js_scoreDither - Js__alpha - Js_dxDither
@@ -2453,11 +2459,11 @@ function DoCalc(side, ply, alpha, beta, gainScore, slk, InChk)
     if (evflag) then
         Js_cCompNodes = Js_cCompNodes + 1
         -- if (Js_cCompNodes % 200 == 0) then
-        local currTime = playdate.getElapsedTime() --.4
+        local currTime = getTime() --.4
         if (Js_cCompNodes % 40 == 0 or currTime - Js_prevYieldTime > .5) then
         -- if (currTime - Js_prevYieldTime > .3) then
             Js_prevYieldTime = currTime
-            coroutine.yield()
+            yield()
         end
         Agression(side, Js_agress[1 + side])
 
@@ -3594,7 +3600,7 @@ function Seek(side, ply, depth, alpha, beta, bstline, rpt)
 
             node.score = (-Seek(xside, ply + 1, iif((depth > 0), depth - 1, 0), -beta, -alpha, nxtline, rcnt))
 
-            if (math.abs(node.score) > 9000) then
+            if (abs(node.score) > 9000) then
                 node.flags = (node.flags | Js__idem)
             else
                 if (rcnt.i == 1) then
@@ -3687,7 +3693,7 @@ function Seek(side, ply, depth, alpha, beta, bstline, rpt)
     end
 
     -- if (os.clock() - Js_startTime > Js_searchTimeout) then
-    if (playdate.getElapsedTime() > Js_searchTimeout) then
+    if (getTime() > Js_searchTimeout) then
         Js_flag.timeout = true
     end
 
@@ -4115,7 +4121,6 @@ function nonZeroNestedTableSize(t)
 end
 
 local function removeLastTwoMovesPgn()
-    printDebug("ChessGame: removeLast2MovesPgn() before pgn: "..Js_pgn, DEBUG)
     local movesFlattened = splitString(Js_pgn, " ")
     table.remove(movesFlattened)
     table.remove(movesFlattened)
@@ -4123,7 +4128,6 @@ local function removeLastTwoMovesPgn()
     for i = 1, #movesFlattened do
         Js_pgn = Js_pgn..movesFlattened[i].." "
     end
-    printDebug("ChessGame: removeLast2MovesPgn() after pgn: "..Js_pgn, DEBUG)
 end
 
 
@@ -4173,15 +4177,13 @@ function ChessGame:newGame(onProgressCallback, onDoneCallback)
         UpdateDisplay()
         -- onDoneCallback()
         self.gameLoading = false
-        printDebug("ChessGame: newGame() took "..playdate.getElapsedTime().." seconds", DEBUG)
+        printDebug("ChessGame: newGame() took "..getTime().." seconds", DEBUG)
     end)
 
     self.timer = longRunningTask(newGameCoroutine, 2.3, 10, onProgressCallback, onDoneCallback)
 end
 
 function ChessGame:moveUser(from, to)
-
-    printDebug("ChessGame: number of timers allocated: "..#playdate.timer.allTimers(), DEBUG)
     -- todo remove
     -- local moves = self:calculateAvailableMoves(from)
     -- todo remove nop state
@@ -4190,9 +4192,13 @@ function ChessGame:moveUser(from, to)
     self.state = GAME_STATE.NOP
     if from == "" or to == "" then
         -- self.state = GAME_STATE.INVALID_MOVE
+        -- self:calculateAvailableMoves(to)
+        -- self:calculateAvailableMoves(from)
         printDebug("ChessGame: moveUser() move empty", DEBUG)
         return false
     end
+
+    -- self:calculateAvailableMoves(to)
 
     local isValid = EnterMove(from, to, "")
     if isValid == false then
@@ -4230,7 +4236,7 @@ function ChessGame:moveComputer(onProgressCallback, onDoneCallback)
                               newRow,
                               newCol}
 
-        printDebug("ChessGame: nodes searched= " .. Js_cCompNodes .. " time=" .. playdate.getElapsedTime().." depth="..Js_maxDepth, DEBUG)     -- to see performance
+        printDebug("ChessGame: nodes searched= " .. Js_cCompNodes .. " time=" .. getTime().." depth="..Js_maxDepth, DEBUG)     -- to see performance
         -- -- self.state = GAME_STATE.VALID_MOVE
         -- self.state = GAME_STATE.COMPUTER_MOVED
         self:updateState()
@@ -4250,7 +4256,7 @@ end
 
 function ChessGame:updateState()
     -- ShowStat()
-    printDebug("ChessGame: Js_castled = "..tostring(Js_castled).."\nJs_captured = "..tostring(Js_captured).."\nJs_userInCheck = "..tostring(Js_userInCheck).."\nJs_userMoved = "..tostring(Js_userMoved).."\nJs_computerMoved = "..tostring(Js_computerMoved).."\nJs_userInvalidMove = "..tostring(Js_userInvalidMove).."\nJs_promoted"..tostring(Js_promoted), DEBUG)
+    printDebug("ChessGame: Js_castled = "..tostring(Js_castled).." Js_captured = "..tostring(Js_captured).." Js_userInCheck = "..tostring(Js_userInCheck).." Js_userMoved = "..tostring(Js_userMoved).." Js_computerMoved = "..tostring(Js_computerMoved).." Js_userInvalidMove = "..tostring(Js_userInvalidMove).." Js_promoted"..tostring(Js_promoted), DEBUG)
 
     if Js_userMoved then
         self.state = GAME_STATE.USER_MOVED
@@ -4341,12 +4347,11 @@ function ChessGame:setDifficulty(params)
     Js_maxDepth = params[2]
     Js_maxDepthSeek = (Js_maxDepth - 1)
     -- todo variables need to be reinitialized because they
-    -- deoend on maxDepth
+    -- depend on maxDepth
     printDebug("ChessGame: difficulty set: timeout = " .. Js_searchTimeout .. " seconds, depth = " .. Js_maxDepth, DEBUG)
 end
 
 -- start will all the pieces then remove pieces you see
--- todo handle case with multiple queens
 function ChessGame:getMissingPieces(board)
     local pieceCount = {
         ["p"] = 8,
@@ -4363,23 +4368,13 @@ function ChessGame:getMissingPieces(board)
         ["K"] = 1,
     }
 
-    -- get either the current game board or
-    -- the board that is visible
-    local boardToUse = nil
-    if board then
-        boardToUse = board
-    else
-        boardToUse = getBoard()
-    end
-
+    local boardToUse = board or getBoard()
     local boardPieces = boardToUse:gsub("[%c%p%s]", "")
-
     for i = 1, boardPieces:len() do
         local piece = boardPieces:sub(i, i)
         pieceCount[piece] -= 1
     end
 
-    printTable(pieceCount)
     return pieceCount
 end
 
@@ -4415,38 +4410,8 @@ function ChessGame:getUsersMove()
     return self.usersMove
 end
 
-function ChessGame:calculateAvailableMoves(fromSquare)
-    local results = {}
-    local move = {}
-    move[1] = string.byte(fromSquare, 1)
-    move[2] = string.byte(fromSquare, 2)
-    -- rgch[1] = string.byte(from_sq, 1) --(char)
-    -- rgch[2] = string.byte(from_sq, 2)
-    -- rgch[3] = string.byte(to_sq, 1)  --(char)
-    -- rgch[4] = string.byte(to_sq, 2)
-    -- i = 4
-    for i=1,64 do
-        local moveStr = Js_szAlgMvt[i]
-        move[3] = string.byte(moveStr, 1)
-        move[4] = string.byte(moveStr, 2)
-        move[5] = 0
-        local result = CheckMov(move, 0)
-        if result ~= 0 then
-            table.insert(results, moveStr)
-        end
-    end
-    return results
-    -- horribly inneficient
-    -- loop through all 64 possible moves
-    -- Js_szAlgMvt = { "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1", "a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2", "a3",
-    -- "b3", "c3", "d3", "e3", "f3", "g3", "h3", "a4", "b4", "c4", "d4", "e4", "f4", "g4", "h4", "a5", "b5", "c5", "d5",
-    -- "e5", "f5", "g5", "h5", "a6", "b6", "c6", "d6", "e6", "f6", "g6", "h6", "a7", "b7", "c7", "d7", "e7", "f7", "g7",
-    -- "h7", "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8" }
-
-end
-
 function ChessGame:squareToRowCol(square)
-    local row = math.floor(8 - (square+1)/8 + 1)
+    local row = floor(8 - (square+1)/8 + 1)
     local col = square % 8 + 1
     return row, col
 end
@@ -4486,12 +4451,14 @@ function ChessGame:toSavedTable()
         self:undoLastTwoMoves()
     end
 
+    -- only save non empty values
     local Js_movesListSize = nonZeroNestedTableSize(Js_movesList)
     local Js_movesListCopy = {}
     for i=1, Js_movesListSize, 1 do
         Js_movesListCopy[i] = Js_movesList[i]
     end
 
+    -- only save non empty values
     local Js_TreeSize = nonZeroNestedTableSize(Js_Tree)
     local Js_TreeCopy = {}
     for i=1, Js_TreeSize, 1 do

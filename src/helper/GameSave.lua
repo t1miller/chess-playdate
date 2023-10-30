@@ -1,8 +1,8 @@
 import 'helper/Utils'
 
 GAME_SAVE_KEYS = {
-    BoardGridView = "saved data for board",
-    MoveGridView = "saved data for move grid",
+    BoardGrid = "saved data for board",
+    MoveGrid = "saved data for move grid",
     ChessGame = "saved data for chessgame"
 }
 
@@ -29,8 +29,8 @@ function GameSave:getSize()
     return fileSize
 end
 
-function GameSave:isEmpty()
-    return self:getSize() < 1
+function GameSave:exists()
+    return playdate.file.exists("gameSave.json")
 end
 
 function GameSave:put(k,v)

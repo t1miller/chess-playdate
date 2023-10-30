@@ -1,6 +1,5 @@
 
 import "CoreLibs/graphics"
-import 'library/AnimatedSprite'
 
 local gfx <const> = playdate.graphics
 local DEBUG <const> = false
@@ -40,12 +39,10 @@ end
 
 local function cacheImages()
 	printDebug("ImageCache: caching", DEBUG)
-	-- cache piece images
 	for _, pieceImagePath in pairs(PIECE_IMG_PATHS) do
 		local pieceImage = gfx.image.new(pieceImagePath)
 		cachedImages[pieceImagePath] = pieceImage
 	end
-
 	printDebug("ImageCache: done caching", DEBUG)
 end
 

@@ -7,14 +7,14 @@ local DEBUG <const> = false
 
 class('Toast').extends()
 
-function Toast:init()
+function Toast:init(x, y)
     Toast.super.init(self)
 
     self.text = ""
     self.progress = 0
     self.font = gfx.font.new("fonts/Roobert-10-Bold")
-    self.x = 200
-    self.y = 200
+    self.x = x or 200
+    self.y = y or 200
     self.padding = 20
     self.frameTimer = nil
 end
@@ -23,31 +23,14 @@ function Toast:updateProgress(progress)
     self.progress = progress
 end
 
--- function Toast:draw()
---     local percentString = string.format("%.0f", self.progress)
---     local textWithPercent = self.text.." ("..percentString.."%)"
---     gfx.pushContext()
---         gfx.setFont(self.font)
---         local width, height = gfx.getTextSize(textWithPercent)
---         gfx.fillRoundRect(self.x-width/2-self.padding/2, self.y-self.padding/2, width+self.padding, height+self.padding, 9)
---         gfx.setColor(gfx.kColorWhite)
---         gfx.drawRoundRect(self.x-width/2-self.padding/2, self.y-self.padding/2, width+self.padding, height+self.padding, 9)
---         gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
---         gfx.drawTextAligned(textWithPercent, self.x, self.y, kTextAlignment.center)
---     gfx.popContext()
--- end
-
 function Toast:show(text, duration, enableProgress)
     printDebug("Utils: showing toast message: "..text.." for "..duration.." frames", DEBUG)
 
-    self.text = text
-    if self.frameTimer then
-        self.frameTimer:remove()
-    end
+    self:dismiss()
 
+    self.text = text
     self.frameTimer = playdate.frameTimer.new(duration)
     self.frameTimer.updateCallback = function()
-        -- local textToShow = text
         if enableProgress then
             local percentString = string.format("%.0f", self.progress)
             self.text = text.." ("..percentString.."%)"
