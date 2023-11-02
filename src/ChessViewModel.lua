@@ -215,12 +215,6 @@ function ChessViewModel:setupInputHandler()
                 self.toast:show("Wait for game to load.",30)
                 return
             end
-            
-            -- if self.endGameDialog:isShowing() then
-            --     self.endGameDialog:dismiss()
-            --     self:newGame()
-            --     return
-            -- end
         
             if self.chessGame:isGameOver() then
                 self:showEndGameDialog(self.chessGame:getState())
@@ -268,7 +262,6 @@ function ChessViewModel:setupMenu()
             self.toast:show("Wait for computers move.",30)
             return
         end
-        -- todo this has a bug
         self:undoMove()
     end)
 end

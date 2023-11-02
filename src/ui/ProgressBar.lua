@@ -5,7 +5,7 @@ import "CoreLibs/graphics"
 import 'helper/Utils'
 
 local gfx <const> = playdate.graphics
-local DEBUG <const> = false
+local DEBUG <const> = true
 local TEXT_Z <const> = 105
 local PROGRESS_BAR_STATE <const> = {
     SHOWING = "SHOWING",

@@ -7,7 +7,7 @@ import 'helper/Utils'
 
 local gfx<const> = playdate.graphics
 
-local DEBUG <const> = false
+local DEBUG <const> = true
 local DIALOG_Z <const> = 1000
 local DIALOG_STATE <const> = {
     SHOWING = "0",

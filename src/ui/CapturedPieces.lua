@@ -7,7 +7,7 @@ import 'ui/Piece'
 
 local gfx <const> = playdate.graphics
 local abs <const> = math.abs
-local DEBUG <const> = false
+local DEBUG <const> = true
 local BLACK_PIECES =   {["p"] = 0,["n"] = 0,["b"] = 0,["r"] = 0,["q"] = 0,}
 local WHITE_PIECES =   {["P"] = 0,["N"] = 0,["B"] = 0,["R"] = 0,["Q"] = 0,}
 local PIECE_VALUES =   {["p"] = 1,["P"] = 1,["n"] = 3,["N"] = 3,["b"] = 3,["B"] = 3,["r"] = 5,["R"] = 5,["q"] = 9,["Q"] = 9,}

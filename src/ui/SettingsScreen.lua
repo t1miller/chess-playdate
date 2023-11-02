@@ -3,7 +3,7 @@ import "CoreLibs/sprites"
 import "CoreLibs/graphics"
 
 local gfx<const> = playdate.graphics
-local DEBUG <const> = false
+local DEBUG <const> = true
 
 class('SettingsScreen').extends()
 

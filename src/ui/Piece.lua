@@ -9,7 +9,7 @@ local geo = playdate.geometry
 local gfx<const> = playdate.graphics
 local Animator <const> = gfx.animator
 
-local DEBUG <const> = false
+local DEBUG <const> = true
 
 class('Piece').extends(gfx.sprite)
 
