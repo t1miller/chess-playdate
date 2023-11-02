@@ -352,6 +352,10 @@ Js_heavy = { false, false, false, true, true, true, false, false }
 
 Js_pgn = ""   -- save too
 
+Js_AUTHOR = "Copyright � 1998-2002 - Stephane N.B. Nguyen - Vaureal, FRANCE"
+Js_WEBSITE = "http://www.ludochess.com/"
+Js_STR_COPY = "JESTER 1.10e by " .. Js_AUTHOR .. Js_WEBSITE
+
 -- Some helping functions for Lua scripting
 
 -- (if ? then : else) substitute

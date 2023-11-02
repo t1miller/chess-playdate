@@ -245,11 +245,13 @@ function ChessViewModel:setupMenu()
     local menu = playdate.getSystemMenu()
     
     self.difficultyMenuItem = menu:addOptionsMenuItem("Difficulty", { "level 1", "level 2", "level 3", "level 4", "level 5", "level 6" }, self.settings:get(SettingKeys.difficulty), function(value)
-        local originalDifficulty = self.settings:get(SettingKeys.difficulty)
-        local newDifficulty = value
-        if originalDifficulty ~= newDifficulty then
-            self:showChangeDifficultyDialog(originalDifficulty, newDifficulty)
-        end
+
+        local difficultyToast = Toast(200,25)
+        difficultyToast:show("Difficulty: "..newDifficulty.."\nComputer thinks "..self.GAME_DIFFICULTY[newDifficulty][2].." moves ahead and\nspends up to "..self.GAME_DIFFICULTY[newDifficulty][1].." seconds thinking.", 180)
+
+        self.chessGame:setDifficulty(self.GAME_DIFFICULTY[value])
+        self.settings:set(SettingKeys.difficulty, value)
+        self.settings:save()
     end)
 
     menu:addMenuItem("new game", function()
@@ -285,30 +287,30 @@ function ChessViewModel:showEndGameDialog(state)
     endGameDialog:show()
 end
 
-function ChessViewModel:showChangeDifficultyDialog(originalDifficulty, newDifficulty)
-    local confirmationDialog = Dialog(200, 120, "New Game", "Changing difficulty requires\nstarting a new game. Are \nyou sure?", "Ⓐ New Game\nⒷ Ignore Change")
-    confirmationDialog:setFonts(nil, playdate.graphics.font.new("fonts/Roobert-11-Medium"), nil)
-    confirmationDialog:setAlignments(kTextAlignment.center, kTextAlignment.left, nil)
-    confirmationDialog:setOffsets(nil, 5, 15, 45, 50, 120)
-    confirmationDialog:setButtonCallbacks(
-        -- a button clicked
-        function ()
-            self.chessGame:setDifficulty(self.GAME_DIFFICULTY[newDifficulty])
-            self.settings:set(SettingKeys.difficulty, newDifficulty)
-            self.settings:save()
-            confirmationDialog:dismiss()
+-- function ChessViewModel:showChangeDifficultyDialog(originalDifficulty, newDifficulty)
+--     local confirmationDialog = Dialog(200, 120, "New Game", "Changing difficulty requires\nstarting a new game. Are \nyou sure?", "Ⓐ New Game\nⒷ Ignore Change")
+--     confirmationDialog:setFonts(nil, playdate.graphics.font.new("fonts/Roobert-11-Medium"), nil)
+--     confirmationDialog:setAlignments(kTextAlignment.center, kTextAlignment.left, nil)
+--     confirmationDialog:setOffsets(nil, 5, 15, 45, 50, 120)
+--     confirmationDialog:setButtonCallbacks(
+--         -- a button clicked
+--         function ()
+--             self.chessGame:setDifficulty(self.GAME_DIFFICULTY[newDifficulty])
+--             self.settings:set(SettingKeys.difficulty, newDifficulty)
+--             self.settings:save()
+--             confirmationDialog:dismiss()
 
-            local difficultyToast = Toast(200,25)
-            difficultyToast:show("Difficulty: "..newDifficulty.."\nComputer thinks "..self.GAME_DIFFICULTY[newDifficulty][2].." moves ahead and\nspends up to "..self.GAME_DIFFICULTY[newDifficulty][1].." seconds thinking.", 180)
-            self.toast:show("Restarting chess engine.", 60, true)
-            self:newGame()
-        end,
+--             local difficultyToast = Toast(200,25)
+--             difficultyToast:show("Difficulty: "..newDifficulty.."\nComputer thinks "..self.GAME_DIFFICULTY[newDifficulty][2].." moves ahead and\nspends up to "..self.GAME_DIFFICULTY[newDifficulty][1].." seconds thinking.", 180)
+--             self.toast:show("Restarting chess engine.", 60, true)
+--             self:newGame()
+--         end,
 
-        -- b button clicked
-        function ()
-            self.difficultyMenuItem:setValue(originalDifficulty)
-            confirmationDialog:dismiss()
-        end
-    )
-    confirmationDialog:show()
-end
+--         -- b button clicked
+--         function ()
+--             self.difficultyMenuItem:setValue(originalDifficulty)
+--             confirmationDialog:dismiss()
+--         end
+--     )
+--     confirmationDialog:show()
+-- end

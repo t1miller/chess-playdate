@@ -90,6 +90,7 @@ function Position:genMoves(squareTxt)
    -- For each of our pieces, iterate through each possible 'ray' of moves,
    -- as defined in the 'directions' map. The rays are broken e.g. by
    -- captures or immediately in case of pieces such as knights.
+
    -- todo 
    -- todo
    -- todo dont need to loop 64 squares, just need the square we're interested in
@@ -103,7 +104,7 @@ function Position:genMoves(squareTxt)
 	    for j=i+d, limit, d do
 	       local q = self.board:sub(j + __1, j + __1)
 	       -- Stay inside the board
-	       if isspace(self.board:sub(j + __1, j + __1)) then break; end
+	       if isspace(q) then break; end
 	       -- Castling
 	       if i == A1 and q == 'K' and self.wc[0 + __1] then
 		  table.insert(moves,  {j, j-2})
@@ -111,7 +112,6 @@ function Position:genMoves(squareTxt)
 	       if i == H1 and q == 'K' and self.wc[1 + __1] then 
 		  table.insert(moves,  {j, j+2})
 	       end
-	       -- print(p, q, i, d, j)
 	       -- No friendly captures
 	       if isupper(q) then break; end
 	       -- Special pawn stuff
@@ -126,7 +126,6 @@ function Position:genMoves(squareTxt)
 	       end
 	       -- Move it
 	       table.insert(moves, {i, j})
-	       -- print(i, j)
 	       -- Stop crawlers from sliding
 	       if p == 'P' or p == 'N' or p == 'K' then break; end
 	       -- No sliding after captures

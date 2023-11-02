@@ -1,7 +1,7 @@
 # Chess For The Playdate
 
 ## Chess Engines
-- [Jester] engine by [Marty Franz] ported to lua by [ChessForEva]
+- [Jester] engine by [Stephane N.B. Nguyen] ported to lua by [ChessForEva]
 - [Sunfish] engine by [Thomas Ahle] ported to lua by [soumith]
 
 ## User Interface
@@ -15,9 +15,9 @@
 
 
 
-[ChessForEva]: <https://github.com/Chessforeva/Lua4chess>
-[Jester]: <https://www.chessprogramming.org/Jester_US>
-[Marty Franz]: <https://www.chessprogramming.org/Marty_Franz>
+[ChessForEva]: <http://chessforeva.blogspot.com/>
+[Jester]: <https://www.chessprogramming.org/Jester>
+[Stephane N.B. Nguyen]: <https://www.chessprogramming.org/St%C3%A9phane_Nguyen>
 [Sunfish]: <https://github.com/thomasahle/sunfish>
 [Thomas Ahle]: <https://github.com/thomasahle>
 [soumith]: <https://github.com/soumith/sunfish.lua>
