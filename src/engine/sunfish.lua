@@ -22,7 +22,7 @@ local directions = {
 }
 
 -------------------------------------------------------------------------------
--- Chess logic
+-- Utils
 -------------------------------------------------------------------------------
 local function isspace(s)
    if s == ' ' or s == '\n' then
@@ -44,21 +44,20 @@ local function islower(s)
    return s:lower() == s
 end
 
--- super inefficient
-local function swapcase(s)
-   local s2 = ''
-   for i=1,#s do
-      local c = s:sub(i, i)
-      if islower(c) then
-	 s2 = s2 .. c:upper()
-      else
-	 s2 = s2 .. c:lower()
-      end
-   end
-   return s2
+local function parse(c)
+   if not c then return nil end
+   local p, v = c:sub(1,1), c:sub(2,2)
+   if not (p and v and tonumber(v)) then return nil end
+
+   local fil, rank = string.byte(p) - string.byte('a'), tonumber(v) - 1
+   return A1 + fil - 10*rank
 end
 
-Position = {}
+-------------------------------------------------------------------------------
+-- Chess logic
+-------------------------------------------------------------------------------
+
+local Position = {}
 
 function Position.new(board, score, wc, bc, ep, kp)
    --[[  A state of a chess game
@@ -139,16 +138,26 @@ function Position:genMoves(squareTxt)
    return moves
 end
 
-
-function Position:rotate()
-   return self.new(
-      swapcase(self.board:reverse()), -self.score,
-      self.bc, self.wc, 119-self.ep, 119-self.kp)
-end
-
 -------------------------------------------------------------------------------
 -- User interface
 -------------------------------------------------------------------------------
+local function getSunfishBoard(board)
+   local boardTable = splitString(board, "\n")
+   local sunfishBoard =
+   "         \n" ..
+   "         \n" ..
+   " "..boardTable[1].."\n"..
+   " "..boardTable[2].."\n"..
+   " "..boardTable[3].."\n"..
+   " "..boardTable[4].."\n"..
+   " "..boardTable[5].."\n"..
+   " "..boardTable[6].."\n"..
+   " "..boardTable[7].."\n"..
+   " "..boardTable[8].."\n"..
+   "         \n" ..
+   "         \n"
+   return sunfishBoard
+end
 
 function getMoveOptions(squareTxt, board)
     if squareTxt == "" then
@@ -164,43 +173,4 @@ function getMoveOptions(squareTxt, board)
         squares[row..","..col] = true
     end
     return squares
-end
-
-function getSunfishBoard(board)
-    local boardTable = splitString(board, "\n")
-    local sunfishBoard =
-    "         \n" ..
-    "         \n" ..
-    " "..boardTable[1].."\n"..
-    " "..boardTable[2].."\n"..
-    " "..boardTable[3].."\n"..
-    " "..boardTable[4].."\n"..
-    " "..boardTable[5].."\n"..
-    " "..boardTable[6].."\n"..
-    " "..boardTable[7].."\n"..
-    " "..boardTable[8].."\n"..
-    "         \n" ..
-    "         \n"
-    return sunfishBoard
-end
-
-function parse(c)
-   if not c then return nil end
-   local p, v = c:sub(1,1), c:sub(2,2)
-   if not (p and v and tonumber(v)) then return nil end
-
-   local fil, rank = string.byte(p) - string.byte('a'), tonumber(v) - 1
-   return A1 + fil - 10*rank
-end
-
-
-function ttfind(t, k)
-   assert(t)
-   if not k then return false end
-   for _,v in ipairs(t) do
-      if k[1] == v[1] and k[2] == v[2] then
-	 return true
-      end
-   end
-   return false
 end

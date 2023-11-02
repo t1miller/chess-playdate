@@ -7,8 +7,7 @@ import 'engine/sunfish' -- for help highlighting squares piece can move to
 
 import 'helper/Utils'
 import 'helper/ImageCache'
-import 'ui/Rectangle'
-import 'ui/Circle'
+import 'ui/Shape'
 import 'ui/Piece'
 
 local gfx <const> = playdate.graphics
@@ -42,7 +41,7 @@ local FILES <const> = {
 class('BoardGrid').extends()
 
 local selfself = nil
-function BoardGrid:init(newBoard)
+function BoardGrid:init()
 	BoardGrid.super.init(self)
 
 	selfself = self
@@ -70,8 +69,8 @@ function BoardGrid:init(newBoard)
 	self.availableMoves = {}
 	self.availableMovesSprites = {}
 	self.animationDoneCallback = nil
-	self.selectedSquareSprite = Rectangle(-50, -50, SELECT_SQUARE_Z, 25, 25, RECT_TYPE.FILLED, nil, .5, img.kDitherTypeBayer8x8)
-	self.clickedSquareSprite =  Rectangle(0, 0, CLICKED_SQUARE_Z, 27, 27, RECT_TYPE.FILLED)
+	self.selectedSquareSprite = Shape(-50, -50, SELECT_SQUARE_Z, 25, 25, SHAPE_TYPE.RECT_FILLED, nil, .5, img.kDitherTypeBayer8x8)
+	self.clickedSquareSprite =  Shape(0, 0, CLICKED_SQUARE_Z, 27, 27, SHAPE_TYPE.RECT_FILLED)
 	self.rankAndFileFont =  gfx.font.new("fonts/Roobert-10-Bold")
 	self.borderOffset = 2
 	self.boardWidth = 228
@@ -173,7 +172,6 @@ function BoardGrid:clickCell()
 	self.clicked[1] = self.clicked[2]
 	self.clicked[2] =  { r, c, position, piece }
 	if self.clicked[1][3] ~= self.clicked[2][3] then
-		-- todo handle case of when user is cranking game
 		printDebug("BoardGrid: clickCell() drawing", DEBUG)
 		self:drawBoardGrid()
 	end
@@ -326,15 +324,15 @@ function BoardGrid:drawAvailableMoves(position)
 		local circleSprite
 		if self:getPieceAt(r, c) == '.' then
 			if self:isLightSquare(r, c) then
-				circleSprite = Circle(x+16, y+16, BOARD_SQUARES_Z, 7, 7, CIRCLE_TYPE.FILLED, gfx.kColorBlack, .5, img.kDitherTypeBayer8x8)
+				circleSprite = Shape(x+12, y+12, BOARD_SQUARES_Z, 7, 7, SHAPE_TYPE.CIRCLE_FILLED, gfx.kColorBlack, .5, img.kDitherTypeBayer8x8)
 			else
-				circleSprite = Circle(x+16, y+16, BOARD_SQUARES_Z, 7, 7, CIRCLE_TYPE.FILLED, gfx.kColorWhite, .5, img.kDitherTypeBayer8x8)
+				circleSprite = Shape(x+12, y+12, BOARD_SQUARES_Z, 7, 7, SHAPE_TYPE.CIRCLE_FILLED, gfx.kColorWhite, .5, img.kDitherTypeBayer8x8)
 			end
 		else
 			if self:isLightSquare(r, c) then
-				circleSprite = Circle(x+16, y+16, BOARD_SQUARES_Z, 25, 25, CIRCLE_TYPE.BORDER, gfx.kColorBlack)
+				circleSprite = Shape(x+3, y+3, BOARD_SQUARES_Z, 25, 25, SHAPE_TYPE.CIRCLE_NOT_FILLED, gfx.kColorBlack)
 			else
-				circleSprite = Circle(x+16, y+16, BOARD_SQUARES_Z, 25, 25, CIRCLE_TYPE.BORDER, gfx.kColorWhite)
+				circleSprite = Shape(x+3, y+3, BOARD_SQUARES_Z, 25, 25, SHAPE_TYPE.CIRCLE_NOT_FILLED, gfx.kColorWhite)
 			end
 		end
 
@@ -368,7 +366,6 @@ function BoardGrid:drawBoardBorders()
 	printDebug("BoardGrid: drawBoardBorders()", DEBUG)
 	local outerBoardImage = img.new(self.boardWidth+25, self.boardWidth+10)
 	gfx.pushContext(outerBoardImage)
-		gfx.setDitherPattern(img.kDitherTypeNone)
 		gfx.setLineWidth(4)
 		gfx.drawRect(0, 0, self.boardWidth+25, self.boardWidth+10)
 	gfx.popContext()
@@ -380,7 +377,6 @@ function BoardGrid:drawBoardBorders()
 
 	local innerBoardImage = img.new(self.boardWidth-8, self.boardWidth-8)
 	gfx.pushContext(innerBoardImage)
-		gfx.setDitherPattern(img.kDitherTypeNone)
 		gfx.setLineWidth(4)
 		gfx.drawRect(0, 0, self.boardWidth-8, self.boardWidth-8)
 		gfx.setColor(gfx.kColorWhite)
@@ -409,9 +405,9 @@ function BoardGrid:drawBoardSquares()
 	for r = 1, 8 do
 		for c = 1,8 do
 			if self:isLightSquare(r, c) then
-				Rectangle(20 + (r-1)*27, 6 + (c-1)*27, BOARD_SQUARES_Z, 27, 27, RECT_TYPE.FILLED, gfx.kColorWhite)
+				Shape(20 + (r-1)*27, 6 + (c-1)*27, BOARD_SQUARES_Z, 27, 27, SHAPE_TYPE.RECT_FILLED, gfx.kColorWhite)
 			else
-				Rectangle(20 + (r-1)*27, 6 + (c-1)*27, BOARD_SQUARES_Z, 27, 27, RECT_TYPE.FILLED, gfx.kColorBlack)
+				Shape(20 + (r-1)*27, 6 + (c-1)*27, BOARD_SQUARES_Z, 27, 27, SHAPE_TYPE.RECT_FILLED, gfx.kColorBlack)
 			end
 		end
 	end
@@ -421,7 +417,7 @@ function BoardGrid:drawPieceSprite(r, c)
 	local pieceChar = self:getPieceAt(r, c)
 
 	if self.piecesSprites[r][c][2] == pieceChar then
-		-- new piece already drawn at this location
+		-- same piece already drawn at this location
 		return
 	end
 

@@ -32,9 +32,7 @@ local samplePlayers = {}
 local function loadSounds()
     for path, name in pairs(SOUND_FILE_PATHS) do
         local player = sampler.new(path)
-        assert(player)
         samplePlayers[name] = player
-        -- samplePlayers[name]:setVolume(1.0)
     end
     printDebug(samplePlayers, DEBUG)
 end
@@ -74,7 +72,6 @@ function playSoundGameState(state)
            state == GAME_STATE.RESIGN then
         playSound(SOUND_NAMES.GAME_END)
     end
-    
 end
 
 loadSounds()

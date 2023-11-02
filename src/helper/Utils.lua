@@ -54,25 +54,6 @@ function printDebug(msg, debug)
     end
 end
 
--- local TOAST_FONT <const> = gfx.font.new("fonts/Roobert-10-Bold")
--- function showToast(text, duration)
---     local PADDING <const> = 20
---     local X <const> = 200
---     local Y <const> = 200
---     local t = playdate.frameTimer.new(duration)
---     t.updateCallback = function()
---         gfx.pushContext()
---             gfx.setFont(TOAST_FONT)
---             local width, height = gfx.getTextSize(text)
---             gfx.fillRoundRect(X-width/2-PADDING/2, Y-PADDING/2, width+PADDING, height+PADDING, 9)
---             gfx.setColor(gfx.kColorWhite)
---             gfx.drawRoundRect(X-width/2-PADDING/2, Y-PADDING/2, width+PADDING, height+PADDING, 9)
---             gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
---             gfx.drawTextAligned(text, X, Y, kTextAlignment.center)
---         gfx.popContext()
---     end
--- end
-
 function iif(statement, arg1, arg2)
     if statement then
         return arg1
@@ -91,7 +72,6 @@ local getElapsedTime<const> = playdate.getElapsedTime
 local coroutineStatus<const> = coroutine.status
 local coroutineResume<const> = coroutine.resume
 function longRunningTask(co, estimatedTotalTime, interval, onProgressCallback, onDoneCallback)
-    -- todo might need to nill and remove existing timer
 
     resetElapsedTime()
     local timer = nil

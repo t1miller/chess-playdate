@@ -34,17 +34,13 @@ function GameSave:exists()
 end
 
 function GameSave:put(k,v)
-    printDebug("GameSave: putting key="..k, DEBUG)
+    printDebug("GameSave: putting key="..k.." value="..v, DEBUG)
     self.gameSave[k] = v
 end
 
 function GameSave:get(k)
     printDebug("GameSave: get key="..k, DEBUG)
-    if self.gameSave[k] then
-        return self.gameSave[k]
-    end
-    printDebug("GameSave: error key doesnt exist", DEBUG)
-    return nil
+    return self.gameSave[k]
 end
 -- load all saved tables into object
 -- save game state when app is about to exit
@@ -64,6 +60,5 @@ function GameSave:load()
     end
     self.gameSave = gameSaveFile
     printDebug("GameSave: game save file took "..playdate.getElapsedTime().." seconds to load", DEBUG)
-    printDebug("GameSave: loaded gameSave file", DEBUG)
 end
 
