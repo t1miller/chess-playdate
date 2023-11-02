@@ -2,7 +2,6 @@ import "CoreLibs/object"
 import "CoreLibs/sprites"
 import "CoreLibs/graphics"
 import "CoreLibs/ui"
-import "CoreLibs/nineslice"
 
 import 'engine/sunfish' -- for help highlighting squares piece can move to
 
@@ -14,7 +13,7 @@ import 'ui/Piece'
 
 local gfx <const> = playdate.graphics
 local img <const> = gfx.image
-local DEBUG <const> = true
+local DEBUG <const> = false
 local WOOD_BACKGROUND_Z <const> = -1000
 local BORDERS_Z <const> = -990
 local BOARD_SQUARES_Z <const> = -980
@@ -450,6 +449,7 @@ function BoardGrid:drawPieceSprite(r, c)
 	local oldX, oldY = self:calculatePieceOldXY()
 
 	self.piecesSprites[r][c][1]:animate(oldX, oldY, newX, newY, self.animationDoneCallback)
+	self.animationDoneCallback = nil
 end
 
 function BoardGrid:calculatePieceOldXY()

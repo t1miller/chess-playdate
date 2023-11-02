@@ -3,11 +3,13 @@ import "CoreLibs/sprites"
 import "CoreLibs/graphics"
 
 import 'helper/Utils'
+import 'ui/Piece'
 
 local gfx <const> = playdate.graphics
 local abs <const> = math.abs
 local DEBUG <const> = false
 local BLACK_PIECES =   {["p"] = 0,["n"] = 0,["b"] = 0,["r"] = 0,["q"] = 0,}
+local WHITE_PIECES =   {["P"] = 0,["N"] = 0,["B"] = 0,["R"] = 0,["Q"] = 0,}
 local PIECE_VALUES =   {["p"] = 1,["P"] = 1,["n"] = 3,["N"] = 3,["b"] = 3,["B"] = 3,["r"] = 5,["R"] = 5,["q"] = 9,["Q"] = 9,}
 
 class('CapturedPieces').extends()
@@ -82,6 +84,7 @@ function CapturedPieces:drawPieces()
 		for j = 1, self.missingPieces[pieceOrder[i]] do
 			sprites[j]:setZIndex(self.z)
 			sprites[j]:moveTo(self.x + xOffset, self.y + yOffset)
+			sprites[j]:add()
 			xOffset += 12
 			numberOfPiecesDrawn += 1
 			self.z += 1
@@ -103,6 +106,7 @@ function CapturedPieces:drawPieces()
 		for j = 1, self.missingPieces[pieceOrder[i]] do
 			sprites[j]:setZIndex(self.z)
 			sprites[j]:moveTo(self.x + xOffset, self.y + yOffset)
+			sprites[j]:add()
 			xOffset += 12
 			numberOfPiecesDrawn += 1
 			self.z += 1
@@ -125,7 +129,7 @@ function CapturedPieces:drawScores()
 
 		if self.textSpriteWhite ~= nil then
 			self.textSpriteWhite:remove()
-			self.textSpriteWhite:update()
+			-- self.textSpriteWhite:update()
 			-- self.textSpriteWhite = nil
 		end
 
@@ -144,7 +148,7 @@ function CapturedPieces:drawScores()
 
 		if self.textSpriteBlack ~= nil then
 			self.textSpriteBlack:remove()
-			self.textSpriteBlack:update()
+			-- self.textSpriteBlack:update()
 			-- self.textSpriteBlack = nil
 		end
 
@@ -169,7 +173,7 @@ function CapturedPieces:calculateScores()
 		if count > 0 then
 			if BLACK_PIECES[piece] then
 				whitesScore += PIECE_VALUES[piece] * count
-			else
+			elseif WHITE_PIECES[piece] then
 				blacksScore += PIECE_VALUES[piece] * count
 			end
 		end

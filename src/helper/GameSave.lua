@@ -54,19 +54,16 @@ function GameSave:save()
     printDebug("GameSave: saving gameSave file="..tostring(success).." took "..playdate.getElapsedTime().." seconds", DEBUG)
 end
 
--- function GameSave:saveAfterDelay()
---     runAfterDelay(2000, self.save)
--- end
-
 function GameSave:load()
+    printDebug("GameSave: load gameSave file", DEBUG)
     playdate.resetElapsedTime()
 	local gameSaveFile = store.read("gameSave")
-    printDebug("GameSave: game save file took "..playdate.getElapsedTime().." seconds to load", DEBUG)
     if gameSaveFile == nil then
         printDebug("GameSave: error loading gameSave file", DEBUG)
         return
     end
     self.gameSave = gameSaveFile
+    printDebug("GameSave: game save file took "..playdate.getElapsedTime().." seconds to load", DEBUG)
     printDebug("GameSave: loaded gameSave file", DEBUG)
 end
 

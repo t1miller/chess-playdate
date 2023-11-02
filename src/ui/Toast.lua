@@ -12,7 +12,7 @@ function Toast:init(x, y)
 
     self.text = ""
     self.progress = 0
-    self.font = gfx.font.new("fonts/Roobert-10-Bold")
+    self.font = gfx.font.new("fonts/Roobert-11-Medium")
     self.x = x or 200
     self.y = y or 200
     self.padding = 20

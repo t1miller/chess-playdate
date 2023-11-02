@@ -9,7 +9,7 @@ local geo = playdate.geometry
 local gfx<const> = playdate.graphics
 local Animator <const> = gfx.animator
 
-local DEBUG <const> = true
+local DEBUG <const> = false
 
 class('Piece').extends(gfx.sprite)
 
@@ -44,7 +44,7 @@ function Piece:update()
             if self.animationDoneCallback then
                 self.animationDoneCallback()
                 self.animationDoneCallback = nil
-                printDebug("Piece: calling animation done callback: ", DEBUG)
+                printDebug("Piece: called animation done callback: ", DEBUG)
             end
             self:setUpdatesEnabled(false)
         end
@@ -58,5 +58,5 @@ function Piece:animate(fromX, fromY, toX, toY, animationDoneCallback)
     self.animationDoneCallback = animationDoneCallback
     self.animationDoneCount = 0
     self:setAnimator(self.animator)
-    printDebug("Piece: animating piece: "..self.pieceChar.." fronX:"..fromX.." fromY:"..fromY.." toX:"..toX.." toY:"..toY)
+    printDebug("Piece: animating piece: "..self.pieceChar.." fronX:"..fromX.." fromY:"..fromY.." toX:"..toX.." toY:"..toY, DEBUG)
 end

@@ -5,7 +5,7 @@ SettingKeys = {
 }
 
 local store = playdate.datastore
-local DEBUG <const> = true
+local DEBUG <const> = false
 
 class("Settings").extends()
 

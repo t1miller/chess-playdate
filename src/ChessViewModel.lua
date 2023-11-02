@@ -25,16 +25,16 @@ function ChessViewModel:init()
 
     -- {time, depth}
     self.GAME_DIFFICULTY = {
-        ["easy"] = { 2, 4 },
-        ["med"] = { 10, 4 },
-        ["hard"] = { 50, 5 },
-        ["harder"] = { 100, 6 },
-        ["expert"] = { 200, 6 },
-        ["master"] = {300, 7 },
+        ["level 1"] = { 2, 4 },
+        ["level 2"] = { 10, 4 },
+        ["level 3"] = { 25, 5 },
+        ["level 4"] = { 100, 6 },
+        ["level 5"] = { 200, 6 },
+        ["level 6"] = {300, 7 },
     }
-    self.settings = Settings({[SettingKeys.difficulty] = "easy"})
+    self.settings = Settings({[SettingKeys.difficulty] = "level 1"})
     self.boardGrid = BoardGrid()
-    self.progressBar = ProgressBar(260, 155)
+    self.progressBar = ProgressBar(260, 160)
     self.capturedPieces = CapturedPieces(255, 0)
     self.moveGrid = MoveGrid(255, 55)
     self.toast = Toast()
@@ -43,14 +43,11 @@ function ChessViewModel:init()
         self.GAME_DIFFICULTY[self.settings:get(SettingKeys.difficulty)]
     )
 
-    self.toast:show("loading chess engine", 300, true)
+    self.toast:show("Loading chess engine", 300, true)
     self:newGame(true)
 
-    -- self:showConfirmationDialog()
-    -- self:showEndGameDialog(self.chessGame:getState())
-    -- local settingsScreen = SettingsScreen()
-    -- self.progressBar:show()
-    -- self.endGameDialog:show(GAME_STATE.USER_WON)
+    -- self:showChangeDifficultyDialog("level 1", "level 2")
+    -- self:showEndGameDialog(GAME_STATE.COMPUTER_WON)
 
     self:setupMenu()
     playSoundGameState(self.chessGame:getState())
@@ -77,9 +74,10 @@ function ChessViewModel:newGame(gameJustLaunched)
                 self.gameSave = GameSave()
                 if self.gameSave:exists() then
                     self:loadPrevGame()
-                    self.toast:show("loaded previous game", 60)
+                    self.toast:show("Loaded previous game.", 60)
                 end
             end
+            -- self.progressBar:show()
             -- self.boardGrid:addBoard(self.chessGame:getBoard())
             -- self.capturedPieces:addPieces({
             --     ["p"] = 7,
@@ -151,18 +149,13 @@ function ChessViewModel:gameStateMachine()
     if didMove == false then
         return
     end
-    
-    if self.chessGame:isGameOver() then
-        self:showEndGameDialog(self.chessGame:getState())
-        return
-    end
 end
 
 -- undo last 2 moves
 function ChessViewModel:undoMove()
     local success = self.chessGame:undoLastTwoMoves()
     if success then
-        self.toast:show("undid 2 moves", 50)
+        self.toast:show("Undid 2 moves.", 50)
         self.boardGrid:setBoardToActivePos()
         self.boardGrid:removeBoard()
         self.boardGrid:removeBoard()
@@ -170,7 +163,7 @@ function ChessViewModel:undoMove()
         self.capturedPieces:addPieces(self.chessGame:getMissingPieces(self.boardGrid:getVisibleBoard()))
         self.moveGrid:removeLastTwoMoves()
     else
-        self.toast:show("nothing to undo",50)
+        self.toast:show("Nothing to undo.",50)
     end
 end
 
@@ -214,12 +207,12 @@ function ChessViewModel:setupInputHandler()
 
 		AButtonDown = function ()
             if self.chessGame:isComputerThinking() then
-                self.toast:show("wait for computers move",30)
+                self.toast:show("Wait for computers move.",30)
                 return
             end
         
             if self.chessGame:isGameLoading() then
-                self.toast:show("wait for game to load",30)
+                self.toast:show("Wait for game to load.",30)
                 return
             end
             
@@ -229,22 +222,22 @@ function ChessViewModel:setupInputHandler()
             --     return
             -- end
         
-            -- if self.chessGame:isGameOver() then
-            --     self.endGameDialog:show(self.chessGame:getState())
-            --     return
-            -- end
+            if self.chessGame:isGameOver() then
+                self:showEndGameDialog(self.chessGame:getState())
+                return
+            end
         
             self:gameStateMachine()
 		end,
 
         cranked = function (change, acceleratedChange)
             if self.chessGame:isGameLoading() then
-                self.toast:show("wait for game to load",30)
+                self.toast:show("Wait for game to load.",30)
                 return
             end
 
             if self.chessGame:isComputerThinking() then
-                self.toast:show("wait for computers move",30)
+                self.toast:show("Wait for computers move.",30)
                 return
             end
 
@@ -257,7 +250,7 @@ end
 function ChessViewModel:setupMenu()
     local menu = playdate.getSystemMenu()
     
-    self.difficultyMenuItem = menu:addOptionsMenuItem("Difficulty", { "easy", "med", "hard", "harder", "expert", "master" }, self.settings:get(SettingKeys.difficulty), function(value)
+    self.difficultyMenuItem = menu:addOptionsMenuItem("Difficulty", { "level 1", "level 2", "level 3", "level 4", "level 5", "level 6" }, self.settings:get(SettingKeys.difficulty), function(value)
         local originalDifficulty = self.settings:get(SettingKeys.difficulty)
         local newDifficulty = value
         if originalDifficulty ~= newDifficulty then
@@ -266,13 +259,13 @@ function ChessViewModel:setupMenu()
     end)
 
     menu:addMenuItem("new game", function()
-        self.toast:show("restarting chess engine", 60, true)
+        self.toast:show("Restarting chess engine", 60, true)
         self:newGame()
     end)
 
     menu:addMenuItem("undo move", function()
         if self.chessGame:isComputerThinking() then
-            self.toast:show("wait for computers move",30)
+            self.toast:show("Wait for computers move.",30)
             return
         end
         -- todo this has a bug
@@ -285,7 +278,7 @@ function ChessViewModel:showEndGameDialog(state)
     endGameDialog:setButtonCallbacks(
         -- a button clicked
         function ()
-            self.toast:show("restarting chess engine", 60, true)
+            self.toast:show("Restarting chess engine", 60, true)
             self:newGame()
             endGameDialog:dismiss()
         end,
@@ -300,7 +293,10 @@ function ChessViewModel:showEndGameDialog(state)
 end
 
 function ChessViewModel:showChangeDifficultyDialog(originalDifficulty, newDifficulty)
-    local confirmationDialog = Dialog(200, 120, "New Game", "\nChanging difficulty requires starting\n a new game. Are you sure?", "Ⓐ New Game\nⒷ Ignore Change")
+    local confirmationDialog = Dialog(200, 120, "New Game", "Changing difficulty requires\nstarting a new game. Are \nyou sure?", "Ⓐ New Game\nⒷ Ignore Change")
+    confirmationDialog:setFonts(nil, playdate.graphics.font.new("fonts/Roobert-11-Medium"), nil)
+    confirmationDialog:setAlignments(kTextAlignment.center, kTextAlignment.left, nil)
+    confirmationDialog:setOffsets(nil, 5, 15, 45, 50, 120)
     confirmationDialog:setButtonCallbacks(
         -- a button clicked
         function ()
@@ -310,8 +306,8 @@ function ChessViewModel:showChangeDifficultyDialog(originalDifficulty, newDiffic
             confirmationDialog:dismiss()
 
             local difficultyToast = Toast(200,25)
-            difficultyToast:show("Difficulty: "..newDifficulty.."\ncomputer thinks "..self.GAME_DIFFICULTY[newDifficulty][2].. " moves ahead and\nspends up to "..self.GAME_DIFFICULTY[newDifficulty][1].." seconds thinking", 180)
-            self.toast:show("restarting chess engine", 60, true)
+            difficultyToast:show("Difficulty: "..newDifficulty.."\nComputer thinks "..self.GAME_DIFFICULTY[newDifficulty][2].." moves ahead and\nspends up to "..self.GAME_DIFFICULTY[newDifficulty][1].." seconds thinking.", 180)
+            self.toast:show("Restarting chess engine.", 60, true)
             self:newGame()
         end,
 

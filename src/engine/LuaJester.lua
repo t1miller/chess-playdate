@@ -130,32 +130,32 @@ Js_agress_across = -6
 Js_pinned_p = -8
 Js_pinned_other = -12
 
-local Js_nGameMoves = {}   --int[]
-local Js_depth_Seek = 0
-local Js_c1 = 0
-local Js_c2 = 0
-local Js_agress2 = {}   --int[]
-local Js_agress1 = {}   --int[]
-local Js_ptValue = 0
-local Js_flip = false
-local Js_fEat = false
-local Js_myPiece = ""
-local Js_Message = ""
+Js_nGameMoves = {}   --int[]
+Js_depth_Seek = 0
+Js_c1 = 0
+Js_c2 = 0
+Js_agress2 = {}   --int[]
+Js_agress1 = {}   --int[]
+Js_ptValue = 0
+Js_flip = false
+Js_fEat = false
+Js_myPiece = ""
+Js_Message = ""
 
-local Js_fiftyMoves = 0
-local Js_indenSqr = 0
-local Js_realBestDepth = 0
-local Js_realBestScore = 0
-local Js_realBestMove = 0
-local Js_lastDepth = 0
-local Js_lastScore = 0
--- local Js_fKO = false
+Js_fiftyMoves = 0
+Js_indenSqr = 0
+Js_realBestDepth = 0
+Js_realBestScore = 0
+Js_realBestMove = 0
+Js_lastDepth = 0
+Js_lastScore = 0
+Js_fKO = false
 
 
--- local Js_fromMySquare = 0
--- local Js_toMySquare = 0
-local Js_cNodes = 0
-local Js_scoreDither = 0
+Js_fromMySquare = 0
+Js_toMySquare = 0
+Js_cNodes = 0
+Js_scoreDither = 0
 Js__alpha = 0
 Js__beta = 0
 Js_dxAlphaBeta = 0
@@ -163,43 +163,43 @@ Js_maxDepthSeek = 0
 Js_specialScore = 0
 Js_hint = 0
 
-local Js_currentScore = 0
+Js_currentScore = 0
 
-local Js_proPiece = 0
-local Js_pawc1 = {}
-local Js_pawc2 = {}
-local Js_origSquare = 0
-local Js_destSquare = 0
+Js_proPiece = 0
+Js_pawc1 = {}
+Js_pawc2 = {}
+Js_origSquare = 0
+Js_destSquare = 0
 
-local Js_cCompNodes = 0
-local Js_dxDither = 0
-local Js_scoreWin0 = 0
-local Js_scoreWin1 = 0
-local Js_scoreWin2 = 0
-local Js_scoreWin3 = 0
-local Js_scoreWin4 = 0
+Js_cCompNodes = 0
+Js_dxDither = 0
+Js_scoreWin0 = 0
+Js_scoreWin1 = 0
+Js_scoreWin2 = 0
+Js_scoreWin3 = 0
+Js_scoreWin4 = 0
 
--- local Js_USER_TOPLAY = 0
--- local Js_JESTER_TOPLAY = 1
+Js_USER_TOPLAY = 0
+Js_JESTER_TOPLAY = 1
 
-local Js_hollow = 2
-local Js_empty = 0
-local Js_pawn = 1
-local Js_knight = 2
-local Js_bishop = 3
-local Js_rook = 4
-local Js_queen = 5
-local Js_king = 6
+Js_hollow = 2
+Js_empty = 0
+Js_pawn = 1
+Js_knight = 2
+Js_bishop = 3
+Js_rook = 4
+Js_queen = 5
+Js_king = 6
 
 -- black == 1
 -- white == 0
-local Js_white = 0
-local Js_black = 1
+Js_white = 0
+Js_black = 1
 
-local Js_N9 = 90
+Js_N9 = 90
 
--- local Js_szIdMvt = "ABCDEFGH" .. "IJKLMNOP" .. "QRSTUVWX" .. "abcdefgh" .. "ijklmnop" .. "qrstuvwx" .. "01234567" .. "89YZyz*+"
-local Js_szAlgMvt = { "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1", "a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2", "a3",
+-- Js_szIdMvt = "ABCDEFGH" .. "IJKLMNOP" .. "QRSTUVWX" .. "abcdefgh" .. "ijklmnop" .. "qrstuvwx" .. "01234567" .. "89YZyz*+"
+Js_szAlgMvt = { "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1", "a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2", "a3",
     "b3", "c3", "d3", "e3", "f3", "g3", "h3", "a4", "b4", "c4", "d4", "e4", "f4", "g4", "h4", "a5", "b5", "c5", "d5",
     "e5", "f5", "g5", "h5", "a6", "b6", "c6", "d6", "e6", "f6", "g6", "h6", "a7", "b7", "c7", "d7", "e7", "f7", "g7",
     "h7", "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8" }
@@ -214,7 +214,7 @@ Js_castle_msk = 16
 Js_enpassant_msk = 32
 Js__idem = 64
 Js_menace_pawn = 128
--- local Js_check = 256
+Js_check = 256
 Js_capture = 512
 Js_draw = 1024
 Js_pawnVal = 100
@@ -234,123 +234,123 @@ Js_xltBN = 2048
 Js_xltRQ = 1536
 Js_xltNN = 8192
 
-local Js_movesList = {}        --new _MOVES[512]
-local Js_flag = {mate =  false, timeout = false, recapture = false}   --new _GAMESTATS()
-local Js_Tree = {}             --new _BTREE[2000]
-local Js_root = {replay = 0, f = 0, t = 0, flags = 0, score = 0}
-local Js_tmpTree = {replay = 0, f = 0, t = 0, flags = 0, score = 0}    --new _BTREE()
-local Js_treePoint = {}        --new int[Js_maxDepth]
-local Js_board = {}            --new int[64]
-local Js_color = {}            --new int[64]
-local Js_pieceMap = {}         --new int[2][16]
-local Js_pawnMap = {}          --new int[2][8]
-local Js_roquer = { 0, 0 }
-local Js_nMvtOnBoard = {}      --new int[64]
-local Js_scoreOnBoard = {}     --new int[64]
-local Js_gainScore = {i = 0}
+Js_movesList = {}        --new _MOVES[512]
+Js_flag = {mate =  false, timeout = false, recapture = false}   --new _GAMESTATS()
+Js_Tree = {}             --new _BTREE[2000]
+Js_root = {replay = 0, f = 0, t = 0, flags = 0, score = 0}
+Js_tmpTree = {replay = 0, f = 0, t = 0, flags = 0, score = 0}    --new _BTREE()
+Js_treePoint = {}        --new int[Js_maxDepth]
+Js_board = {}            --new int[64]
+Js_color = {}            --new int[64]
+Js_pieceMap = {}         --new int[2][16]
+Js_pawnMap = {}          --new int[2][8]
+Js_roquer = { 0, 0 }
+Js_nMvtOnBoard = {}      --new int[64]
+Js_scoreOnBoard = {}     --new int[64]
+Js_gainScore = {i = 0}
 
-local Js_otherTroop = { 1, 0, 2 }
-local Js_variants = {}     --new int[Js_maxDepth]
-local Js_pieceIndex = {}   --new int[64]
-local Js_piecesCount = { 0, 0 }
-local Js_arrowData = {}    --new int[4200]
-local Js_crossData = {}    --new int[4200]
-local Js_agress = {}       --new int[2][64]
-local Js_matrl = { 0, 0 }
-local Js_pmatrl = { 0, 0 }
-local Js_ematrl = { 0, 0 }
-local Js_pinned = { 0, 0 }
-local Js_withPawn = { 0, 0 }
-local Js_withKnight = { 0, 0 }
-local Js_withBishop = { 0, 0 }
-local Js_withRook = { 0, 0 }
-local Js_withQueen = { 0, 0 }
-local Js_flagCheck = {}    --new int[Js_maxDepth]
-local Js_flagEat = {}      --new int[Js_maxDepth]
-local Js_menacePawn = {}   --new int[Js_maxDepth]
-local Js_scorePP = {}      --new int[Js_maxDepth]
-local Js_scoreTP = {}      --new int[Js_maxDepth]
-local Js_eliminate0 = {}   --new int[Js_maxDepth]
-local Js_eliminate1 = {}   --new int[Js_maxDepth]
-local Js_eliminate2 = {}   --new int[Js_maxDepth]
-local Js_eliminate3 = {}   --new int[Js_maxDepth]
-local Js_storage = {}      --new short[10000]
-local Js_wPawnMvt = {}     --new int[64]
-local Js_bPawnMvt = {}     --new int[64]
-local Js_knightMvt = {}    --new int[2][64]
-local Js_bishopMvt = {}    --new int[2][64]
-local Js_kingMvt = {}      --new int[2][64]
-local Js_killArea = {}     --new int[2][64]
-local Js_fDevl = { 0, 0 }
-local Js_nextCross = {}    --new char[40000]
-local Js_nextArrow = {}    --new char[40000]
-local Js_tmpCh = {}        --new char[20]
-local Js_movCh = {}        --new char[8]
-local Js_b_r = {}          --new int[64]
+Js_otherTroop = { 1, 0, 2 }
+Js_variants = {}     --new int[Js_maxDepth]
+Js_pieceIndex = {}   --new int[64]
+Js_piecesCount = { 0, 0 }
+Js_arrowData = {}    --new int[4200]
+Js_crossData = {}    --new int[4200]
+Js_agress = {}       --new int[2][64]
+Js_matrl = { 0, 0 }
+Js_pmatrl = { 0, 0 }
+Js_ematrl = { 0, 0 }
+Js_pinned = { 0, 0 }
+Js_withPawn = { 0, 0 }
+Js_withKnight = { 0, 0 }
+Js_withBishop = { 0, 0 }
+Js_withRook = { 0, 0 }
+Js_withQueen = { 0, 0 }
+Js_flagCheck = {}    --new int[Js_maxDepth]
+Js_flagEat = {}      --new int[Js_maxDepth]
+Js_menacePawn = {}   --new int[Js_maxDepth]
+Js_scorePP = {}      --new int[Js_maxDepth]
+Js_scoreTP = {}      --new int[Js_maxDepth]
+Js_eliminate0 = {}   --new int[Js_maxDepth]
+Js_eliminate1 = {}   --new int[Js_maxDepth]
+Js_eliminate2 = {}   --new int[Js_maxDepth]
+Js_eliminate3 = {}   --new int[Js_maxDepth]
+Js_storage = {}      --new short[10000]
+Js_wPawnMvt = {}     --new int[64]
+Js_bPawnMvt = {}     --new int[64]
+Js_knightMvt = {}    --new int[2][64]
+Js_bishopMvt = {}    --new int[2][64]
+Js_kingMvt = {}      --new int[2][64]
+Js_killArea = {}     --new int[2][64]
+Js_fDevl = { 0, 0 }
+Js_nextCross = {}    --new char[40000]
+Js_nextArrow = {}    --new char[40000]
+Js_tmpCh = {}        --new char[20]
+Js_movCh = {}        --new char[8]
+Js_b_r = {}          --new int[64]
 
-local Js_upperNot = { " ", "P", "N", "B", "R", "Q", "K" }
-local Js_lowerNot = { " ", "p", "n", "b", "r", "q", "k" }
-local Js_rgszPiece = { "", "", "N", "B", "R", "Q", "K" }
-local Js_asciiMove = { { " ", " ", " ", " ", " ", " " }, { " ", " ", " ", " ", " ", " " }, { " ", " ", " ", " ", " ", " " },
+Js_upperNot = { " ", "P", "N", "B", "R", "Q", "K" }
+Js_lowerNot = { " ", "p", "n", "b", "r", "q", "k" }
+Js_rgszPiece = { "", "", "N", "B", "R", "Q", "K" }
+Js_asciiMove = { { " ", " ", " ", " ", " ", " " }, { " ", " ", " ", " ", " ", " " }, { " ", " ", " ", " ", " ", " " },
     { " ", " ", " ", " ", " ", " " } }
-local Js_reguBoard = { Js_rook, Js_knight, Js_bishop, Js_queen, Js_king, Js_bishop, Js_knight, Js_rook, Js_pawn, Js_pawn,
+Js_reguBoard = { Js_rook, Js_knight, Js_bishop, Js_queen, Js_king, Js_bishop, Js_knight, Js_rook, Js_pawn, Js_pawn,
     Js_pawn, Js_pawn, Js_pawn, Js_pawn, Js_pawn, Js_pawn, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, Js_pawn, Js_pawn, Js_pawn, Js_pawn, Js_pawn, Js_pawn, Js_pawn, Js_pawn, Js_rook,
     Js_knight, Js_bishop, Js_queen, Js_king, Js_bishop, Js_knight, Js_rook }
-local Js_reguColor = { Js_white, Js_white, Js_white, Js_white, Js_white, Js_white, Js_white, Js_white, Js_white, Js_white,
+Js_reguColor = { Js_white, Js_white, Js_white, Js_white, Js_white, Js_white, Js_white, Js_white, Js_white, Js_white,
     Js_white, Js_white, Js_white, Js_white, Js_white, Js_white, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
     2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, Js_black, Js_black, Js_black, Js_black, Js_black, Js_black, Js_black,
     Js_black, Js_black, Js_black, Js_black, Js_black, Js_black, Js_black, Js_black, Js_black }
-local Js_pieceTyp = { { Js_empty, Js_pawn, Js_knight, Js_bishop, Js_rook, Js_queen, Js_king, Js_empty },
+Js_pieceTyp = { { Js_empty, Js_pawn, Js_knight, Js_bishop, Js_rook, Js_queen, Js_king, Js_empty },
     { Js_empty, Js_bkPawn, Js_knight, Js_bishop, Js_rook, Js_queen, Js_king, Js_empty } }
-local Js_direction = { { 0, 0, 0, 0, 0, 0, 0, 0 }, { 10, 9, 11, 0, 0, 0, 0, 0 }, { 8, -8, 12, -12, 19, -19, 21, -21 },
+Js_direction = { { 0, 0, 0, 0, 0, 0, 0, 0 }, { 10, 9, 11, 0, 0, 0, 0, 0 }, { 8, -8, 12, -12, 19, -19, 21, -21 },
     { 9, 11, -9, -11, 0, 0, 0, 0 }, { 1, 10, -1, -10, 0, 0, 0, 0 }, { 1, 10, -1, -10, 9, 11, -9, -11 },
     { 1, 10, -1, -10, 9, 11, -9, -11 }, { -10, -9, -11, 0, 0, 0, 0, 0 } }
-local Js_maxJobs = { 0, 2, 1, 7, 7, 7, 1, 2 }
-local Js_virtualBoard = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 1, 2, 3, 4, 5,
+Js_maxJobs = { 0, 2, 1, 7, 7, 7, 1, 2 }
+Js_virtualBoard = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 1, 2, 3, 4, 5,
     6, 7, -1, -1, 8, 9, 10, 11, 12, 13, 14, 15, -1, -1, 16, 17, 18, 19, 20, 21, 22, 23, -1, -1, 24, 25, 26, 27, 28, 29,
     30, 31, -1, -1, 32, 33, 34, 35, 36, 37, 38, 39, -1, -1, 40, 41, 42, 43, 44, 45, 46, 47, -1, -1, 48, 49, 50, 51, 52,
     53, 54, 55, -1, -1, 56, 57, 58, 59, 60, 61, 62, 63, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1 }
-local Js_start_K = { 0, 0, -4, -10, -10, -4, 0, 0, -4, -4, -8, -12, -12, -8, -4, -4, -12, -16, -20, -20, -20, -20, -16, -12,
+Js_start_K = { 0, 0, -4, -10, -10, -4, 0, 0, -4, -4, -8, -12, -12, -8, -4, -4, -12, -16, -20, -20, -20, -20, -16, -12,
     -16, -20, -24, -24, -24, -24, -20, -16, -16, -20, -24, -24, -24, -24, -20, -16, -12, -16, -20, -20, -20, -20, -16,
     -12, -4, -4, -8, -12, -12, -8, -4, -4, 0, 0, -4, -10, -10, -4, 0, 0 }
-local Js_end_K = { 0, 6, 12, 18, 18, 12, 6, 0, 6, 12, 18, 24, 24, 18, 12, 6, 12, 18, 24, 30, 30, 24, 18, 12, 18, 24, 30, 36,
+Js_end_K = { 0, 6, 12, 18, 18, 12, 6, 0, 6, 12, 18, 24, 24, 18, 12, 6, 12, 18, 24, 30, 30, 24, 18, 12, 18, 24, 30, 36,
     36, 30, 24, 18, 18, 24, 30, 36, 36, 30, 24, 18, 12, 18, 24, 30, 30, 24, 18, 12, 6, 12, 18, 24, 24, 18, 12, 6, 0, 6,
     12, 18, 18, 12, 6, 0 }
-local Js_vanish_K = { 0, 8, 16, 24, 24, 16, 8, 0, 8, 32, 40, 48, 48, 40, 32, 8, 16, 40, 56, 64, 64, 56, 40, 16, 24, 48, 64, 72,
+Js_vanish_K = { 0, 8, 16, 24, 24, 16, 8, 0, 8, 32, 40, 48, 48, 40, 32, 8, 16, 40, 56, 64, 64, 56, 40, 16, 24, 48, 64, 72,
     72, 64, 48, 24, 24, 48, 64, 72, 72, 64, 48, 24, 16, 40, 56, 64, 64, 56, 40, 16, 8, 32, 40, 48, 48, 40, 32, 8, 0, 8,
     16, 24, 24, 16, 8, 0 }
-local Js_end_KBNK = { 99, 90, 80, 70, 60, 50, 40, 40, 90, 80, 60, 50, 40, 30, 20, 40, 80, 60, 40, 30, 20, 10, 30, 50, 70, 50,
+Js_end_KBNK = { 99, 90, 80, 70, 60, 50, 40, 40, 90, 80, 60, 50, 40, 30, 20, 40, 80, 60, 40, 30, 20, 10, 30, 50, 70, 50,
     30, 10, 0, 20, 40, 60, 60, 40, 20, 0, 10, 30, 50, 70, 50, 30, 10, 20, 30, 40, 60, 80, 40, 20, 30, 40, 50, 60, 80, 90,
     40, 40, 50, 60, 70, 80, 90, 99 }
-local Js_knight_pos = { 0, 4, 8, 10, 10, 8, 4, 0, 4, 8, 16, 20, 20, 16, 8, 4, 8, 16, 24, 28, 28, 24, 16, 8, 10, 20, 28, 32, 32,
+Js_knight_pos = { 0, 4, 8, 10, 10, 8, 4, 0, 4, 8, 16, 20, 20, 16, 8, 4, 8, 16, 24, 28, 28, 24, 16, 8, 10, 20, 28, 32, 32,
     28, 20, 10, 10, 20, 28, 32, 32, 28, 20, 10, 8, 16, 24, 28, 28, 24, 16, 8, 4, 8, 16, 20, 20, 16, 8, 4, 0, 4, 8, 10,
     10, 8, 4, 0 }
-local Js_bishop_pos = { 14, 14, 14, 14, 14, 14, 14, 14, 14, 22, 18, 18, 18, 18, 22, 14, 14, 18, 22, 22, 22, 22, 18, 14, 14, 18,
+Js_bishop_pos = { 14, 14, 14, 14, 14, 14, 14, 14, 14, 22, 18, 18, 18, 18, 22, 14, 14, 18, 22, 22, 22, 22, 18, 14, 14, 18,
     22, 22, 22, 22, 18, 14, 14, 18, 22, 22, 22, 22, 18, 14, 14, 18, 22, 22, 22, 22, 18, 14, 14, 22, 18, 18, 18, 18, 22,
     14, 14, 14, 14, 14, 14, 14, 14, 14 }
-local Js_pawn_pos = { 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 0, 0, 4, 4, 4, 6, 8, 2, 10, 10, 2, 8, 6, 6, 8, 12, 16, 16, 12, 8, 6, 8,
+Js_pawn_pos = { 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 0, 0, 4, 4, 4, 6, 8, 2, 10, 10, 2, 8, 6, 6, 8, 12, 16, 16, 12, 8, 6, 8,
     12, 16, 24, 24, 16, 12, 8, 12, 16, 24, 32, 32, 24, 16, 12, 12, 16, 24, 32, 32, 24, 16, 12, 0, 0, 0, 0, 0, 0, 0, 0 }
-local Js_valueMap = { 0, Js_pawnVal, Js_knightVal, Js_bishopVal, Js_rookVal, Js_queenVal, Js_kingVal }
-local Js_xlat = { 0, Js_xltP, Js_xltN, Js_xltB, Js_xltR, Js_xltQ, Js_xltK }
-local Js_pss_pawn0 = { 0, 60, 80, 120, 200, 360, 600, 800 }
-local Js_pss_pawn1 = { 0, 30, 40, 60, 100, 180, 300, 800 }
-local Js_pss_pawn2 = { 0, 15, 25, 35, 50, 90, 140, 800 }
-local Js_pss_pawn3 = { 0, 5, 10, 15, 20, 30, 140, 800 }
-local Js_isol_pawn = { -12, -16, -20, -24, -24, -20, -16, -12 }
-local Js_takeBack = { -6, -10, -15, -21, -28, -28, -28, -28, -28, -28, -28, -28, -28, -28, -28, -28 }
-local Js_mobBishop = { -2, 0, 2, 4, 6, 8, 10, 12, 13, 14, 15, 16, 16, 16 }
-local Js_mobRook = { 0, 2, 4, 6, 8, 10, 11, 12, 13, 14, 14, 14, 14, 14, 14 }
-local Js_menaceKing = { 0, -8, -20, -36, -52, -68, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80,
+Js_valueMap = { 0, Js_pawnVal, Js_knightVal, Js_bishopVal, Js_rookVal, Js_queenVal, Js_kingVal }
+Js_xlat = { 0, Js_xltP, Js_xltN, Js_xltB, Js_xltR, Js_xltQ, Js_xltK }
+Js_pss_pawn0 = { 0, 60, 80, 120, 200, 360, 600, 800 }
+Js_pss_pawn1 = { 0, 30, 40, 60, 100, 180, 300, 800 }
+Js_pss_pawn2 = { 0, 15, 25, 35, 50, 90, 140, 800 }
+Js_pss_pawn3 = { 0, 5, 10, 15, 20, 30, 140, 800 }
+Js_isol_pawn = { -12, -16, -20, -24, -24, -20, -16, -12 }
+Js_takeBack = { -6, -10, -15, -21, -28, -28, -28, -28, -28, -28, -28, -28, -28, -28, -28, -28 }
+Js_mobBishop = { -2, 0, 2, 4, 6, 8, 10, 12, 13, 14, 15, 16, 16, 16 }
+Js_mobRook = { 0, 2, 4, 6, 8, 10, 11, 12, 13, 14, 14, 14, 14, 14, 14 }
+Js_menaceKing = { 0, -8, -20, -36, -52, -68, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80,
     -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80, -80 }
 Js_queenRook = { 0, 56, 0 }
 Js_kingRook = { 7, 63, 0 }
 Js_kingPawn = { 4, 60, 0 }
 Js_raw7 = { 6, 1, 0 }
-local Js_heavy = { false, false, false, true, true, true, false, false }
+Js_heavy = { false, false, false, true, true, true, false, false }
 
-local Js_pgn = ""   -- save too
+Js_pgn = ""   -- save too
 
 -- Some helping functions for Lua scripting
 
@@ -1338,8 +1338,8 @@ function ShowThink(score4, best)
         s = s .. copyValueOf(Js_tmpCh) .. " "
         i = i + 1
     end
-    MessageOut("Thinking: "..s , true)
-    ShowScore(score4)
+    -- MessageOut("Thinking: "..s , true)
+    -- ShowScore(score4)
 end
 
 function ResetData()
@@ -3709,7 +3709,7 @@ function SwitchSides(oposit)
         Js_computer = Js_otherTroop[1 + Js_computer]
         Js_enemy = Js_otherTroop[1 + Js_enemy]
 
-        -- Js_JESTER_TOPLAY = Js_otherTroop[1 + Js_JESTER_TOPLAY]
+        Js_JESTER_TOPLAY = Js_otherTroop[1 + Js_JESTER_TOPLAY]
     end
     Js_fUserWin_kc = false
 end
@@ -4184,26 +4184,15 @@ function ChessGame:newGame(onProgressCallback, onDoneCallback)
 end
 
 function ChessGame:moveUser(from, to)
-    -- todo remove
-    -- local moves = self:calculateAvailableMoves(from)
-    -- todo remove nop state
-    -- and add INVALID_MOVE state back
     printDebug("ChessGame: moveUser() move="..from..to, DEBUG)
     self.state = GAME_STATE.NOP
     if from == "" or to == "" then
-        -- self.state = GAME_STATE.INVALID_MOVE
-        -- self:calculateAvailableMoves(to)
-        -- self:calculateAvailableMoves(from)
         printDebug("ChessGame: moveUser() move empty", DEBUG)
         return false
     end
 
-    -- self:calculateAvailableMoves(to)
-
     local isValid = EnterMove(from, to, "")
     if isValid == false then
-        -- self.state = GAME_STATE.INVALID_MOVE
-        -- todo check for invalid move because check
         printDebug("ChessGame: moveUser() move is invalid", DEBUG)
         self:updateState()
         return false
@@ -4237,10 +4226,7 @@ function ChessGame:moveComputer(onProgressCallback, onDoneCallback)
                               newCol}
 
         printDebug("ChessGame: nodes searched= " .. Js_cCompNodes .. " time=" .. getTime().." depth="..Js_maxDepth, DEBUG)     -- to see performance
-        -- -- self.state = GAME_STATE.VALID_MOVE
-        -- self.state = GAME_STATE.COMPUTER_MOVED
         self:updateState()
-        -- onDoneCallback()
         self.computerThinking = false
     end)
 
@@ -4249,14 +4235,18 @@ end
 
 function ChessGame:isGameOver()
     return
-        self.state == GAME_STATE.COMPUTER_WON or self.state == GAME_STATE.USER_WON or self.state == GAME_STATE.DRAW or
-        self.state == GAME_STATE.DRAW_BY_REPITITION or self.state == GAME_STATE.INSUFFICIENT_MATERIAL or self.state ==
-        GAME_STATE.STALEMATE or self.state == GAME_STATE.RESIGN
+        self.state == GAME_STATE.COMPUTER_WON or
+        self.state == GAME_STATE.USER_WON or
+        self.state == GAME_STATE.DRAW or
+        self.state == GAME_STATE.DRAW_BY_REPITITION or
+        self.state == GAME_STATE.INSUFFICIENT_MATERIAL or
+        self.state == GAME_STATE.STALEMATE or
+        self.state == GAME_STATE.RESIGN
 end
 
 function ChessGame:updateState()
     -- ShowStat()
-    printDebug("ChessGame: Js_castled = "..tostring(Js_castled).." Js_captured = "..tostring(Js_captured).." Js_userInCheck = "..tostring(Js_userInCheck).." Js_userMoved = "..tostring(Js_userMoved).." Js_computerMoved = "..tostring(Js_computerMoved).." Js_userInvalidMove = "..tostring(Js_userInvalidMove).." Js_promoted"..tostring(Js_promoted), DEBUG)
+    printDebug("ChessGame: Js_castled = "..tostring(Js_castled).." Js_captured = "..tostring(Js_captured).." Js_userInCheck = "..tostring(Js_userInCheck).." Js_userMoved = "..tostring(Js_userMoved).." Js_computerMoved = "..tostring(Js_computerMoved).." Js_userInvalidMove = "..tostring(Js_userInvalidMove), DEBUG)
 
     if Js_userMoved then
         self.state = GAME_STATE.USER_MOVED
@@ -4277,10 +4267,6 @@ function ChessGame:updateState()
     if Js_castled then
         self.state = GAME_STATE.CASTLED
     end
-
-    -- if Js_promoted then
-    --     self.state = GAME_STATE.PROMOTED
-    -- end
 
     if Js_fCheck_kc and Js_userInvalidMove ~= true then
         self.state = GAME_STATE.CHECK
@@ -4467,11 +4453,10 @@ function ChessGame:toSavedTable()
 
     return {
         -- start of ResetData() variables
-        -- ["Js_movesList"] = Js_movesList, compress this w/ Js_movesListCopy
-        -- ["Js_Tree"] = Js_Tree, compress this w/ Js_TreeCopy
-        ["Js_movesListCopy"] = Js_movesListCopy,
-        ["Js_TreeCopy"] = Js_TreeCopy,
-
+        ["Js_movesListCopy"] = Js_movesListCopy, --compress this w/ Js_movesListCopy
+        ["Js_TreeCopy"] = Js_TreeCopy, --compress this w/ Js_TreeCopy
+        -- ["Js_movesList"] = Js_movesList,
+        -- ["Js_Tree"] = Js_Tree,
         ["Js_treePoint"] = Js_treePoint,
         ["Js_variants"] = Js_variants,
         ["Js_flagCheck"] = Js_flagCheck,
@@ -4487,8 +4472,10 @@ function ChessGame:toSavedTable()
         ["Js_nMvtOnBoard"] = Js_nMvtOnBoard,
         ["Js_scoreOnBoard"] = Js_scoreOnBoard,
         ["Js_pieceIndex"] = Js_pieceIndex,
-        -- ["Js_arrowData"] = Js_arrowData, not going to save, let ResetData initialize
-        -- ["Js_crossData"] = Js_crossData, not going to save, let ResetData initialize
+
+        -- ["Js_arrowData"] = Js_arrowData, -- not going to save, let ResetData initialize
+        -- ["Js_crossData"] = Js_crossData, -- not going to save, let ResetData initialize
+        
         ["Js_agress"] = Js_agress,
         ["Js_wPawnMvt"] = Js_wPawnMvt,
         ["Js_bPawnMvt"] = Js_bPawnMvt,
@@ -4496,9 +4483,11 @@ function ChessGame:toSavedTable()
         ["Js_bishopMvt"] = Js_bishopMvt,
         ["Js_kingMvt"] = Js_kingMvt,
         ["Js_killArea"] = Js_killArea,
-        -- ["Js_storage"] = Js_storage, not going to save, let ResetData initialize
-        -- ["Js_nextCross"] = Js_nextCross, not going to save, let ResetData initialize
-        -- ["Js_nextArrow"] = Js_nextArrow, not going to save, let ResetData initialize
+
+        ["Js_storage"] = Js_storage, -- not going to save, let ResetData initialize
+        -- ["Js_nextCross"] = Js_nextCross, -- not going to save, let ResetData initialize
+        -- ["Js_nextArrow"] = Js_nextArrow, -- not going to save, let ResetData initialize
+
         -- done w/ ResetData() variables
         -- start of InitGame
         ["Js_flip"] = Js_flip,
@@ -4564,10 +4553,10 @@ end
 
 function ChessGame:initFromSavedTable(data)
             -- start of ResetData() variables
-        -- Js_movesList = data["Js_movesList"], compress this w/ Js_movesListCopy
-        -- Js_Tree = data["Js_Tree"], compress this w/ Js_TreeCopy
-        local Js_movesListCopy = data["Js_movesListCopy"]
-        local Js_TreeCopy = data["Js_TreeCopy"]
+        local Js_movesListCopy = data["Js_movesListCopy"] --compress this w/ Js_movesListCopy
+        local Js_TreeCopy = data["Js_TreeCopy"] --compress this w/ Js_TreeCopy
+        -- Js_movesList = data["Js_movesList"]
+        -- Js_Tree = data["Js_Tree"]
 
         Js_treePoint = data["Js_treePoint"]
         Js_variants = data["Js_variants"]
@@ -4584,8 +4573,10 @@ function ChessGame:initFromSavedTable(data)
         Js_nMvtOnBoard = data["Js_nMvtOnBoard"]
         Js_scoreOnBoard = data["Js_scoreOnBoard"]
         Js_pieceIndex = data["Js_pieceIndex"]
-        -- Js_arrowData = data["Js_arrowData"] not going to save, let ResetData initialize
-        -- Js_crossData = data["Js_crossData"] not going to save, let ResetData initialize
+
+        -- Js_arrowData = data["Js_arrowData"] -- not going to save, let ResetData initialize
+        -- Js_crossData = data["Js_crossData"] -- not going to save, let ResetData initialize
+
         Js_agress = data["Js_agress"]
         Js_wPawnMvt = data["Js_wPawnMvt"]
         Js_bPawnMvt = data["Js_bPawnMvt"]
@@ -4593,9 +4584,11 @@ function ChessGame:initFromSavedTable(data)
         Js_bishopMvt = data["Js_bishopMvt"]
         Js_kingMvt = data["Js_kingMvt"]
         Js_killArea = data["Js_killArea"]
-        -- Js_storage = data["Js_storage"] not going to save, let ResetData initialize
-        -- Js_nextCross = data["Js_nextCross"] not going to save, let ResetData initialize
-        -- Js_nextArrow = data["Js_nextArrow"] not going to save, let ResetData initialize
+
+        Js_storage = data["Js_storage"] -- not going to save, let ResetData initialize
+        -- Js_nextCross = data["Js_nextCross"] -- not going to save, let ResetData initialize
+        -- Js_nextArrow = data["Js_nextArrow"] -- not going to save, let ResetData initialize
+
         -- done w/ ResetData() variables
         -- start of InitGame
         Js_flip = data["Js_flip"]

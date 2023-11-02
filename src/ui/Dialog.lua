@@ -7,7 +7,7 @@ import 'helper/Utils'
 
 local gfx<const> = playdate.graphics
 
-local DEBUG <const> = true
+local DEBUG <const> = false
 local DIALOG_Z <const> = 1000
 local DIALOG_STATE <const> = {
     SHOWING = "0",
@@ -28,9 +28,19 @@ function Dialog:init(x, y, title, description, buttonText)
     self.buttonText = buttonText or ""
     self.width = 260
     self.height = 170
-    self.fontTitle = gfx.font.new("fonts/Roobert-24-Medium")
-    self.fontButtons = gfx.font.new("fonts/Roobert-11-Bold")
-    self.fontDescription = gfx.font.new("fonts/Roobert-10-Bold")
+    self.titleFont = gfx.font.new("fonts/Roobert-24-Medium")
+    self.buttonFont =  gfx.font.new("fonts/Roobert-11-Bold")
+    self.descriptionFont = gfx.font.new("fonts/Roobert-20-Medium")
+    self.titleAlignment = kTextAlignment.center
+    self.buttonAlignment = kTextAlignment.left
+    self.descriptionAlignment = kTextAlignment.center
+    self.titleX = self.width/2
+    self.titleY = 10
+    self.descriptionX = self.width/2
+    self.descriptionY = 60
+    self.buttonX = 70
+    self.buttonY = 110
+
 
     self.dialogBoxInputHandler = {AButtonDown = function () end, BButtonDown = function () end}
 
@@ -80,6 +90,27 @@ function Dialog:setTitleAndDescription(state)
     end
 end
 
+function Dialog:setAlignments(titleAlignment, descriptionAlignment, buttonAlignment)
+    self.titleAlignment = titleAlignment or self.titleAlignment
+    self.descriptionAlignment = descriptionAlignment or self.descriptionAlignment
+    self.buttonAlignment = buttonAlignment or self.buttonAlignment
+end
+
+function Dialog:setFonts(titleFont, descriptionFont, buttonFont)
+    self.titleFont = titleFont or self.titleFont
+    self.descriptionFont = descriptionFont or self.descriptionFont
+    self.buttonFont = buttonFont or self.buttonFont
+end
+
+function Dialog:setOffsets(titleX, titleY, descriptionX, descriptionY, buttonX, buttonY)
+    self.titleX = titleX or self.titleX
+    self.titleY = titleY or self.titleY
+    self.descriptionX = descriptionX or self.descriptionX
+    self.descriptionY = descriptionY or self.descriptionY
+    self.buttonX = buttonX or self.buttonX
+    self.buttonY = buttonY or self.buttonY
+end
+
 function Dialog:draw()
 
     gfx.pushContext()
@@ -95,16 +126,16 @@ function Dialog:draw()
 
         -- buttons
         gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
-        gfx.setFont(self.fontButtons)
-        gfx.drawTextAligned(self.buttonText, 70, 115, kTextAlignment.left)
+        gfx.setFont(self.buttonFont)
+        gfx.drawTextAligned(self.buttonText, self.buttonX, self.buttonY, self.buttonAlignment)
 
         -- title
-        gfx.setFont(self.fontTitle)
-        gfx.drawTextAligned(self.title, self.width/2, 10, kTextAlignment.center)
+        gfx.setFont(self.titleFont)
+        gfx.drawTextAligned(self.title, self.titleX, self.titleY, self.titleAlignment)
 
         -- description
-        gfx.setFont(self.fontDescription)
-        gfx.drawTextAligned(self.description,  self.width/2, 50, kTextAlignment.center)
+        gfx.setFont(self.descriptionFont)
+        gfx.drawTextAligned(self.description,  self.descriptionX, self.descriptionY, self.descriptionAlignment)
 
     gfx.popContext()
 end

@@ -5,7 +5,7 @@ import 'ChessViewModel'
 
 local frameTimer <const> = playdate.frameTimer
 local timer <const> = playdate.timer
-local sprite <const> = gfx.sprite
+local sprite <const> = playdate.graphics.sprite
 
 local chessViewModel = ChessViewModel()
 

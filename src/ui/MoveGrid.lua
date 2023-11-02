@@ -8,7 +8,6 @@ import 'helper/Utils'
 
 local gfx<const> = playdate.graphics
 local DEBUG <const> = false
-local MOVE_FONT<const> = gfx.font.new("fonts/Roobert-10-Bold")
 local MOVE_GRID_Z<const> = -150
 
 class('MoveGrid').extends()
@@ -18,7 +17,7 @@ function MoveGrid:init(x, y)
 
     self.x = x
     self.y = y
-    self.height = 94
+    self.height = 100
     self.width = 145
     self.emptyMove = "   ..."
     self.moveFont = gfx.font.new("fonts/Roobert-10-Bold")
@@ -32,13 +31,28 @@ function MoveGrid:init(x, y)
 
     local selfself = self
     function self.gridview:drawCell(section, row, column, selected, x, y, width, height)
+
+        -- draw vertical dividers
+        if column == 1 then
+            gfx.pushContext()
+                gfx.setLineWidth(2)
+                if row == 1 then
+                    gfx.drawLine(x+width+2, y+3, x+width+2, y+height+4)
+                elseif row == 2 or row == 3 then
+                    gfx.drawLine(x+width+2, y, x+width+2, y+height+7)
+                else
+                    gfx.drawLine(x+width+2, y, x+width+2, y+height+2)
+                end
+            gfx.popContext()
+        end
+
         if row + selfself.moveListOffset > #selfself.moveList or row + selfself.moveListOffset < 1 then
             return
         end
         
         gfx.pushContext()
             if selected then
-                gfx.fillRoundRect(x, y, width, height, 4)
+                gfx.fillRoundRect(x, y+2, width, height+1, 4)
                 gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
                 selfself.highlightedMove = {row, column}
             else
@@ -50,7 +64,7 @@ function MoveGrid:init(x, y)
                 selfself.moveList[row+selfself.moveListOffset][column],
                 selfself.emptyMove
             )
-            gfx.drawTextInRect(moveText, x+2, y+1, width, height, nil, "...", nil, selfself.moveFont)
+            gfx.drawTextInRect(moveText, x+2, y+5, width, height, nil, "...", nil, selfself.moveFont)
         gfx.popContext()
     end
 
@@ -58,14 +72,17 @@ function MoveGrid:init(x, y)
 end
 
 function MoveGrid:loadGridView()
-    self.gridview = playdate.ui.gridview.new(64, 17)
+    self.gridview = playdate.ui.gridview.new(64, 18)
 	self.gridview.backgroundImage = gfx.nineSlice.new("images/gridBackground", 7, 7, 18, 18)
     self.gridview:setNumberOfRows(4)
     self.gridview:setNumberOfColumns(2)
-    self.gridview:setSectionHeaderHeight(1)
     self.gridview:setCellPadding(2, 2, 2, 2)
-    self.gridview:setContentInset(4, 4, 4, 4)
+    -- self.gridview:setContentInset(4, 4, 4, 0)
+    self.gridview:setContentInset(4, 2, 2, 2)
     self.gridview:setHorizontalDividerHeight(1)
+    self.gridview:addHorizontalDividerAbove(1,2)
+    self.gridview:addHorizontalDividerAbove(1,3)
+    self.gridview:addHorizontalDividerAbove(1,4)
     self.gridview.changeRowOnColumnWrap = true
 
     -- sprite that holds image
@@ -79,7 +96,6 @@ end
 function MoveGrid:draw()
 	local listviewImage = gfx.image.new(self.width, self.height)
 	gfx.pushContext(listviewImage)
-        gfx.setFont(MOVE_FONT)
         self.gridview:drawInRect(0, 0, self.width, self.height)
 		self.gridviewSprite:setImage(listviewImage)
 	gfx.popContext()
