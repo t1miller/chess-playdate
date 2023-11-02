@@ -6,7 +6,7 @@
 
 ## User Interface
 - [Lichess] for chess [pieces] and [sounds]
-- a lot of help from posts on playdate dev forum
+- a lot of help from posts on [playdate dev forum]
 
 ## Example Game Play
 ![chessExample1](https://github.com/t1miller/chess-playdate/assets/10984030/04dc5ea0-ee95-476c-a888-45ff0443e838)
