@@ -48,9 +48,9 @@ function ChessViewModel:init()
 
     -- self:showChangeDifficultyDialog("level 1", "level 2")
     -- self:showEndGameDialog(GAME_STATE.COMPUTER_WON)
+    -- playSoundGameState(self.chessGame:getState())
 
     self:setupMenu()
-    playSoundGameState(self.chessGame:getState())
 end
 
 
@@ -247,7 +247,7 @@ function ChessViewModel:setupMenu()
     self.difficultyMenuItem = menu:addOptionsMenuItem("Difficulty", { "level 1", "level 2", "level 3", "level 4", "level 5", "level 6" }, self.settings:get(SettingKeys.difficulty), function(value)
 
         local difficultyToast = Toast(200,25)
-        difficultyToast:show("Difficulty: "..newDifficulty.."\nComputer thinks "..self.GAME_DIFFICULTY[newDifficulty][2].." moves ahead and\nspends up to "..self.GAME_DIFFICULTY[newDifficulty][1].." seconds thinking.", 180)
+        difficultyToast:show("Difficulty: "..value.."\nComputer thinks "..self.GAME_DIFFICULTY[value][2].." moves ahead and\nspends up to "..self.GAME_DIFFICULTY[value][1].." seconds thinking.", 180)
 
         self.chessGame:setDifficulty(self.GAME_DIFFICULTY[value])
         self.settings:set(SettingKeys.difficulty, value)
