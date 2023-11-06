@@ -25,10 +25,3 @@ end
 function playdate.deviceWillSleep()
     chessViewModel:saveGame()
 end
-
--- TODO
--- Intro Screen?
--- change color
--- history of previous games
--- show what the computer is thinking
--- make dialogs look better (font, alignment) verify all of them

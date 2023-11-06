@@ -29,7 +29,10 @@ local FILES <const> = {
 	[7] = "g",
 	[8] = "h",
 }
--- Board Representation
+---------------
+----Boards-----
+---------------
+-- user white board
 -- rnbqkbnr\n
 -- pppppppp\n
 -- ........\n
@@ -38,14 +41,24 @@ local FILES <const> = {
 -- ........\n
 -- PPPPPPPP\n
 -- RNBQKBNR\n
+--
+-- user black board
+-- RNBQKBNR\n
+-- PPPPPPPP\n
+-- ........\n
+-- ........\n
+-- ........\n
+-- ........\n
+-- pppppppp\n
+-- rnbqkbnr\n
 class('BoardGrid').extends()
 
 local selfself = nil
-function BoardGrid:init()
+function BoardGrid:init(isUserWhite)
 	BoardGrid.super.init(self)
 
 	selfself = self
-	self.isWhite = true
+	self.isUserWhite = isUserWhite
 	self.clicked = {
 		{ -1, -1, "", "" },
 		{ -1, -1, "", "" }
@@ -61,6 +74,7 @@ function BoardGrid:init()
 		{{},{},{},{},{},{},{},{}},
 		{{},{},{},{},{},{},{},{}},
 	}
+	self.rankAndFileSprites = {}
 	self.buttonTimer = nil
 	self.isReverseDirection = false
 	self.boardList = {}
@@ -153,8 +167,7 @@ function BoardGrid:nextPosition()
 end
 
 function BoardGrid:isLightSquare(row, col)
-	local remainder = iif(self.isWhite, 0, 1)
-	return (row + col) % 2 == remainder
+	return (row + col) % 2 == 0
 end
 
 function BoardGrid:getPieceAt(row, col)
@@ -163,11 +176,12 @@ function BoardGrid:getPieceAt(row, col)
 	return piece
 end
 
+-- todo change this to support white and black
 function BoardGrid:clickCell()
 	printDebug("BoardGrid: clickCell()", DEBUG)
 	local _, r, c = self.gridview:getSelection()
-	local position = FILES[c] .. tostring(9 - r)
 	local piece = self:getPieceAt(r, c)
+	local position = iif(self.isUserWhite, FILES[c] .. tostring(9 - r),  FILES[9-c] .. tostring(r))
 
 	self.clicked[1] = self.clicked[2]
 	self.clicked[2] =  { r, c, position, piece }
@@ -175,7 +189,7 @@ function BoardGrid:clickCell()
 		printDebug("BoardGrid: clickCell() drawing", DEBUG)
 		self:drawBoardGrid()
 	end
-	self:drawAvailableMoves(position)
+	self:drawAvailableMoves(FILES[c] .. tostring(9 - r))
 	return self.clicked[1][3], self.clicked[2][3]
 end
 
@@ -266,6 +280,20 @@ function BoardGrid:drawCell(section, row, column, selected, x, y, width, height)
 	end
 end
 
+function BoardGrid:changeColor(isUserWhite)
+	self.isUserWhite = isUserWhite
+	self:clearRankAndFiles()
+	self:drawRanks()
+	self:drawFiles()
+end
+
+function BoardGrid:clearRankAndFiles()
+	for i=1, #self.rankAndFileSprites do
+		self.rankAndFileSprites[i]:remove()
+	end
+	self.rankAndFileSprites = {}
+end
+
 -- clear saved boards and tiles clicked
 function BoardGrid:clear()
 	self.boardList = {}
@@ -283,14 +311,14 @@ function BoardGrid:drawBoardGrid()
 end
 
 function BoardGrid:drawClickedCell(row, column, x, y)
-	if selfself:isLightSquare(row, column) then
-		selfself.clickedSquareSprite:setColor(gfx.kColorBlack)
-		selfself.clickedSquareSprite:setDither(.2, img.kDitherTypeBayer8x8)
+	if self:isLightSquare(row, column) then
+		self.clickedSquareSprite:setColor(gfx.kColorBlack)
+		self.clickedSquareSprite:setDither(.2, img.kDitherTypeBayer8x8)
 	else
-		selfself.clickedSquareSprite:setColor(gfx.kColorWhite)
-		selfself.clickedSquareSprite:setDither(.6, img.kDitherTypeBayer8x8)
+		self.clickedSquareSprite:setColor(gfx.kColorWhite)
+		self.clickedSquareSprite:setDither(.6, img.kDitherTypeBayer8x8)
 	end
-	selfself.clickedSquareSprite:moveTo(x,y)
+	self.clickedSquareSprite:moveTo(x,y)
 end
 
 function BoardGrid:drawHighlightedCell(row, column, x, y)
@@ -311,11 +339,11 @@ end
 
 function BoardGrid:drawAvailableMoves(position)
 	self.availableMoves = {}
-	self.availableMoves = getMoveOptions(position, self.boardList[self.boardListIdx])
+	self.availableMoves = getMoveOptions(self.isUserWhite, position, self.boardList[self.boardListIdx])
 
 	self:clearAvailableMoves()
 
-	for key, _ in pairs(self.availableMoves) do 
+	for key, _ in pairs(self.availableMoves) do
 		local rowCol = splitString(key,",")
 		local r = tonumber(rowCol[1])
 		local c = tonumber(rowCol[2])
@@ -344,21 +372,32 @@ function BoardGrid:drawText(text, x, y)
 	local textSprite = gfx.sprite.spriteWithText(text, 20, 20, nil, nil, nil, nil, self.rankAndFileFont)
 	textSprite:moveTo(x, y)
 	textSprite:add()
+	return textSprite
 end
 
 function BoardGrid:drawFiles()
 	printDebug("BoardGrid: drawFiles()", DEBUG)
 	for i = 1, #FILES do
-		self:drawText(FILES[i], 7 + i * 27, 230)
+		local textSprite
+		if self.isUserWhite then
+			textSprite = self:drawText(FILES[i], 7 + i * 27, 230)
+		else
+			textSprite = self:drawText(FILES[i], 7 + (9-i) * 27, 230)
+		end
+		table.insert(self.rankAndFileSprites, textSprite)
 	end
 end
 
 function BoardGrid:drawRanks()
 	printDebug("BoardGrid: drawRanks()", DEBUG)
-	local j = 8
-	for i = 1, 8, 1 do
-		self:drawText(tostring(i), 11, j * 27 - 6)
-		j -= 1
+	for i = 1, 8 do
+		local textSprite
+		if self.isUserWhite then
+			textSprite = self:drawText(tostring(i), 11, (9-i) * 27 - 6)
+		else
+			textSprite = self:drawText(tostring(i), 11, i * 27 - 6)
+		end
+		table.insert(self.rankAndFileSprites, textSprite)
 	end
 end
 
@@ -416,34 +455,32 @@ end
 function BoardGrid:drawPieceSprite(r, c)
 	local pieceChar = self:getPieceAt(r, c)
 
+	-- same piece already drawn at this location
 	if self.piecesSprites[r][c][2] == pieceChar then
-		-- same piece already drawn at this location
 		return
 	end
 
+	-- new piece at this location is different than the existing piece
 	if self.piecesSprites[r][c][1] ~= nil then
-		-- new piece at this location is different than the existing piece
 		self.piecesSprites[r][c][1]:remove()
 		self.piecesSprites[r][c][2] = self.emptySquare
 	end
 
+	-- nothing to draw
 	if pieceChar == self.emptySquare then
-		-- nothing to draw
 		return
 	end
 
 	self.piecesSprites[r][c] = {Piece(0, 0, PIECE_IMAGE_Z, pieceChar), pieceChar}
-
 	local newX, newY = self:calculateXYfromRowCol(r, c)
+
+	-- this is a new game, draw all the pieces w/out animation
 	if #self.moveList == 0 then
-		-- this is a new game, draw all the pieces
-		-- w/out animation
 		self.piecesSprites[r][c][1]:moveTo(newX, newY)
 		return
 	end
 
 	local oldX, oldY = self:calculatePieceOldXY()
-
 	self.piecesSprites[r][c][1]:animate(oldX, oldY, newX, newY, self.animationDoneCallback)
 	self.animationDoneCallback = nil
 end

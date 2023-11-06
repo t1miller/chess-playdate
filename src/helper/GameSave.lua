@@ -34,7 +34,6 @@ function GameSave:exists()
 end
 
 function GameSave:put(k,v)
-    printDebug("GameSave: putting key="..k.." value="..v, DEBUG)
     self.gameSave[k] = v
 end
 

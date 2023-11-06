@@ -80,7 +80,6 @@ Js_computerMoved = false
 Js_userInvalidMove = false
 
 
-
 Js_nMovesMade = 0
 Js_computer = 0
 Js_player = 0
@@ -4134,6 +4133,20 @@ local function removeLastTwoMovesPgn()
     end
 end
 
+local function rotateBoard(boardStr)
+    local board = splitString(boardStr,"\n")
+    reverseItemsInRows(board)
+    reverseRows(board)
+    return board[1].."\n"..
+           board[2].."\n"..
+           board[3].."\n"..
+           board[4].."\n"..
+           board[5].."\n"..
+           board[6].."\n"..
+           board[7].."\n"..
+           board[8].."\n"
+end
+
 
 
 GAME_STATE = {
@@ -4160,19 +4173,18 @@ class('ChessGame').extends()
 function ChessGame:init()
     ChessGame.super.init(self)
     printDebug("ChessGame: initialized jester engine", DEBUG)
-    -- self:newGame()
 end
 
-function ChessGame:newGame(onProgressCallback, onDoneCallback)
+function ChessGame:newGame(isUserWhite, onProgressCallback, onDoneCallback)
     printDebug("ChessGame: newGame() search depth = " .. Js_maxDepth .. " search timeout = " .. (Js_searchTimeout) .. " seconds", DEBUG)
     playdate.resetElapsedTime()
     self.state = GAME_STATE.NEW_GAME
     self.computerThinking = false
     if self.timer then
-        -- user might click end game while computer is thinking
         self.timer:remove()
         self.timer = nil
     end
+    self.isUserWhite = isUserWhite
     self.computersMove = {}
     self.usersMove = {}
     self.gameLoading = true
@@ -4358,7 +4370,7 @@ function ChessGame:getMissingPieces(board)
         ["K"] = 1,
     }
 
-    local boardToUse = board or getBoard()
+    local boardToUse = board or self:getBoard()
     local boardPieces = boardToUse:gsub("[%c%p%s]", "")
     for i = 1, boardPieces:len() do
         local piece = boardPieces:sub(i, i)
@@ -4373,7 +4385,12 @@ function ChessGame:getState()
 end
 
 function ChessGame:getBoard()
-    return getBoard()
+    local boardStr = getBoard()
+    if self.isUserWhite then
+        return boardStr
+    else
+        return rotateBoard(boardStr)
+    end
 end
 
 function ChessGame:getPGNMoves()
@@ -4400,9 +4417,16 @@ function ChessGame:getUsersMove()
     return self.usersMove
 end
 
+-- 56,57,58,59,60,61,62,63
+-- ...
+-- 7,6,5,4,3,2,1,0
 function ChessGame:squareToRowCol(square)
     local row = floor(8 - (square+1)/8 + 1)
     local col = square % 8 + 1
+    if self.isUserWhite == false then
+        row = 9 - row
+        col = 9 - col
+    end
     return row, col
 end
 
@@ -4671,6 +4695,7 @@ function ChessGame:initFromSavedTable(data)
         end
 
 end
+
 
 -------------------------------------------
 -- SAMPLES...

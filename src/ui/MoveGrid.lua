@@ -14,14 +14,12 @@ class('MoveGrid').extends()
 
 function MoveGrid:init(x, y)
     MoveGrid.super.init(self)
-
     self.x = x
     self.y = y
     self.height = 100
     self.width = 145
     self.emptyMove = "   ..."
     self.moveFont = gfx.font.new("fonts/Roobert-10-Bold")
-    self.highlightedMove = {}
     self.moveList = {
         {self.emptyMove,self.emptyMove},
     }
@@ -32,40 +30,15 @@ function MoveGrid:init(x, y)
     local selfself = self
     function self.gridview:drawCell(section, row, column, selected, x, y, width, height)
 
-        -- draw vertical dividers
         if column == 1 then
-            gfx.pushContext()
-                gfx.setLineWidth(2)
-                if row == 1 then
-                    gfx.drawLine(x+width+2, y+3, x+width+2, y+height+4)
-                elseif row == 2 or row == 3 then
-                    gfx.drawLine(x+width+2, y, x+width+2, y+height+7)
-                else
-                    gfx.drawLine(x+width+2, y, x+width+2, y+height+2)
-                end
-            gfx.popContext()
+            selfself:drawVerticalDivider(x, y, width, height, row)
         end
 
         if row + selfself.moveListOffset > #selfself.moveList or row + selfself.moveListOffset < 1 then
             return
         end
-        
-        gfx.pushContext()
-            if selected then
-                gfx.fillRoundRect(x, y+2, width, height+1, 4)
-                gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
-                selfself.highlightedMove = {row, column}
-            else
-                gfx.setImageDrawMode(gfx.kDrawModeCopy)
-            end
 
-            local moveText = iif(
-                column <= #selfself.moveList[row+selfself.moveListOffset],
-                selfself.moveList[row+selfself.moveListOffset][column],
-                selfself.emptyMove
-            )
-            gfx.drawTextInRect(moveText, x+2, y+5, width, height, nil, "...", nil, selfself.moveFont)
-        gfx.popContext()
+        selfself:drawMoveAndHighlight(selected, row, column, x, y, width, height)
     end
 
     self:draw()
@@ -101,25 +74,51 @@ function MoveGrid:draw()
 	gfx.popContext()
 end
 
+function MoveGrid:drawMoveAndHighlight(selected, row, column, x, y, width, height)
+    gfx.pushContext()
+        -- draw highlighted rectangle
+        if selected then
+            gfx.fillRoundRect(x, y+2, width, height+1, 4)
+            gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
+        else
+            gfx.setImageDrawMode(gfx.kDrawModeCopy)
+        end
+
+        -- draw move text
+        local moveText = iif(
+            column <= #self.moveList[row+self.moveListOffset],
+            self.moveList[row+self.moveListOffset][column],
+            self.emptyMove
+        )
+        gfx.drawTextInRect(moveText, x+2, y+5, width, height, nil, "...", nil, self.moveFont)
+    gfx.popContext()
+end
+
+function MoveGrid:drawVerticalDivider(x, y, width, height, row)
+    gfx.pushContext()
+        gfx.setLineWidth(2)
+        if row == 1 then
+            gfx.drawLine(x+width+2, y+3, x+width+2, y+height+4)
+        elseif row == 2 or row == 3 then
+            gfx.drawLine(x+width+2, y, x+width+2, y+height+7)
+        else
+            gfx.drawLine(x+width+2, y, x+width+2, y+height+2)
+        end
+    gfx.popContext()
+end
+
 function MoveGrid:setMoveToActiveMove()
-    -- todo this can probably be simplified
-    printDebug("MoveGrid: setMoveToActiveMove()", DEBUG)
     if #self.moveList < 1 then
         return
     end
 
     self.moveListOffset = 0
     if self.moveList[1][1] == self.emptyMove then
-        if self.highlightedMove[1] == 1 and self.highlightedMove[2] == 1 then
-            return
-        end
         self.gridview:setSelection(1,1,1)
     else
-        if self.highlightedMove[1] == 1 and self.highlightedMove[2] == 2 then
-            return
-        end
         self.gridview:setSelection(1,1,2)
     end
+
     printDebug("MoveGrid: setMoveToActiveMove() drawing()", DEBUG)
     self:draw()
 end
@@ -134,10 +133,9 @@ function MoveGrid:clear()
     self:draw()
 end
 
-function MoveGrid:updateMoveGrid(moves, highlightLeft)
-    printDebug("MoveGrid: updateMoveGrid()", DEBUG)
+function MoveGrid:updateMoveGrid(moves, whiteMoved)
     self.moveList = moves
-    if highlightLeft then
+    if whiteMoved then
         self.gridview:setSelection(1,1,1)
     else
         self.gridview:setSelection(1,1,2)
@@ -146,12 +144,7 @@ function MoveGrid:updateMoveGrid(moves, highlightLeft)
     self:draw()
 end
 
-function MoveGrid:shiftMoveGrid(amount)
-    self.moveListOffset += amount
-end
-
 function MoveGrid:removeLastTwoMoves()
-    printDebug("MoveGrid: removeLastTwoMoves()", DEBUG)
     if #self.moveList < 1 then return end
     table.remove(self.moveList,1)
     if #self.moveList == 0 then
@@ -164,48 +157,43 @@ function MoveGrid:removeLastTwoMoves()
 end
 
 function MoveGrid:prevMove()
-    printDebug("MoveGrid: prevMove()", DEBUG)
     local _, row, col = self.gridview:getSelection()
     if self.moveListOffset + row >= #self.moveList and col == 1 then
         -- reached the end of the list, no prev moves
         return
     end
 
-    if row == 4 and col == 1 then
-        self:shiftMoveGrid(1)
-        self.gridview:selectNextColumn(false)
-    else
-        if col == 2 then
-            self.gridview:selectPreviousColumn(false)
-        else
-            self.gridview:selectNextRow(false)
-            self.gridview:selectNextColumn(false)
-        end
+    local newRow = iif(col == 1, row + 1, row)
+    local newCol = iif(col == 1, 2, 1)
+    if newRow == 5 then
+        newRow = 4
+        self.moveListOffset += 1
     end
+
     printDebug("MoveGrid: prevMove() drawing", DEBUG)
+
+    self.gridview:setSelection(1, newRow, newCol)
     self:draw()
 end
 
 function MoveGrid:nextMove()
-    printDebug("MoveGrid: nextMove()", DEBUG)
 
     local _, row, col = self.gridview:getSelection()
-
-    if row == 1 and col == 2 then
-        if self.moveListOffset + row <= 1 then
-            return
-        end
-        self:shiftMoveGrid(-1)
-        self.gridview:selectPreviousColumn(false)
-    else
-        if col == 1 then
-            self.gridview:selectNextColumn(false)
-        else
-            self.gridview:selectPreviousRow(false)
-            self.gridview:selectPreviousColumn(false)
-        end
+    if self.moveListOffset == 0 and row == 1 and col == 2 then
+        -- reached front of list, no next moves
+        return
     end
+
+    local newRow = iif(col == 2, row - 1, row)
+    local newCol = iif(col == 1, 2, 1)
+    if newRow == 0 then
+        newRow = 1
+        self.moveListOffset -= 1
+    end
+
     printDebug("MoveGrid: nextMove() drawing", DEBUG)
+
+    self.gridview:setSelection(1, newRow, newCol)
     self:draw()
 end
 

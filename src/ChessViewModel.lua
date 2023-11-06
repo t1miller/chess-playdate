@@ -15,6 +15,15 @@ import 'engine/LuaJester'
 
 
 local DEBUG <const> = true
+-- {time, depth}
+local GAME_DIFFICULTY = {
+    ["level 1"] = { 2, 4 },
+    ["level 2"] = { 10, 4 },
+    ["level 3"] = { 25, 5 },
+    ["level 4"] = { 100, 6 },
+    ["level 5"] = { 200, 6 },
+    ["level 6"] = {300, 7 },
+}
 
 class('ChessViewModel').extends()
 
@@ -22,40 +31,53 @@ function ChessViewModel:init()
     ChessViewModel.super.init(self)
 
     self:setupInputHandler()
+    -- get settings
+    self.settings = Settings({
+        [SettingKeys.difficulty] = "level 1",
+        [SettingKeys.isUserWhite] = true
+    })
+    self.difficulty = self.settings:get(SettingKeys.difficulty)
+    self.isUserWhite = self.settings:get(SettingKeys.isUserWhite)
 
-    -- {time, depth}
-    self.GAME_DIFFICULTY = {
-        ["level 1"] = { 2, 4 },
-        ["level 2"] = { 10, 4 },
-        ["level 3"] = { 25, 5 },
-        ["level 4"] = { 100, 6 },
-        ["level 5"] = { 200, 6 },
-        ["level 6"] = {300, 7 },
-    }
-    self.settings = Settings({[SettingKeys.difficulty] = "level 1"})
-    self.boardGrid = BoardGrid()
-    self.progressBar = ProgressBar(260, 160)
-    self.capturedPieces = CapturedPieces(255, 0)
+    -- setup UI
+    self.boardGrid = BoardGrid(self.isUserWhite)
+    self.capturedPieces = CapturedPieces(self.isUserWhite, 255, 0)
     self.moveGrid = MoveGrid(255, 55)
+    self.progressBar = ProgressBar(260, 160)
     self.toast = Toast()
+
+    -- setup engine
     self.chessGame = ChessGame()
     self.chessGame:setDifficulty(
-        self.GAME_DIFFICULTY[self.settings:get(SettingKeys.difficulty)]
+        GAME_DIFFICULTY[self.difficulty]
     )
 
-    self.toast:show("Loading chess engine", 300, true)
-    self:newGame(true)
+    -- self:showChooseColorDialog()
 
-    -- self:showChangeDifficultyDialog("level 1", "level 2")
-    -- self:showEndGameDialog(GAME_STATE.COMPUTER_WON)
-    -- playSoundGameState(self.chessGame:getState())
-
+    self:newGame(self.isUserWhite, true)
     self:setupMenu()
 end
 
+function ChessViewModel:changeColor()
+    self.boardGrid:changeColor(self.isUserWhite)
+    self.capturedPieces:changeColor(self.isUserWhite)
+end
 
-function ChessViewModel:newGame(gameJustLaunched)
-    self.chessGame:newGame(
+function ChessViewModel:newGame(isUserWhite, gameJustLaunched)
+
+    if gameJustLaunched then
+        self.toast:show("Loading chess engine", 300, true)
+    else
+        self.toast:show("Restarting chess engine", 60, true)
+    end
+
+    if isUserWhite ~= self.isUserWhite then
+        self.isUserWhite = isUserWhite
+        self:changeColor()
+    end
+
+    self.chessGame:newGame(isUserWhite,
+
         -- onProgressCallback
         function (progress)
             self.toast:updateProgress(progress)
@@ -70,11 +92,14 @@ function ChessViewModel:newGame(gameJustLaunched)
             self.moveGrid:clear()
             self.progressBar:hide()
 
+            local loadedGame = false
             if gameJustLaunched then
                 self.gameSave = GameSave()
                 if self.gameSave:exists() then
+                    -- todo handle case when color is black
                     self:loadPrevGame()
                     self.toast:show("Loaded previous game.", 60)
+                    loadedGame = true
                 end
             end
             -- self.progressBar:show()
@@ -91,6 +116,11 @@ function ChessViewModel:newGame(gameJustLaunched)
             --     ["q"] = 3,
             --     ["Q"] = 6,
             -- })
+            -- self:showEndGameDialog(GAME_STATE.USER_WON)
+
+            if not loadedGame and not self.isUserWhite then
+                self:getComputersMove()
+            end
             playSoundGameState(self.chessGame:getState())
         end
     )
@@ -111,7 +141,7 @@ function ChessViewModel:getComputersMove()
             self.boardGrid:addMove(self.chessGame:getComputersMove())
             self.boardGrid:addBoard(self.chessGame:getBoard())
             self.capturedPieces:addPieces(self.chessGame:getMissingPieces())
-            self.moveGrid:updateMoveGrid(self.chessGame:getPGNMoves(), false)
+            self.moveGrid:updateMoveGrid(self.chessGame:getPGNMoves(), not self.isUserWhite)
             self.progressBar:hide()
             playSoundGameState(self.chessGame:getState())
             if self.chessGame:isGameOver() then
@@ -125,7 +155,7 @@ end
 function ChessViewModel:getUsersMove()
     local from, to = self.boardGrid:clickCell()
     local result = self.chessGame:moveUser(from, to)
-    if result == false then
+    if not result then
         return false
     end
     self.boardGrid:addMove(self.chessGame:getUsersMove(),
@@ -135,7 +165,7 @@ function ChessViewModel:getUsersMove()
     )
     self.boardGrid:addBoard(self.chessGame:getBoard())
     self.capturedPieces:addPieces(self.chessGame:getMissingPieces())
-    self.moveGrid:updateMoveGrid(self.chessGame:getPGNMoves(), true)
+    self.moveGrid:updateMoveGrid(self.chessGame:getPGNMoves(), self.isUserWhite)
     return true
 end
 
@@ -146,7 +176,7 @@ function ChessViewModel:gameStateMachine()
     
     local didMove = self:getUsersMove()
     playSoundGameState(self.chessGame:getState())
-    if didMove == false then
+    if not didMove then
         return
     end
 end
@@ -171,6 +201,8 @@ function ChessViewModel:loadPrevGame()
     self.boardGrid:initFromSavedTable(self.gameSave:get(GAME_SAVE_KEYS.BoardGrid))
     self.moveGrid:initFromSavedTable(self.gameSave:get(GAME_SAVE_KEYS.MoveGrid))
     self.chessGame:initFromSavedTable(self.gameSave:get(GAME_SAVE_KEYS.ChessGame))
+
+    -- todo is this neccessary
     self.capturedPieces:addPieces(self.chessGame:getMissingPieces())
 
     self.gameSave:delete()
@@ -178,7 +210,7 @@ end
 
 function ChessViewModel:saveGame()
     if self.chessGame:getState() ~= GAME_STATE.NEW_GAME
-        and self.chessGame:isComputerThinking() == false then
+        and not self.chessGame:isComputerThinking() then
 
         -- if computer is mid move the entire game wont be saved
         -- its difficult to handle the case were computer is mid move
@@ -244,19 +276,18 @@ end
 function ChessViewModel:setupMenu()
     local menu = playdate.getSystemMenu()
     
-    self.difficultyMenuItem = menu:addOptionsMenuItem("Difficulty", { "level 1", "level 2", "level 3", "level 4", "level 5", "level 6" }, self.settings:get(SettingKeys.difficulty), function(value)
+    self.difficultyMenuItem = menu:addOptionsMenuItem("Difficulty", { "level 1", "level 2", "level 3", "level 4", "level 5", "level 6" }, self.difficulty, function(value)
 
         local difficultyToast = Toast(200,25)
-        difficultyToast:show("Difficulty: "..value.."\nComputer thinks "..self.GAME_DIFFICULTY[value][2].." moves ahead and\nspends up to "..self.GAME_DIFFICULTY[value][1].." seconds thinking.", 180)
+        difficultyToast:show("Difficulty: "..value.."\nComputer thinks "..GAME_DIFFICULTY[value][2].." moves ahead and\nspends up to "..GAME_DIFFICULTY[value][1].." seconds thinking.", 180)
 
-        self.chessGame:setDifficulty(self.GAME_DIFFICULTY[value])
+        self.chessGame:setDifficulty(GAME_DIFFICULTY[value])
         self.settings:set(SettingKeys.difficulty, value)
         self.settings:save()
     end)
 
     menu:addMenuItem("new game", function()
-        self.toast:show("Restarting chess engine", 60, true)
-        self:newGame()
+        self:showChooseColorDialog()
     end)
 
     menu:addMenuItem("undo move", function()
@@ -269,12 +300,11 @@ function ChessViewModel:setupMenu()
 end
 
 function ChessViewModel:showEndGameDialog(state)
-    local endGameDialog = Dialog(200, 120, nil, nil, "Ⓐ New Game\nⒷ Dismiss")
+    local endGameDialog = Dialog(200, 120, nil, nil, nil, nil, "Ⓐ New Game\nⒷ Dismiss")
     endGameDialog:setButtonCallbacks(
         -- a button clicked
         function ()
-            self.toast:show("Restarting chess engine", 60, true)
-            self:newGame()
+            self:newGame(self.isUserWhite, false)
             endGameDialog:dismiss()
         end,
 
@@ -283,34 +313,30 @@ function ChessViewModel:showEndGameDialog(state)
             endGameDialog:dismiss()
         end
     )
-    endGameDialog:setTitleAndDescription(state)
+    endGameDialog:setTitleAndDescription(self.isUserWhite, state)
     endGameDialog:show()
 end
 
--- function ChessViewModel:showChangeDifficultyDialog(originalDifficulty, newDifficulty)
---     local confirmationDialog = Dialog(200, 120, "New Game", "Changing difficulty requires\nstarting a new game. Are \nyou sure?", "Ⓐ New Game\nⒷ Ignore Change")
---     confirmationDialog:setFonts(nil, playdate.graphics.font.new("fonts/Roobert-11-Medium"), nil)
---     confirmationDialog:setAlignments(kTextAlignment.center, kTextAlignment.left, nil)
---     confirmationDialog:setOffsets(nil, 5, 15, 45, 50, 120)
---     confirmationDialog:setButtonCallbacks(
---         -- a button clicked
---         function ()
---             self.chessGame:setDifficulty(self.GAME_DIFFICULTY[newDifficulty])
---             self.settings:set(SettingKeys.difficulty, newDifficulty)
---             self.settings:save()
---             confirmationDialog:dismiss()
+function ChessViewModel:showChooseColorDialog()
+    local chooseColorDialog = Dialog(200, 120, nil, 130, "Choose Side", nil, "Ⓐ White Pieces\nⒷ Black Pieces")
+    chooseColorDialog:setOffsets(nil, nil, 15, 45, 60, 70)
+    chooseColorDialog:setButtonCallbacks(
+        -- a button clicked
+        function ()
+            self.settings:set(SettingKeys.isUserWhite, true)
+            self.settings:save()
+            self:newGame(true, false)
+            chooseColorDialog:dismiss()
+        end,
 
---             local difficultyToast = Toast(200,25)
---             difficultyToast:show("Difficulty: "..newDifficulty.."\nComputer thinks "..self.GAME_DIFFICULTY[newDifficulty][2].." moves ahead and\nspends up to "..self.GAME_DIFFICULTY[newDifficulty][1].." seconds thinking.", 180)
---             self.toast:show("Restarting chess engine.", 60, true)
---             self:newGame()
---         end,
+        -- b button clicked
+        function ()
+            self.settings:set(SettingKeys.isUserWhite, false)
+            self.settings:save()
+            self:newGame(false, false)
+            chooseColorDialog:dismiss()
+        end
+    )
+    chooseColorDialog:show()
+end
 
---         -- b button clicked
---         function ()
---             self.difficultyMenuItem:setValue(originalDifficulty)
---             confirmationDialog:dismiss()
---         end
---     )
---     confirmationDialog:show()
--- end

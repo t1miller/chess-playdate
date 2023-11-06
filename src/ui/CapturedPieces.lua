@@ -14,8 +14,9 @@ local PIECE_VALUES =   {["p"] = 1,["P"] = 1,["n"] = 3,["N"] = 3,["b"] = 3,["B"] 
 
 class('CapturedPieces').extends()
 
-function CapturedPieces:init(x, y)
+function CapturedPieces:init(isUserWhite,x, y)
 	CapturedPieces.super.init(self)
+	self.isUserWhite = isUserWhite
 	self.x = x
 	self.y = y
 	self.z = 0
@@ -34,7 +35,6 @@ function CapturedPieces:clearPieceSprites()
 	for _, sprites in pairs(self.pieceSprites) do
 		for j = 1, #sprites do
 			sprites[j]:remove()
-			-- sprites[j]:update()
 		end
 	end
 	self.z = 0
@@ -46,6 +46,10 @@ function CapturedPieces:clear()
 	self.prevBlackScore = -1
 	self.prevWhiteScore = -1
 	self:drawScores()
+end
+
+function CapturedPieces:changeColor(isUserWhite)
+	self.isUserWhite = isUserWhite
 end
 
 function CapturedPieces:addPieces(missingPieces)
@@ -74,47 +78,64 @@ end
 function CapturedPieces:drawPieces()
 	printDebug("CapturedPieces: drawPieces()", DEBUG)
 
+	local whiteXOffset, whiteYOffset, whiteYincrement, blackXOffset, blackYOffset, blackYincrement
+	if self.isUserWhite then
+		whiteXOffset = 30
+		whiteYOffset = -3
+		whiteYincrement = 26
+		blackXOffset = 30
+		blackYOffset = 211
+		blackYincrement = -22
+	else
+		whiteXOffset = 30
+		whiteYOffset = 211
+		whiteYincrement = -22
+		blackXOffset = 30
+		blackYOffset = -3
+		blackYincrement = 26
+	end
+
 	-- draw blacks capture pieces, the white pieces
-	local xOffset = 30
-	local yOffset = -3
+	-- local xOffset = 30
+	-- local yOffset = -3
 	local numberOfPiecesDrawn = 0
 	local pieceOrder = {"P","N","B","R","Q"}
 	for i = 1, #pieceOrder do
 		local sprites = self.pieceSprites[pieceOrder[i]]
 		for j = 1, self.missingPieces[pieceOrder[i]] do
 			sprites[j]:setZIndex(self.z)
-			sprites[j]:moveTo(self.x + xOffset, self.y + yOffset)
+			sprites[j]:moveTo(self.x + whiteXOffset, self.y + whiteYOffset)
 			sprites[j]:add()
-			xOffset += 12
+			whiteXOffset += 12
 			numberOfPiecesDrawn += 1
 			self.z += 1
 			-- first row filled, draw second row
 			if numberOfPiecesDrawn == 8 then
-				yOffset += 26
-				xOffset = -3
+				whiteYOffset += whiteYincrement
+				whiteYOffset = -3
 			end
 		end
 	end
 
 	-- draw whites captured pieces, the black pieces
-	xOffset = 30
-	yOffset = 211
+	-- xOffset = 30
+	-- yOffset = 211
 	numberOfPiecesDrawn = 0
 	pieceOrder = {"p","n","b","r","q"}
 	for i = 1, #pieceOrder do
 		local sprites = self.pieceSprites[pieceOrder[i]]
 		for j = 1, self.missingPieces[pieceOrder[i]] do
 			sprites[j]:setZIndex(self.z)
-			sprites[j]:moveTo(self.x + xOffset, self.y + yOffset)
+			sprites[j]:moveTo(self.x + blackXOffset, self.y + blackYOffset)
 			sprites[j]:add()
-			xOffset += 12
+			blackXOffset += 12
 			numberOfPiecesDrawn += 1
 			self.z += 1
 
 			-- first row filled, draw second row
 			if numberOfPiecesDrawn == 8 then
-				yOffset -= 22
-				xOffset = -3
+				blackYOffset += blackYincrement
+				blackXOffset = -3
 			end
 		end
 	end
@@ -123,6 +144,15 @@ end
 function CapturedPieces:drawScores()
 	printDebug("CapturedPieces: drawScores()", DEBUG)
 	local whitesScore, blacksScore = self:calculateScores()
+
+	local whiteScoreYOffset, blackScoreYOffset
+	if self.isUserWhite then
+		whiteScoreYOffset = 220
+		blackScoreYOffset = 2
+	else
+		whiteScoreYOffset = 2
+		blackScoreYOffset = 220
+	end
 
 	if whiteScore ~= self.prevWhiteScore then
 		local whitesScoreString = "+"..whitesScore
@@ -136,7 +166,7 @@ function CapturedPieces:drawScores()
 		-- draw whites score
 		self.textSpriteWhite = gfx.sprite.spriteWithText(whitesScoreString, 75, 25, nil, nil, nil, kTextAlignment.left, self.font)
 		self.textSpriteWhite:setCenter(0,0)
-		self.textSpriteWhite:moveTo(self.x + 2, self.y + 220)
+		self.textSpriteWhite:moveTo(self.x + 2, self.y + whiteScoreYOffset)
 		self.textSpriteWhite:add()
 
 		self.prevWhiteScore = whitesScore
@@ -155,7 +185,7 @@ function CapturedPieces:drawScores()
 		-- draw blacks score
 		self.textSpriteBlack = gfx.sprite.spriteWithText(blacksScoreString, 75, 25, nil, nil, nil, kTextAlignment.left, self.font)
 		self.textSpriteBlack:setCenter(0,0)
-		self.textSpriteBlack:moveTo(self.x + 2, self.y + 2)
+		self.textSpriteBlack:moveTo(self.x + 2, self.y + blackScoreYOffset)
 		self.textSpriteBlack:add()
 	
 		self.prevBlackScore = blacksScore

@@ -7,10 +7,6 @@ import 'helper/Utils'
 local gfx <const> = playdate.graphics
 local DEBUG <const> = true
 local TEXT_Z <const> = 105
-local PROGRESS_BAR_STATE <const> = {
-    SHOWING = "SHOWING",
-    NOT_SHOWING = "NOT_SHOWING"
-}
 
 class('ProgressBar').extends()
 
@@ -19,7 +15,6 @@ function ProgressBar:init(x, y)
 
     self.x = x
     self.y = y
-    self.state = PROGRESS_BAR_STATE.NOT_SHOWING
     self.percent = 0
     self.font = gfx.font.new("fonts/Roobert-10-Bold")
 
@@ -59,7 +54,6 @@ function ProgressBar:initBackgroundSprite()
 end
 
 function ProgressBar:hide()
-    self.state = PROGRESS_BAR_STATE.NOT_SHOWING
     self.percent = 0
     self.textSpritePercent:remove()
     self.backgroundSprite:remove()
@@ -70,17 +64,12 @@ function ProgressBar:hide()
 end
 
 function ProgressBar:show()
-    self.state = PROGRESS_BAR_STATE.SHOWING
     self.backgroundSprite:add()
     self.borderSprite:add()
     self.textSpriteLoading:add()
     self.textSpritePercent:add()
     self:updateProgress(0)
     printDebug("ProgressBar: show()", DEBUG)
-end
-
-function ProgressBar:isShowing()
-    return self.state == PROGRESS_BAR_STATE.SHOWING
 end
 
 function ProgressBar:updateProgress(percent)

@@ -97,3 +97,21 @@ function longRunningTask(co, estimatedTotalTime, interval, onProgressCallback, o
     end)
     return timer
 end
+
+function reverseItemsInRows(board)
+    for r = 1, #board do
+        board[r] = string.reverse(board[r])
+    end
+end
+
+function reverseRows(board)
+    local left = 1
+    local right = #board
+    while left < right do
+        local tmp = board[left]
+        board[left] = board[right]
+        board[right] = tmp
+        left += 1
+        right -= 1
+    end
+end

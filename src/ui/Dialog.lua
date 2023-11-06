@@ -16,7 +16,7 @@ local DIALOG_STATE <const> = {
 
 class('Dialog').extends(gfx.sprite)
 
-function Dialog:init(x, y, title, description, buttonText)
+function Dialog:init(x, y, width, height, title, description, buttonText)
     Dialog.super.init(self)
 
     self.x = x
@@ -26,8 +26,8 @@ function Dialog:init(x, y, title, description, buttonText)
     self.title = title or ""
     self.description = description or ""
     self.buttonText = buttonText or ""
-    self.width = 260
-    self.height = 170
+    self.width = width or 260
+    self.height = height or 170
     self.titleFont = gfx.font.new("fonts/Roobert-24-Medium")
     self.buttonFont =  gfx.font.new("fonts/Roobert-11-Bold")
     self.descriptionFont = gfx.font.new("fonts/Roobert-20-Medium")
@@ -65,13 +65,13 @@ function Dialog:setButtonCallbacks(aButtonCallback, bButtonCallback)
 	}
 end
 
-function Dialog:setTitleAndDescription(state)
+function Dialog:setTitleAndDescription(isUserWhite, state)
     if state == GAME_STATE.COMPUTER_WON then
         self.title = "Checkmate!"
-        self.description = "Black won"
+        self.description = iif(isUserWhite,  "Black won", "White won")
     elseif state == GAME_STATE.USER_WON then
         self.title = "Checkmate"
-        self.description = "White won"
+        self.description = iif(isUserWhite, "White won", "Black won")
     elseif state == GAME_STATE.DRAW_BY_REPITITION then
         self.title = "Draw!"
         self.description = "Threefold repitition"
@@ -85,8 +85,8 @@ function Dialog:setTitleAndDescription(state)
         self.title = "Stalemate!"
         self.description = ""
     elseif state == GAME_STATE.RESIGN then
-        self.title = "Black Resigned!"
-        self.description = "White won"
+        self.title = iif(isUserWhite,"Black Resigned!", "White Resigned!")
+        self.description = iif(isUserWhite, "White won", "Black won")
     end
 end
 

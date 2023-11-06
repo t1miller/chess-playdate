@@ -1,7 +1,8 @@
 
 -- I like to keep my settings keys global and descriptive.
 SettingKeys = {
-	difficulty = "difficulty"
+	difficulty = "difficulty",
+	isUserWhite = "isUserWhite"
 }
 
 local store = playdate.datastore
