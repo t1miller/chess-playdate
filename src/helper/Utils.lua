@@ -1,6 +1,6 @@
 import "CoreLibs/frameTimer"
 
-local DEBUG <const> = true
+local DEBUG <const> = false
 
 function reverseTable(x)
     local rev = {}

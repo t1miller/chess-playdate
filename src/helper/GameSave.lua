@@ -7,7 +7,7 @@ GAME_SAVE_KEYS = {
 }
 
 local store <const> = playdate.datastore
-local DEBUG <const> = true
+local DEBUG <const> = false
 
 class("GameSave").extends()
 

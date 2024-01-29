@@ -7,7 +7,7 @@ import "CoreLibs/nineslice"
 import 'helper/Utils'
 
 local gfx<const> = playdate.graphics
-local DEBUG <const> = true
+local DEBUG <const> = false
 local MOVE_GRID_Z<const> = -150
 
 class('MoveGrid').extends()

@@ -14,7 +14,7 @@ import 'helper/GameSave'
 import 'engine/LuaJester'
 
 
-local DEBUG <const> = true
+local DEBUG <const> = false
 -- {time, depth}
 local GAME_DIFFICULTY = {
     ["level 1"] = { 2, 4 },

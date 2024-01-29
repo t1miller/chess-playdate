@@ -12,7 +12,7 @@ import 'ui/Piece'
 
 local gfx <const> = playdate.graphics
 local img <const> = gfx.image
-local DEBUG <const> = true
+local DEBUG <const> = false
 local WOOD_BACKGROUND_Z <const> = -1000
 local BORDERS_Z <const> = -990
 local BOARD_SQUARES_Z <const> = -980

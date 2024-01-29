@@ -12,8 +12,7 @@ local chessViewModel = ChessViewModel()
 playdate.setMinimumGCTime(10)
 
 function playdate.update()
-    sprite.update()
-    playdate.drawFPS(0,0)
+    sprite:update()
     frameTimer:updateTimers()
     timer:updateTimers()
 end

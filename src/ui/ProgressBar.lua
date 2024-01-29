@@ -5,7 +5,7 @@ import "CoreLibs/graphics"
 import 'helper/Utils'
 
 local gfx <const> = playdate.graphics
-local DEBUG <const> = true
+local DEBUG <const> = false
 local TEXT_Z <const> = 105
 
 class('ProgressBar').extends()

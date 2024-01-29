@@ -11,7 +11,7 @@
 -- sorry for hack, just very good source for lua
 import 'helper/Utils'
 
-local DEBUG <const> = true
+local DEBUG <const> = false
 local abs <const> = math.abs
 local floor <const> = math.floor
 
